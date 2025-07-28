@@ -5,6 +5,7 @@ export const UpdatedComic = styled.div`
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
+  padding-left: 8px;
 `;
 
 export const Header = styled.div`
@@ -20,8 +21,8 @@ export const Title = styled.h2`
 `;
 
 export const Item = styled.div`
-  width: 23.5%;
-  padding: 0 7px;
+  width: calc((100% - 40px) / 4);
+  padding: 0;
   margin: 0 0 10px;
 `;
 

@@ -49,12 +49,11 @@ export const Categories = styled.ul`
   border: 1px solid #ccc;
   display: none;
   z-index: 9999;
-  max-height: 300px;
-  min-width: 200px;
   box-shadow: 0 4px 8px rgba(0,0,0,0.1);
   padding: 0;
   margin: 0;
-
+  grid-template-columns: repeat(4, minmax(150px, 1fr));
+  
   & > li {
     list-style: none;
     padding: 10px;
@@ -65,6 +64,7 @@ export const Categories = styled.ul`
 
   & > li:hover {
     background-color: #eee;
+    color: violet;
   }
 `
 
@@ -72,6 +72,52 @@ export const ItemCategories = styled.li`
   position: relative;
 
   &:hover ${Categories} {
-    display: block;
+    display: grid;
   }
 `
+
+export const RankingMenu = styled.ul`
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: white;
+  border: 1px solid #ccc;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  display: none;
+  z-index: 9999;
+  padding: 0;
+  margin: 0;
+  grid-template-columns: repeat(2, minmax(140px, 1fr));
+
+  & > li {
+    list-style: none;
+    padding: 6px 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    white-space: nowrap;
+    color: black;
+    background-color: white;
+    border: 0.2px solid #eeecec;
+  }
+
+  & > li:hover {
+    background-color: #eee;
+    color: violet;
+  }
+
+  & > li.highlight {
+    color: red;
+    font-weight: bold;
+  }
+`;
+
+export const ItemRanking = styled.li`
+  position: relative;
+
+  &:hover ${RankingMenu} {
+    display: grid;
+  }
+`;
