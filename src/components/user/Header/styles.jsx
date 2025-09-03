@@ -1,7 +1,7 @@
 import styled from 'styled-components'
 
 export const HeaderConatiner = styled.header`
-  background: url(https://nettruyenvio.com/assets/images/bg_header_2017.jpg) top center repeat-x;
+  background: url(https://nettruyenvia.com/assets/images/bg_header_2017.jpg) top center repeat-x;
   width: 100%;
   height: 55px;
   -moz-transition: top .3s ease-in-out;

@@ -5,7 +5,7 @@ const Header = () => {
     <S.HeaderConatiner>
       <S.Navbar>
         <img
-          src="https://nettruyenvio.com/assets/images/logo-nettruyen.png"
+          src="https://nettruyenvia.com/assets/images/logo-nettruyen.png"
           alt=""
         />
         <div class="search-box">
