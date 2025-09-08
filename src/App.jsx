@@ -5,17 +5,19 @@ import UserLayout from './layouts/UserLayout'
 import Dashboard from './pages/admin/Dashboard'
 import Home from './pages/user/Home'
 
+import { ROUTES } from './constants/routes'
+
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path='/' element={<UserLayout />}>
-          <Route index element={<Home />}/>
+        <Route element={<UserLayout />}>
+          <Route path={ROUTES.USER.HOME} element={<Home />}/>
         </Route>
 
-        <Route path='/admin' element={<AdminLayout />}>
-          <Route index element={<Dashboard />}/>
-        </Route>
+        {/* <Route element={<AdminLayout />}>
+          <Route element={<Dashboard />}/>
+        </Route> */}
       </Routes>
     </BrowserRouter>
   )
