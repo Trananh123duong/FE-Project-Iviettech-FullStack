@@ -1,244 +1,42 @@
-import { Link } from 'react-router-dom';
-import ImageGundam from '../../../assets/gundam.jpg';
-import * as S from './styles';
+import { useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { Link } from 'react-router-dom'
+import { getStories } from '../../../redux/thunks/story.thunk'
+import { STORY_LIMIT } from '../../../constants/paging'
+import * as S from './styles'
+
+const timeAgo = (dateString) => {
+  if (!dateString) return ''
+  const diff = Date.now() - new Date(dateString).getTime()
+  const s = Math.floor(diff / 1000)
+  const m = Math.floor(s / 60)
+  const h = Math.floor(m / 60)
+  const d = Math.floor(h / 24)
+  if (d > 0) return `${d} ngày trước`
+  if (h > 0) return `${h} giờ trước`
+  if (m > 0) return `${m} phút trước`
+  return `${s} giây trước`
+}
+
+const compact = (n) =>
+  new Intl.NumberFormat('en', { notation: 'compact' }).format(Number(n || 0))
+
+const latest3Chapters = (chapters = []) =>
+  [...chapters]
+    .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
+    .slice(0, 3)
 
 const ListStory = () => {
-  const comics = [
-    {
-      image: ImageGundam,
-      link: '#',
-      title: 'Điều Còn Khó Hơn Cả Việc Giải Đố ',
-      views: '28K',
-      comments: 35,
-      likes: '5.099',
-      chapters: [
-        { name: 'Chapter 34', link: '#', time: '1 giờ trước' },
-        { name: 'Chapter 33', link: '#', time: '5 giờ trước' },
-        { name: 'Chapter 32', link: '#', time: '1 ngày trước' },
-      ]
-    },
-    {
-      image: ImageGundam,
-      link: '#',
-      title: 'Điều Còn Khó Hơn Cả Việc Giải Đố',
-      views: '28K',
-      comments: 35,
-      likes: '5.099',
-      chapters: [
-        { name: 'Chapter 34', link: '#', time: '1 giờ trước' },
-        { name: 'Chapter 33', link: '#', time: '5 giờ trước' },
-        { name: 'Chapter 32', link: '#', time: '1 ngày trước' },
-      ]
-    },
-    {
-      image: ImageGundam,
-      link: '#',
-      title: 'Điều Còn Khó Hơn Cả Việc Giải Đố',
-      views: '28K',
-      comments: 35,
-      likes: '5.099',
-      chapters: [
-        { name: 'Chapter 34', link: '#', time: '1 giờ trước' },
-        { name: 'Chapter 33', link: '#', time: '5 giờ trước' },
-        { name: 'Chapter 32', link: '#', time: '1 ngày trước' },
-      ]
-    },
-    {
-      image: ImageGundam,
-      link: '#',
-      title: 'Điều Còn Khó Hơn Cả Việc Giải Đố',
-      views: '28K',
-      comments: 35,
-      likes: '5.099',
-      chapters: [
-        { name: 'Chapter 34', link: '#', time: '1 giờ trước' },
-        { name: 'Chapter 33', link: '#', time: '5 giờ trước' },
-        { name: 'Chapter 32', link: '#', time: '1 ngày trước' },
-      ]
-    },
-    {
-      image: ImageGundam,
-      link: '#',
-      title: 'Điều Còn Khó Hơn Cả Việc Giải Đố',
-      views: '28K',
-      comments: 35,
-      likes: '5.099',
-      chapters: [
-        { name: 'Chapter 34', link: '#', time: '1 giờ trước' },
-        { name: 'Chapter 33', link: '#', time: '5 giờ trước' },
-        { name: 'Chapter 32', link: '#', time: '1 ngày trước' },
-      ]
-    },
-    {
-      image: ImageGundam,
-      link: '#',
-      title: 'Điều Còn Khó Hơn Cả Việc Giải Đố',
-      views: '28K',
-      comments: 35,
-      likes: '5.099',
-      chapters: [
-        { name: 'Chapter 34', link: '#', time: '1 giờ trước' },
-        { name: 'Chapter 33', link: '#', time: '5 giờ trước' },
-        { name: 'Chapter 32', link: '#', time: '1 ngày trước' },
-      ]
-    },
-    {
-      image: ImageGundam,
-      link: '#',
-      title: 'Điều Còn Khó Hơn Cả Việc Giải Đố',
-      views: '28K',
-      comments: 35,
-      likes: '5.099',
-      chapters: [
-        { name: 'Chapter 34', link: '#', time: '1 giờ trước' },
-        { name: 'Chapter 33', link: '#', time: '5 giờ trước' },
-        { name: 'Chapter 32', link: '#', time: '1 ngày trước' },
-      ]
-    },
-    {
-      image: ImageGundam,
-      link: '#',
-      title: 'Điều Còn Khó Hơn Cả Việc Giải Đố',
-      views: '28K',
-      comments: 35,
-      likes: '5.099',
-      chapters: [
-        { name: 'Chapter 34', link: '#', time: '1 giờ trước' },
-        { name: 'Chapter 33', link: '#', time: '5 giờ trước' },
-        { name: 'Chapter 32', link: '#', time: '1 ngày trước' },
-      ]
-    },
-    {
-      image: ImageGundam,
-      link: '#',
-      title: 'Điều Còn Khó Hơn Cả Việc Giải Đố',
-      views: '28K',
-      comments: 35,
-      likes: '5.099',
-      chapters: [
-        { name: 'Chapter 34', link: '#', time: '1 giờ trước' },
-        { name: 'Chapter 33', link: '#', time: '5 giờ trước' },
-        { name: 'Chapter 32', link: '#', time: '1 ngày trước' },
-      ]
-    },
-    {
-      image: ImageGundam,
-      link: '#',
-      title: 'Điều Còn Khó Hơn Cả Việc Giải Đố',
-      views: '28K',
-      comments: 35,
-      likes: '5.099',
-      chapters: [
-        { name: 'Chapter 34', link: '#', time: '1 giờ trước' },
-        { name: 'Chapter 33', link: '#', time: '5 giờ trước' },
-        { name: 'Chapter 32', link: '#', time: '1 ngày trước' },
-      ]
-    },
-    {
-      image: ImageGundam,
-      link: '#',
-      title: 'Điều Còn Khó Hơn Cả Việc Giải Đố',
-      views: '28K',
-      comments: 35,
-      likes: '5.099',
-      chapters: [
-        { name: 'Chapter 34', link: '#', time: '1 giờ trước' },
-        { name: 'Chapter 33', link: '#', time: '5 giờ trước' },
-        { name: 'Chapter 32', link: '#', time: '1 ngày trước' },
-      ]
-    },
-    {
-      image: ImageGundam,
-      link: '#',
-      title: 'Điều Còn Khó Hơn Cả Việc Giải Đố',
-      views: '28K',
-      comments: 35,
-      likes: '5.099',
-      chapters: [
-        { name: 'Chapter 34', link: '#', time: '1 giờ trước' },
-        { name: 'Chapter 33', link: '#', time: '5 giờ trước' },
-        { name: 'Chapter 32', link: '#', time: '1 ngày trước' },
-      ]
-    },
-    {
-      image: ImageGundam,
-      link: '#',
-      title: 'Điều Còn Khó Hơn Cả Việc Giải Đố',
-      views: '28K',
-      comments: 35,
-      likes: '5.099',
-      chapters: [
-        { name: 'Chapter 34', link: '#', time: '1 giờ trước' },
-        { name: 'Chapter 33', link: '#', time: '5 giờ trước' },
-        { name: 'Chapter 32', link: '#', time: '1 ngày trước' },
-      ]
-    },
-    {
-      image: ImageGundam,
-      link: '#',
-      title: 'Điều Còn Khó Hơn Cả Việc Giải Đố',
-      views: '28K',
-      comments: 35,
-      likes: '5.099',
-      chapters: [
-        { name: 'Chapter 34', link: '#', time: '1 giờ trước' },
-        { name: 'Chapter 33', link: '#', time: '5 giờ trước' },
-        { name: 'Chapter 32', link: '#', time: '1 ngày trước' },
-      ]
-    },
-    {
-      image: ImageGundam,
-      link: '#',
-      title: 'Điều Còn Khó Hơn Cả Việc Giải Đố',
-      views: '28K',
-      comments: 35,
-      likes: '5.099',
-      chapters: [
-        { name: 'Chapter 34', link: '#', time: '1 giờ trước' },
-        { name: 'Chapter 33', link: '#', time: '5 giờ trước' },
-        { name: 'Chapter 32', link: '#', time: '1 ngày trước' },
-      ]
-    },
-    {
-      image: ImageGundam,
-      link: '#',
-      title: 'Điều Còn Khó Hơn Cả Việc Giải Đố',
-      views: '28K',
-      comments: 35,
-      likes: '5.099',
-      chapters: [
-        { name: 'Chapter 34', link: '#', time: '1 giờ trước' },
-        { name: 'Chapter 33', link: '#', time: '5 giờ trước' },
-        { name: 'Chapter 32', link: '#', time: '1 ngày trước' },
-      ]
-    },
-    {
-      image: ImageGundam,
-      link: '#',
-      title: 'Điều Còn Khó Hơn Cả Việc Giải Đố',
-      views: '28K',
-      comments: 35,
-      likes: '5.099',
-      chapters: [
-        { name: 'Chapter 34', link: '#', time: '1 giờ trước' },
-        { name: 'Chapter 33', link: '#', time: '5 giờ trước' },
-        { name: 'Chapter 32', link: '#', time: '1 ngày trước' },
-      ]
-    },
-    {
-      image: ImageGundam,
-      link: '#',
-      title: 'Điều Còn Khó Hơn Cả Việc Giải Đố',
-      views: '28K',
-      comments: 35,
-      likes: '5.099',
-      chapters: [
-        { name: 'Chapter 34', link: '#', time: '1 giờ trước' },
-        { name: 'Chapter 33', link: '#', time: '5 giờ trước' },
-        { name: 'Chapter 32', link: '#', time: '1 ngày trước' },
-      ]
+  const dispatch = useDispatch()
+  const { data: stories = [], meta = {}, status, error } = useSelector(
+    (state) => state.story.storyList
+  )
+
+  useEffect(() => {
+    if (status === 'idle') {
+      dispatch(getStories({ limit: STORY_LIMIT }))
     }
-  ];
+  }, [status, dispatch])
 
   return (
     <S.UpdatedComic>
@@ -248,35 +46,52 @@ const ListStory = () => {
         </S.Title>
       </S.Header>
 
-      {comics.map((comic, index) => (
-        <S.Item key={index}>
-          <S.ImageWrapper>
-            <Link to="https://www.nettruyenup.com/truyen-tranh/nhat-kiem-doc-ton-342800">
-              <S.Image src={comic.image} alt={comic.title} />
-            </Link>
-            <S.View>
-              <span>
-                <i className="fa fa-eye" /> {comic.views}
-                <i className="fa fa-comment" /> {comic.comments}
-                <i className="fa fa-heart" /> {comic.likes}
-              </span>
-            </S.View>
-          </S.ImageWrapper>
+      {status === 'loading' && <div style={{ padding: 8 }}>Đang tải...</div>}
+      {status === 'failed' && (
+        <div style={{ padding: 8, color: 'red' }}>Lỗi: {error}</div>
+      )}
 
-          <S.TitleH3>{comic.title}</S.TitleH3>
+      {stories.map((story) => {
+        const chapters = latest3Chapters(story.chapters || [])
+        return (
+          <S.Item key={story.id}>
+            <S.ImageWrapper>
+              <Link to={`/truyen/${story.id}`}>
+                <S.Image src={story.thumbnail} alt={story.name} />
+              </Link>
+              <S.View>
+                <span>
+                  <i className="fa fa-eye" /> {compact(story.total_view)}
+                  <i className="fa fa-comment" /> 0
+                  <i className="fa fa-heart" /> {compact(story.total_follow)}
+                </span>
+              </S.View>
+            </S.ImageWrapper>
 
-          <S.ChapterList>
-            {comic.chapters.map((chap, idx) => (
-              <S.ChapterItem key={idx}>
-                <S.ChapterLink href={chap.link}>{chap.name}</S.ChapterLink>
-                <S.ChapterTime>{chap.time}</S.ChapterTime>
-              </S.ChapterItem>
-            ))}
-          </S.ChapterList>
-        </S.Item>
-      ))}
+            <S.TitleH3>
+              <Link to={`/truyen/${story.id}`}>{story.name}</Link>
+            </S.TitleH3>
+
+            <S.ChapterList>
+              {chapters.map((c) => (
+                <S.ChapterItem key={c.id}>
+                  <S.ChapterLink href={`/truyen/${story.id}/chap/${c.chapter_number}`}>
+                    Chapter {c.chapter_number}
+                  </S.ChapterLink>
+                  <S.ChapterTime>{timeAgo(c.updatedAt)}</S.ChapterTime>
+                </S.ChapterItem>
+              ))}
+              {chapters.length === 0 && (
+                <S.ChapterItem>
+                  <span>Chưa có chapter</span>
+                </S.ChapterItem>
+              )}
+            </S.ChapterList>
+          </S.Item>
+        )
+      })}
     </S.UpdatedComic>
-  );
+  )
 }
 
 export default ListStory

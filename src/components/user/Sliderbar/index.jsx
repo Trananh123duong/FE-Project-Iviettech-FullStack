@@ -1,21 +1,25 @@
-import { Link } from 'react-router-dom';
-import Slider from "react-slick";
-import "slick-carousel/slick/slick-theme.css";
-import "slick-carousel/slick/slick.css";
-import ImageGundam from '../../../assets/gundam.jpg';
-import * as S from './styles';
+import { useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { Link } from 'react-router-dom'
+import Slider from 'react-slick'
+import 'slick-carousel/slick/slick-theme.css'
+import 'slick-carousel/slick/slick.css'
+
+import { getStories } from '../../../redux/thunks/story.thunk'
+import * as S from './styles'
 
 const Sliderbar = () => {
-  const comics = [
-    { title: "Bắt Đầu Từ Cửu Đầu Điểu", chapter: 317, time: "3 ngày trước", image: ImageGundam },
-    { title: "Ngạo Thị Thiên Địa", chapter: 863, time: "26 ngày trước", image: ImageGundam },
-    { title: "Thiết Huyết Kiếm Sĩ", chapter: 121.1, time: "22 giờ trước", image: ImageGundam },
-    { title: "Anh Hùng Giai Cấp", chapter: 120, time: "1 tháng trước", image: ImageGundam },
-    { title: "Ta Có Một Sơn Trại1", chapter: 1174, time: "3 ngày trước", image: ImageGundam },
-    { title: "Ta Có Một Sơn Trại2", chapter: 1174, time: "3 ngày trước", image: ImageGundam },
-    { title: "Ta Có Một Sơn Trại3", chapter: 1174, time: "3 ngày trước", image: ImageGundam },
-    // thêm nữa nếu muốn
-  ];
+  const dispatch = useDispatch()
+  const { data: stories, status, error } = useSelector(
+    (state) => state.story.storyList
+  )
+
+  useEffect(() => {
+    if (status === 'idle') {
+      // tuỳ bạn muốn “đề cử” dựa trên sort nào
+      dispatch(getStories({ sort: 'view_day', page: 1, limit: 10 }))
+    }
+  }, [status, dispatch])
 
   const settings = {
     dots: false,
@@ -25,39 +29,75 @@ const Sliderbar = () => {
     slidesToScroll: 1,
     autoplay: true,
     autoplaySpeed: 3000,
-  };
-
-  const renderStory = () => {
-    return comics.map((comic, index) => (
-      <S.ComicCard key={index}>
-        <Link to="https://www.nettruyenup.com/truyen-tranh/nhat-kiem-doc-ton-342800">
-          <img src={comic.image} alt={comic.title} />
-        </Link>
-        <S.StoryInfo>
-          <h3>
-            <Link to="https://www.nettruyenup.com/truyen-tranh/nhat-kiem-doc-ton-342800">
-              {comic.title}
-            </Link>
-          </h3>
-          <Link to="https://www.nettruyenup.com/truyen-tranh/nhat-kiem-doc-ton/chap-213/836799">
-            Chapter {comic.chapter}
-          </Link>
-          <span><i class="fa fa-clock-o"> </i> {comic.time}</span>
-        </S.StoryInfo>
-      </S.ComicCard>
-    ))
   }
-  
+
+  const getLatestChapter = (chapters = []) => {
+    if (!chapters.length) return null
+    return chapters.reduce((latest, c) =>
+      new Date(latest.updatedAt) >= new Date(c.updatedAt) ? latest : c
+    )
+  }
+
+  const timeAgo = (dateString) => {
+    const diff = Date.now() - new Date(dateString).getTime()
+    const seconds = Math.floor(diff / 1000)
+    const minutes = Math.floor(seconds / 60)
+    const hours = Math.floor(minutes / 60)
+    const days = Math.floor(hours / 24)
+    const months = Math.floor(days / 30)
+
+    if (months > 0) return `${months} tháng trước`
+    if (days > 0) return `${days} ngày trước`
+    if (hours > 0) return `${hours} giờ trước`
+    if (minutes > 0) return `${minutes} phút trước`
+    return `${seconds} giây trước`
+  }
+
   return (
     <>
       <S.PageTitle>
-        Truyện đề cử <i class="fa-solid fa-angle-right"></i>
+        Truyện đề cử <i className="fa-solid fa-angle-right"></i>
       </S.PageTitle>
-      <Slider {...settings}>
-        {renderStory()}
-      </Slider>
+
+      {status === 'loading' && <div style={{ padding: 8 }}>Đang tải...</div>}
+      {status === 'failed' && <div style={{ padding: 8, color: 'red' }}>Lỗi: {error}</div>}
+
+      {status === 'succeeded' && (
+        <Slider {...settings}>
+          {stories.map((story) => {
+            const latest = getLatestChapter(story.chapters)
+            return (
+              <S.ComicCard key={story.id}>
+                {/* Điều chỉnh đường dẫn theo router của bạn */}
+                <Link to={`/truyen/${story.id}`}>
+                  <img src={story.thumbnail} alt={story.name} />
+                </Link>
+
+                <S.StoryInfo>
+                  <h3>
+                    <Link to={`/truyen/${story.id}`}>{story.name}</Link>
+                  </h3>
+
+                  {latest ? (
+                    <>
+                      <Link to={`/truyen/${story.id}/chap/${latest.chapter_number}`}>
+                        Chapter {latest.chapter_number}
+                      </Link>
+                      <span>
+                        <i className="fa fa-clock-o" /> {timeAgo(latest.updatedAt)}
+                      </span>
+                    </>
+                  ) : (
+                    <span>Chưa có chap</span>
+                  )}
+                </S.StoryInfo>
+              </S.ComicCard>
+            )
+          })}
+        </Slider>
+      )}
     </>
-  );
+  )
 }
 
 export default Sliderbar

@@ -34,6 +34,7 @@ export const ItemLink = styled(Link)`
   padding: 10px 20px;
   display: block;
   text-decoration: none;
+  background-color: white;
 
   &:hover {
     color: violet;

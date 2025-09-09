@@ -1,6 +1,20 @@
+import { useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { getCategories } from '../../../redux/thunks/category.thunk'
 import * as S from './styles';
 
 const Navbar = () => {
+  const dispatch = useDispatch()
+  const { data: categories, status, error } = useSelector(
+    (state) => state.category.categoryList
+  )
+
+  useEffect(() => {
+    if (status === 'idle') {
+      dispatch(getCategories())
+    }
+  }, [status, dispatch])
+
   return (
     <S.MainNav>
       <S.MainList>
@@ -30,42 +44,13 @@ const Navbar = () => {
           </S.ItemLink>
 
           <S.Categories>
-            <li>Action</li>
-            <li>Adventure</li>
-            <li>Anime</li>
-            <li>Comedy</li>
-            <li>Comic</li>
-            <li>Cooking</li>
-            <li>Doujinshi</li>
-            <li>Drama</li>
-            <li>Fantasy</li>
-            <li>Gender Bender</li>
-            <li>Historical</li>
-            <li>Horror</li>
-            <li>Live action</li>
-            <li>Manga</li>
-            <li>Manhua</li>
-            <li>Martial Arts</li>
-            <li>Mecha</li>
-            <li>Mystery</li>
-            <li>Psychological</li>
-            <li>Romance</li>
-            <li>School Life</li>
-            <li>Sci-fi</li>
-            <li>Shojo</li>
-            <li>Shojo Ai</li>
-            <li>Shounen</li>
-            <li>Shounen Ai</li>
-            <li>Slice of Life</li>
-            <li>Sports</li>
-            <li>Supernatural</li>
-            <li>Thiếu Nhi</li>
-            <li>Tragedy</li>
-            <li>Trinh Thám</li>
-            <li>Truyện scan</li>
-            <li>Truyện Màu</li>
-            <li>Webtoon</li>
-            <li>Xuyên Không</li>
+            {status === 'loading' && <li>Đang tải...</li>}
+            {status === 'failed' && <li>Lỗi: {error}</li>}
+            {status === 'succeeded' &&
+              categories.map((c) => (
+                <S.ItemLink to={`/the-loai/${c.id}`}>{c.name}</S.ItemLink>
+              ))
+            }
           </S.Categories>
         </S.ItemCategories>
 
