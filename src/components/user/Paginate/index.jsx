@@ -7,6 +7,7 @@ import * as S from './styles'
 const selectBucket = (state, scope) => {
   if (scope === 'sliderbar') return state.story.sliderbarList
   if (scope === 'updated')   return state.story.updatedList
+
   return state.story[scope] || state.story.updatedList
 }
 

@@ -4,6 +4,7 @@ import chapterReducer from './redux/slices/chapter.slice'
 import followReducer from './redux/slices/follow.slice'
 import historyReducer from './redux/slices/history.slice'
 import storyReducer from './redux/slices/story.slice'
+import authReducer from './redux/slices/auth.slice'
 
 export default configureStore({
   reducer: {
@@ -11,6 +12,7 @@ export default configureStore({
     category: categoryReducer,
     chapter: chapterReducer,
     follow: followReducer,
-    history: historyReducer
+    history: historyReducer,
+    auth: authReducer,
   },
 })

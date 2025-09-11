@@ -1,86 +1,161 @@
 import styled from 'styled-components'
 
-export const HeaderConatiner = styled.header`
-  background: url(https://nettruyenvia.com/assets/images/bg_header_2017.jpg) top center repeat-x;
+export const HeaderContainer = styled.header`
+  background: url(https://nettruyenvia.com/assets/images/bg_header_2017.jpg)
+    top center repeat-x;
   width: 100%;
   height: 55px;
-  -moz-transition: top .3s ease-in-out;
-  -ms-transition: top .3s ease-in-out;
-  -o-transition: top .3s ease-in-out;
-  transition: top .3s ease-in-out;
+  color: #fff;
 `
 
 export const Navbar = styled.div`
-  display: flex;
-  flex-direction: row;
-  justify-content: space-around;
-  align-items: center;
-  width: 1030px;
   height: 100%;
-  margin: auto;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 12px;
+  display: grid;
+  grid-template-columns: 220px 1fr auto;
+  align-items: center;
+  column-gap: 12px;
+`
 
-  .search-box {
-    display: inline-block;
-    position: relative;
+export const LogoBox = styled.div`
+  display: flex;
+  align-items: center;
+  img {
+    height: 38px;
+    object-fit: contain;
   }
+`
 
-  .search-box input {
-    padding: 15px;
-    width: 440px;
+export const SearchBox = styled.div`
+  position: relative;
+  display: flex;
+  align-items: center;
+
+  input {
+    width: 100%;
+    height: 35px;
     border: none;
-    margin: 5px 0;
-    height: 5px;
-  }
-
-  .search-box input:focus {
+    border-radius: 4px;
+    padding: 0 44px 0 18px;
     outline: none;
   }
 
-  .search-box button {
+  button {
     position: absolute;
-    top: 5px;
-    right: 0px;
+    right: 6px;
+    height: 32px;
+    width: 32px;
     border: none;
-    background-color: white;
-    height: 30px;
-    width: 30px;
-    padding-top: 5px;
+    background: transparent;
+    cursor: pointer;
+    border-radius: 4px;
   }
 
-  .search-box button:hover {
-    cursor: pointer;
-    background-color: #ebebeb;
+  button:hover {
+    background: #ebebeb;
   }
+
+  i {
+    color: #333;
+    font-size: 16px;
+  }
+`
+
+export const RightGroup = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
 `
 
 export const IconGroup = styled.div`
-  display: inline-block;
-  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-right: 6px;
 
   .toggle-dark {
     color: #ff9601;
-    float: left;
-    margin-top: 12px;
-    margin-left: 10px;
-    font-size: 26px !important;
+    font-size: 22px !important;
     cursor: pointer;
-    position: relative;
   }
-
   .notifications {
-    padding: 12px 4px 0 15px;
-    position: relative;
-    display: inline-block;
+    color: #fff;
+    font-size: 22px !important;
     cursor: pointer;
-    font-size: 26px !important;
-    color: white;
   }
 `
 
-export const SignGroup = styled.div`
-  color: white;
+export const Account = styled.div`
+  position: relative;
+  display: inline-flex;
+  align-items: center;
 
-  a {
-    color: white;
+  &:hover .menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+`
+
+export const AccountBtn = styled.div`
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  user-select: none;
+  font-weight: 600;
+
+  .caret {
+    margin-left: 2px;
+    font-size: 14px;
+  }
+`
+
+export const Menu = styled.div`
+  position: absolute;
+  top: 25px;
+  right: 20;
+  color: #222;
+  min-width: 240px;
+  border-radius: 10px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
+  padding: 8px 0;
+  z-index: 10;
+
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(6px);
+  transition: all 0.15s ease;
+
+  a,
+  button {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    color: inherit;
+    text-decoration: none;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+    background: #fff;
+  }
+
+  a:hover,
+  button:hover {
+    background: #f5f5f5;
+  }
+
+  i {
+    width: 18px;
+    text-align: center;
+    font-size: 16px;
   }
 `

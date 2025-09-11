@@ -75,7 +75,14 @@ export const TitleH3 = styled.h3`
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
 
-  &:hover {
+  & a {
+    color: #000;
+    text-decoration: none;
+  }
+  & a:visited {
+    color: #000;
+  }
+  & a:hover {
     color: #0074cc;
     cursor: pointer;
   }
