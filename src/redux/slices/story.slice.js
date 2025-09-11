@@ -1,14 +1,22 @@
 import { createSlice } from '@reduxjs/toolkit'
 import { getStories, getStory } from '../thunks/story.thunk'
 
+const listState = () => ({
+  data: [],
+  meta: {},
+  status: 'idle',
+  error: null,
+})
+
 export const storySlice = createSlice({
   name: 'story',
   initialState: {
-    storyList: {
-      data: [],
-      meta: {},
-      status: 'idle', // 'idle' | 'loading' | 'succeeded' | 'failed'
-      error: null,
+    sliderbarList: listState(),
+    updatedList: listState(),
+    topLists: {
+      view_month: listState(),
+      view_week:  listState(),
+      view_day:   listState(),
     },
     storyDetail: {
       data: {},
@@ -18,23 +26,35 @@ export const storySlice = createSlice({
   },
   reducers: {},
   extraReducers: (builder) => {
+    const pickTarget = (state, scope, sort) => {
+      switch (scope) {
+        case 'sliderbar': return state.sliderbarList
+        case 'updated':   return state.updatedList
+        case 'top':       return state.topLists[sort] || state.topLists.view_day
+        default:          return state.updatedList
+      }
+    }
+
     builder
       // getStories
-      .addCase(getStories.pending, (state) => {
-        state.storyList.status = 'loading'
-        state.storyList.error = null
+      .addCase(getStories.pending, (state, action) => {
+        const { scope = 'updated', sort = null } = action.meta.arg || {}
+        const target = pickTarget(state, scope, sort)
+        target.status = 'loading'
+        target.error = null
       })
       .addCase(getStories.fulfilled, (state, action) => {
-        const { data, meta, more } = action.payload
-        state.storyList.status = 'succeeded'
-        state.storyList.data = more
-          ? [...state.storyList.data, ...data]
-          : data
-        state.storyList.meta = meta
+        const { data, meta, more, scope = 'updated', sort = null } = action.payload
+        const target = pickTarget(state, scope, sort)
+        target.status = 'succeeded'
+        target.data = more ? [...target.data, ...data] : data
+        target.meta = meta
       })
       .addCase(getStories.rejected, (state, action) => {
-        state.storyList.status = 'failed'
-        state.storyList.error = action.error.message
+        const { scope = 'updated', sort = null } = action.meta.arg || {}
+        const target = pickTarget(state, scope, sort)
+        target.status = 'failed'
+        target.error = action.error.message
       })
 
       // getStory

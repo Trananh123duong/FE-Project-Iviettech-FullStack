@@ -1,18 +1,25 @@
 import { Pagination } from 'antd'
 import { useDispatch, useSelector } from 'react-redux'
-import { getStories } from '../../../redux/thunks/story.thunk'
 import { STORY_LIMIT } from '../../../constants/paging'
+import { getStories } from '../../../redux/thunks/story.thunk'
 import * as S from './styles'
 
-const Paginate = () => {
+const selectBucket = (state, scope) => {
+  if (scope === 'sliderbar') return state.story.sliderbarList
+  if (scope === 'updated')   return state.story.updatedList
+  return state.story[scope] || state.story.updatedList
+}
+
+const Paginate = ({ scope = 'updated', baseParams = {} }) => {
   const dispatch = useDispatch()
-  const { meta = {}, status } = useSelector((state) => state.story.storyList)
-  const current = meta.page || 1
+  const { meta = {}, status } = useSelector((state) => selectBucket(state, scope))
+
+  const current  = meta.page  || 1
   const pageSize = meta.limit || STORY_LIMIT
-  const total = meta.total || 0
+  const total    = meta.total || 0
 
   const onChange = (page, size) => {
-    dispatch(getStories({ page, limit: size }))
+    dispatch(getStories({ scope, page, limit: size, ...baseParams }))
   }
 
   if (!total && status !== 'loading') return null

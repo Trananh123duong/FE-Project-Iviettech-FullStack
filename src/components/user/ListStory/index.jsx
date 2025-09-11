@@ -1,8 +1,8 @@
 import { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Link } from 'react-router-dom'
-import { getStories } from '../../../redux/thunks/story.thunk'
 import { STORY_LIMIT } from '../../../constants/paging'
+import { getStories } from '../../../redux/thunks/story.thunk'
 import * as S from './styles'
 
 const timeAgo = (dateString) => {
@@ -29,12 +29,12 @@ const latest3Chapters = (chapters = []) =>
 const ListStory = () => {
   const dispatch = useDispatch()
   const { data: stories = [], meta = {}, status, error } = useSelector(
-    (state) => state.story.storyList
+    (state) => state.story.updatedList
   )
 
   useEffect(() => {
     if (status === 'idle') {
-      dispatch(getStories({ limit: STORY_LIMIT }))
+      dispatch(getStories({ scope: 'updated', limit: STORY_LIMIT }))
     }
   }, [status, dispatch])
 

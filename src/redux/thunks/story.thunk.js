@@ -9,6 +9,8 @@ export const getStories = createAsyncThunk(
     return {
       ...response.data,
       more: params?.more ?? false,
+      scope: params?.scope || 'updated',
+      sort: params?.sort || null,
     }
   }
 )

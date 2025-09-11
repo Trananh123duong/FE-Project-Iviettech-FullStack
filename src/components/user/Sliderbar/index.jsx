@@ -11,13 +11,12 @@ import * as S from './styles'
 const Sliderbar = () => {
   const dispatch = useDispatch()
   const { data: stories, status, error } = useSelector(
-    (state) => state.story.storyList
+    (state) => state.story.sliderbarList
   )
 
   useEffect(() => {
     if (status === 'idle') {
-      // tuỳ bạn muốn “đề cử” dựa trên sort nào
-      dispatch(getStories({ sort: 'view_day', page: 1, limit: 10 }))
+      dispatch(getStories({ scope: 'sliderbar', sort: 'view_day', page: 1, limit: 10 }))
     }
   }, [status, dispatch])
 
@@ -68,7 +67,6 @@ const Sliderbar = () => {
             const latest = getLatestChapter(story.chapters)
             return (
               <S.ComicCard key={story.id}>
-                {/* Điều chỉnh đường dẫn theo router của bạn */}
                 <Link to={`/truyen/${story.id}`}>
                   <img src={story.thumbnail} alt={story.name} />
                 </Link>
