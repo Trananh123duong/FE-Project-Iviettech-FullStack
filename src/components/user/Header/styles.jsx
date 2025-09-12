@@ -1,7 +1,8 @@
 import styled from 'styled-components'
+import bgHeader from '@assets/bg_header.jpg'
 
 export const HeaderContainer = styled.header`
-  background: url(https://nettruyenvia.com/assets/images/bg_header_2017.jpg)
+  background: url(${bgHeader})
     top center repeat-x;
   width: 100%;
   height: 55px;

@@ -5,7 +5,7 @@ import Slider from 'react-slick'
 import 'slick-carousel/slick/slick-theme.css'
 import 'slick-carousel/slick/slick.css'
 
-import { getStories } from '../../../redux/thunks/story.thunk'
+import { getStories } from '@redux/thunks/story.thunk'
 import * as S from './styles'
 
 const Sliderbar = () => {

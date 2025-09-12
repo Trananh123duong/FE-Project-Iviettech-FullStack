@@ -1,7 +1,7 @@
 import { Pagination } from 'antd'
 import { useDispatch, useSelector } from 'react-redux'
-import { STORY_LIMIT } from '../../../constants/paging'
-import { getStories } from '../../../redux/thunks/story.thunk'
+import { STORY_LIMIT } from '@constants/paging'
+import { getStories } from '@redux/thunks/story.thunk'
 import * as S from './styles'
 
 const selectBucket = (state, scope) => {

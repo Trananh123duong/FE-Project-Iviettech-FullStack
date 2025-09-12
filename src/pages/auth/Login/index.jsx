@@ -4,8 +4,8 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 
 import * as S from './styles'
-import { ROUTES } from '../../../constants/routes'
-import { login } from '../../../redux/thunks/auth.thunk'
+import { ROUTES } from '@constants/routes'
+import { login } from '@redux/thunks/auth.thunk'
 
 const Login = () => {
   const [form] = Form.useForm()

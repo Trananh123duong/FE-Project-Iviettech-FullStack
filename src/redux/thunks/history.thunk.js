@@ -1,5 +1,5 @@
 import { createAsyncThunk } from '@reduxjs/toolkit'
-import api from '../../services/api'
+import api from '@services/api'
 
 // GET /me/history  -> { data: [...], meta: { total, page, limit, totalPages } }
 export const getMyHistory = createAsyncThunk(

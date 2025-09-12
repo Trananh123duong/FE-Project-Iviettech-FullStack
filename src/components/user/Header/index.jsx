@@ -1,7 +1,8 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
-import { ROUTES } from '../../../constants/routes'
-import { logout } from '../../../redux/slices/auth.slice'
+import { ROUTES } from '@constants/routes'
+import { logout } from '@redux/slices/auth.slice'
+import logoImg from '@assets/logo.png'
 import * as S from './styles'
 
 const Header = () => {
@@ -21,10 +22,7 @@ const Header = () => {
     <S.HeaderContainer>
       <S.Navbar>
         <Link to={ROUTES.USER.HOME}>
-          <img
-            src="https://nettruyenvia.com/assets/images/logo-nettruyen.png"
-            alt="logo"
-          />
+          <img src={logoImg} alt="logo"/>
         </Link>
 
         <S.SearchBox>
@@ -69,7 +67,7 @@ const Header = () => {
                   <span>Đăng nhập</span>
                 </Link>
                 <Link to={ROUTES.AUTH.REGISTER}>
-                  <i className="fa fa-pencil-square-o" />
+                  <i className="fa fa-clipboard-list" />
                   <span>Đăng ký</span>
                 </Link>
               </S.Menu>

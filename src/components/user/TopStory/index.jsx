@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Link } from 'react-router-dom'
-import { getStories } from '../../../redux/thunks/story.thunk'
+import { getStories } from '@redux/thunks/story.thunk'
 import * as S from './styles'
 
 const TAB_LABELS = ['Top Tháng', 'Top Tuần', 'Top Ngày']

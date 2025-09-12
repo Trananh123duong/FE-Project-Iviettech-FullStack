@@ -1,5 +1,5 @@
 import { createAsyncThunk } from '@reduxjs/toolkit'
-import api from '../../services/api'
+import api from '@services/api'
 
 /**
  * List các truyện tôi theo dõi

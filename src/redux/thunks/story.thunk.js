@@ -1,5 +1,5 @@
 import { createAsyncThunk } from '@reduxjs/toolkit'
-import api from '../../services/api'
+import api from '@services/api'
 
 // List stories
 export const getStories = createAsyncThunk(

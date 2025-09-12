@@ -4,8 +4,8 @@ import { Form, Input, Alert, notification } from 'antd'
 import { useDispatch, useSelector } from 'react-redux'
 import * as S from './styles'
 
-import { ROUTES } from '../../../constants/routes'
-import { register } from '../../../redux/thunks/auth.thunk'
+import { ROUTES } from '@constants/routes'
+import { register } from '@redux/thunks/auth.thunk'
 
 const Register = () => {
   const [form] = Form.useForm()

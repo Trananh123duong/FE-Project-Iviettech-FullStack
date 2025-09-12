@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { getCategories } from '../../../redux/thunks/category.thunk'
+import { getCategories } from '@redux/thunks/category.thunk'
 import * as S from './styles';
 
 const Navbar = () => {
