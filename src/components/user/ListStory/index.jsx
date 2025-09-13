@@ -1,6 +1,8 @@
 import { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
+import qs from 'qs'
+
 import { STORY_LIMIT } from '@constants/paging'
 import { getStories } from '@redux/thunks/story.thunk'
 import * as S from './styles'
@@ -28,15 +30,20 @@ const latest3Chapters = (chapters = []) =>
 
 const ListStory = () => {
   const dispatch = useDispatch()
+  const location = useLocation()
+
   const { data: stories = [], meta = {}, status, error } = useSelector(
     (state) => state.story.updatedList
   )
 
   useEffect(() => {
     if (status === 'idle') {
-      dispatch(getStories({ scope: 'updated', limit: STORY_LIMIT }))
+      const query = qs.parse(location.search, { ignoreQueryPrefix: true })
+      const page = parseInt(query.page || 1, 10)
+      const limit = parseInt(query.limit || STORY_LIMIT, 10)
+      dispatch(getStories({ scope: 'updated', page, limit }))
     }
-  }, [status, dispatch])
+  }, [status, dispatch, location.search])
 
   return (
     <S.UpdatedComic>
