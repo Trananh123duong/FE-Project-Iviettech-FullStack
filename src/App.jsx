@@ -14,6 +14,7 @@ import { getMyProfile } from '@redux/thunks/auth.thunk'
 import Follow from '@pages/user/Follow'
 import HistoryPage from '@pages/user/History'
 import SearchPage from '@pages/user/Search'
+import StoryDetail from '@pages/user/StoryDetail'
 
 function App() {
   const dispatch = useDispatch()
@@ -33,7 +34,9 @@ function App() {
         <Route path={ROUTES.USER.HOME} element={<Home />}/>
         <Route path={ROUTES.USER.FOLLOW} element={<Follow />}/>
         <Route path={ROUTES.USER.HISTORY} element={<HistoryPage />}/>
-        <Route path={ROUTES.USER.SEARCH} element={<SearchPage />}/>
+        <Route path={ROUTES.USER.SEARCH} element={<SearchPage />} />
+        
+        <Route path={ROUTES.USER.STORY} element={<StoryDetail />} />
       </Route>
 
       {/* <Route element={<AdminLayout />}>
