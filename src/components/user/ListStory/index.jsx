@@ -1,10 +1,4 @@
-import { useEffect } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import { Link, useLocation } from 'react-router-dom'
-import qs from 'qs'
-
-import { STORY_LIMIT } from '@constants/paging'
-import { getStories } from '@redux/thunks/story.thunk'
+import { Link } from 'react-router-dom'
 import * as S from './styles'
 
 const timeAgo = (dateString) => {
@@ -28,31 +22,9 @@ const latest3Chapters = (chapters = []) =>
     .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
     .slice(0, 3)
 
-const ListStory = () => {
-  const dispatch = useDispatch()
-  const location = useLocation()
-
-  const { data: stories = [], meta = {}, status, error } = useSelector(
-    (state) => state.story.updatedList
-  )
-
-  useEffect(() => {
-    if (status === 'idle') {
-      const query = qs.parse(location.search, { ignoreQueryPrefix: true })
-      const page = parseInt(query.page || 1, 10)
-      const limit = parseInt(query.limit || STORY_LIMIT, 10)
-      dispatch(getStories({ scope: 'updated', page, limit }))
-    }
-  }, [status, dispatch, location.search])
-
+const ListStory = ({ stories = [], status, error, onUnfollow, unfollowLoading = false }) => {
   return (
     <S.UpdatedComic>
-      <S.Header>
-        <S.Title>
-          Truyện mới cập nhật <i className="fa-solid fa-angle-right"></i>
-        </S.Title>
-      </S.Header>
-
       {status === 'loading' && <div style={{ padding: 8 }}>Đang tải...</div>}
       {status === 'failed' && (
         <div style={{ padding: 8, color: 'red' }}>Lỗi: {error}</div>
@@ -94,6 +66,20 @@ const ListStory = () => {
                 </S.ChapterItem>
               )}
             </S.ChapterList>
+
+            {typeof onUnfollow === 'function' && (
+              <S.Actions>
+                <button
+                  type="button"
+                  className="unfollow-btn"
+                  disabled={unfollowLoading}
+                  onClick={() => onUnfollow(story)}
+                  title="Bỏ theo dõi"
+                >
+                  {unfollowLoading ? 'Đang bỏ theo dõi...' : 'Bỏ theo dõi'}
+                </button>
+              </S.Actions>
+            )}
           </S.Item>
         )
       })}

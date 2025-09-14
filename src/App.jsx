@@ -11,6 +11,9 @@ import Login from '@pages/auth/Login'
 import Register from '@pages/auth/Register'
 
 import { getMyProfile } from '@redux/thunks/auth.thunk'
+import Follow from '@pages/user/Follow'
+import HistoryPage from '@pages/user/History'
+import SearchPage from '@pages/user/Search'
 
 function App() {
   const dispatch = useDispatch()
@@ -28,6 +31,9 @@ function App() {
         <Route path={ROUTES.AUTH.REGISTER} element={<Register />} />
 
         <Route path={ROUTES.USER.HOME} element={<Home />}/>
+        <Route path={ROUTES.USER.FOLLOW} element={<Follow />}/>
+        <Route path={ROUTES.USER.HISTORY} element={<HistoryPage />}/>
+        <Route path={ROUTES.USER.SEARCH} element={<SearchPage />}/>
       </Route>
 
       {/* <Route element={<AdminLayout />}>

@@ -57,7 +57,6 @@ export const Categories = styled.ul`
   
   & > li {
     list-style: none;
-    padding: 10px;
     white-space: nowrap;
     cursor: pointer;
     background-color: white;
@@ -92,7 +91,6 @@ export const RankingMenu = styled.ul`
 
   & > li {
     list-style: none;
-    padding: 6px 10px;
     display: flex;
     align-items: center;
     gap: 6px;

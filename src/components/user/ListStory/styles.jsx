@@ -8,18 +8,6 @@ export const UpdatedComic = styled.div`
   padding-left: 8px;
 `;
 
-export const Header = styled.div`
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-`;
-
-export const Title = styled.h2`
-  font-size: 20px;
-  color: #2980b9;
-`;
-
 export const Item = styled.div`
   width: calc((100% - 40px) / 4);
   padding: 0;
@@ -101,7 +89,6 @@ export const ChapterItem = styled.li`
 `;
 
 export const ChapterLink = styled.a`
-  color: #2980b9;
   text-decoration: none;
   color: black;
 
@@ -122,3 +109,25 @@ export const ChapterTime = styled.i`
   overflow: hidden;
   white-space: nowrap;
 `;
+
+
+export const Actions = styled.div`
+  margin-top: 6px;
+
+  .unfollow-btn {
+    padding: 6px 10px;
+    border: 1px solid #e74c3c;
+    border-radius: 4px;
+    background: transparent;
+    color: #e74c3c;
+    cursor: pointer;
+  }
+  .unfollow-btn[disabled] {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  .unfollow-btn:hover:not([disabled]) {
+    background: #e74c3c;
+    color: #fff;
+  }
+`

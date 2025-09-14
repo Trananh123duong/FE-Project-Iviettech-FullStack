@@ -13,6 +13,7 @@ export const storySlice = createSlice({
   initialState: {
     sliderbarList: listState(),
     updatedList: listState(),
+    searchList:  listState(),
     topLists: {
       view_month: listState(),
       view_week:  listState(),
@@ -29,7 +30,8 @@ export const storySlice = createSlice({
     const pickTarget = (state, scope, sort) => {
       switch (scope) {
         case 'sliderbar': return state.sliderbarList
-        case 'updated':   return state.updatedList
+        case 'updated': return state.updatedList
+        case 'search':    return state.searchList
         case 'top':       return state.topLists[sort] || state.topLists.view_day
         default:          return state.updatedList
       }
@@ -44,7 +46,8 @@ export const storySlice = createSlice({
         target.error = null
       })
       .addCase(getStories.fulfilled, (state, action) => {
-        const { data, meta, more, scope = 'updated', sort = null } = action.payload
+        const { data, meta, more } = action.payload
+        const { scope = 'updated', sort = null } = action.meta.arg || {}
         const target = pickTarget(state, scope, sort)
         target.status = 'succeeded'
         target.data = more ? [...target.data, ...data] : data

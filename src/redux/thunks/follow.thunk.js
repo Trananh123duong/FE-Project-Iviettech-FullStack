@@ -10,7 +10,7 @@ export const getMyFollows = createAsyncThunk(
   'follow/getMyFollows',
   async (params = {}) => {
     // ĐỔI path nếu bạn mount khác (vd: '/follows' hoặc '/users/me/follows')
-    const response = await api.get('/me/follows', { params })
+    const response = await api.get('/me/follow', { params })
     return {
       ...response.data,            // { data, meta }
       more: params?.more ?? false // cho reducer biết append hay replace

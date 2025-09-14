@@ -13,7 +13,7 @@ export const NavTab = styled.ul`
   display: flex;
 
   li {
-    width: 33%;
+    width: 33.3%;
     height: 42px;
   }
 `;

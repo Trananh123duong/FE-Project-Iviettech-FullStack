@@ -51,7 +51,7 @@ const Header = () => {
                   <i className="fa fa-user" />
                   <span>Trang cá nhân</span>
                 </button>
-                <button onClick={() => navigate('/theo-doi')}>
+                <button onClick={() => navigate(ROUTES.USER.FOLLOW)}>
                   <i className="fa fa-book" />
                   <span>Truyện theo dõi</span>
                 </button>
