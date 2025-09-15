@@ -51,8 +51,8 @@ function ReadingHistory() {
                 : `${END_POINT}${story.thumbnail.startsWith('/') ? '' : '/'}${story.thumbnail}`
               : undefined
 
-          const storyHref = `/truyen/${item.story_id}`
-          const readHref = `/truyen/${item.story_id}/chapter/${item.chapter_id}`
+          const storyHref = `/story/${item.story_id}`
+          const readHref = `/story/${item.story_id}/chapter/${item.chapter_id}`
 
           return (
             <List.Item

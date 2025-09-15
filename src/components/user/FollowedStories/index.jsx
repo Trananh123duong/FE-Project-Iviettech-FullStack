@@ -70,7 +70,7 @@ function FollowedStories() {
             >
               <List.Item.Meta
                 avatar={<Avatar shape="square" size={48} src={thumb} />}
-                title={<Link to={`/truyen/${story.id}`}>{story.name}</Link>}
+                title={<Link to={`/story/${story.id}`}>{story.name}</Link>}
                 description={
                   story?.chapters?.length > 0
                     ? `Chap mới nhất: ${story.chapters[0].chapter_number}`

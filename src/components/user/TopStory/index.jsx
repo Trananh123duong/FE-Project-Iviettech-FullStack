@@ -63,16 +63,16 @@ const TopStory = () => {
                 <S.Rank index={idx}>{String(idx + 1).padStart(2, '0')}</S.Rank>
                 <S.ComicBox>
                   <S.Thumb>
-                    <Link to={`/truyen/${story?.id}`}>
+                    <Link to={`/story/${story?.id}`}>
                       <img src={story?.thumbnail} alt={story?.name} />
                     </Link>
                   </S.Thumb>
                   <S.Title>
-                    <Link to={`/truyen/${story?.id}`}>{story?.name}</Link>
+                    <Link to={`/story/${story?.id}`}>{story?.name}</Link>
                   </S.Title>
                   <S.Chapter className="chapter top">
                     {latest ? (
-                      <Link to={`/truyen/${story?.id}/chap/${latest.chapter_number}`}>
+                      <Link to={`/story/${story?.id}/chap/${latest.chapter_number}`}>
                         Chapter {latest.chapter_number}
                       </Link>
                     ) : (

@@ -35,7 +35,7 @@ const ListStory = ({ stories = [], status, error, onUnfollow, unfollowLoading = 
         return (
           <S.Item key={story.id}>
             <S.ImageWrapper>
-              <Link to={`/truyen/${story.id}`}>
+              <Link to={`/story/${story.id}`}>
                 <S.Image src={story.thumbnail} alt={story.name} />
               </Link>
               <S.View>
@@ -48,13 +48,13 @@ const ListStory = ({ stories = [], status, error, onUnfollow, unfollowLoading = 
             </S.ImageWrapper>
 
             <S.TitleH3>
-              <Link to={`/truyen/${story.id}`}>{story.name}</Link>
+              <Link to={`/story/${story.id}`}>{story.name}</Link>
             </S.TitleH3>
 
             <S.ChapterList>
               {chapters.map((c) => (
                 <S.ChapterItem key={c.id}>
-                  <S.ChapterLink href={`/truyen/${story.id}/chap/${c.chapter_number}`}>
+                  <S.ChapterLink href={`/story/${story.id}/chap/${c.chapter_number}`}>
                     Chapter {c.chapter_number}
                   </S.ChapterLink>
                   <S.ChapterTime>{timeAgo(c.updatedAt)}</S.ChapterTime>

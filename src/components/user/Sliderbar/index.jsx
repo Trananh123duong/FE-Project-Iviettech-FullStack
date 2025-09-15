@@ -67,18 +67,18 @@ const Sliderbar = () => {
             const latest = getLatestChapter(story.chapters)
             return (
               <S.ComicCard key={story.id}>
-                <Link to={`/truyen/${story.id}`}>
+                <Link to={`/story/${story.id}`}>
                   <img src={story.thumbnail} alt={story.name} />
                 </Link>
 
                 <S.StoryInfo>
                   <h3>
-                    <Link to={`/truyen/${story.id}`}>{story.name}</Link>
+                    <Link to={`/story/${story.id}`}>{story.name}</Link>
                   </h3>
 
                   {latest ? (
                     <>
-                      <Link to={`/truyen/${story.id}/chap/${latest.chapter_number}`}>
+                      <Link to={`/story/${story.id}/chap/${latest.chapter_number}`}>
                         Chapter {latest.chapter_number}
                       </Link>
                       <span>

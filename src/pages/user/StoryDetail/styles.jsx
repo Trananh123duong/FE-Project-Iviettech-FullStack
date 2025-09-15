@@ -92,13 +92,13 @@ export const FieldRow = styled.div`
   }
 `
 
-export const CategoryLink = styled.a`
+export const CategoryLink = styled.span`
   color: #2a77c6;
+  cursor: pointer;
   text-decoration: none;
-  &:hover {
-    text-decoration: underline;
-  }
-`
+  &:hover { text-decoration: underline; }
+  &:focus { outline: none; text-decoration: underline; }
+`;
 
 export const RatingLine = styled.div`
   margin-top: 4px;
@@ -132,6 +132,30 @@ export const FollowButton = styled(Button)`
     border-color: #d94a3a !important;
     color: #fff !important;
   }
+
+  /* Khi đã theo dõi */
+  &.is-followed {
+    background-color: #16a34a;
+    border-color: #16a34a;
+  }
+  &.is-followed:hover,
+  &.is-followed:focus {
+    background-color: #15803d !important;
+    border-color: #15803d !important;
+  }
+
+  /* Disabled (chưa đăng nhập / đang gọi API) */
+  &:disabled,
+  &[disabled],
+  &.ant-btn[disabled] {
+    background-color: #f1a5a0 !important;
+    border-color: #f1a5a0 !important;
+    color: #fff !important;
+    opacity: 0.6;
+    cursor: not-allowed;
+    pointer-events: none;
+    box-shadow: none;
+  }
 `
 
 export const ReadButton = styled(Button)`
@@ -154,6 +178,31 @@ export const ReadButton = styled(Button)`
 export const ChapterLink = styled.a`
   color: #111;
   text-decoration: none;
+
+  &:hover,
+  &:focus {
+    text-decoration: none;
+  }
+`
+
+export const ChapterTableWrap = styled.div`
+  /* Mốc đã đọc gần nhất: nền vàng nhạt */
+  .ant-table-tbody > tr.is-last-read > td {
+    background: #fffbe6;
+  }
+  /* Tất cả chương đã đọc (<= mốc): chữ xám */
+  .ant-table-tbody > tr.is-read > td {
+    color: #6b7280; /* gray-500 */
+  }
+  .ant-table-tbody > tr.is-read .chapter-link-btn {
+    color: #6b7280;
+  }
+`
+
+export const ChapterLinkBtn = styled.span.attrs({ className: 'chapter-link-btn' })`
+  color: #111;
+  text-decoration: none;
+  cursor: pointer;
 
   &:hover,
   &:focus {

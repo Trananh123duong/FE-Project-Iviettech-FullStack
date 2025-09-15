@@ -36,20 +36,20 @@ const HistoryList = ({ items = [], status, error }) => {
         return (
           <S.Row key={h.id}>
             <S.Thumb>
-              <Link to={`/truyen/${story.id}`}>
+              <Link to={`/story/${story.id}`}>
                 <img src={toAbsolute(story.thumbnail)} alt={story.name || 'thumbnail'} />
               </Link>
             </S.Thumb>
 
             <S.Info>
               <S.StoryTitle>
-                <Link to={`/truyen/${story.id}`}>{story.name || '—'}</Link>
+                <Link to={`/story/${story.id}`}>{story.name || '—'}</Link>
               </S.StoryTitle>
 
               <S.MetaLine>
                 <span>Đọc tới:&nbsp;</span>
                 {chapterNumber !== '-' ? (
-                  <Link to={`/truyen/${story.id}/chap/${chapterNumber}`}>
+                  <Link to={`/story/${story.id}/chap/${chapterNumber}`}>
                     Chapter {chapterNumber}
                   </Link>
                 ) : (
@@ -63,7 +63,7 @@ const HistoryList = ({ items = [], status, error }) => {
 
               {chapterNumber !== '-' && (
                 <S.Actions>
-                  <Link className="read-btn" to={`/truyen/${story.id}/chap/${chapterNumber}`}>
+                  <Link className="read-btn" to={`/story/${story.id}/chap/${chapterNumber}`}>
                     Tiếp tục đọc
                   </Link>
                 </S.Actions>
