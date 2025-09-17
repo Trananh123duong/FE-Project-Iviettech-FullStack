@@ -101,7 +101,7 @@ const StoryDetail = () => {
         <S.ChapterLinkBtn
           role="link"
           tabIndex={0}
-          onClick={() => navigate(`/chapters/${row.id}`)}
+          onClick={() => navigate(`/chapter/${row.id}`)}
           onKeyDown={(e) => e.key === 'Enter' && navigate(`/chapters/${row.id}`)}
         >
           Chapter {n}

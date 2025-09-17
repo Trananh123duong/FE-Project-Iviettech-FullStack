@@ -1,20 +1,19 @@
+// chapter.thunk.js
 import { createAsyncThunk } from '@reduxjs/toolkit'
 import api from '@services/api'
 
 export const getChaptersByStory = createAsyncThunk(
   'chapter/getChaptersByStory',
-  async (params) => {
-    const { storyId } = params
-    const response = await api.get(`/stories/${storyId}/chapters`)
-    return response.data
+  async ({ storyId }) => {
+    const { data } = await api.get(`/stories/${storyId}/chapters`)
+    return data // { chapters, history }
   }
 )
 
 export const getChapter = createAsyncThunk(
   'chapter/getChapter',
-  async (params) => {
-    const { id } = params
-    const response = await api.get(`/chapters/${id}`)
-    return response.data
+  async ({ id }) => {
+    const { data } = await api.get(`/chapters/${id}`)
+    return data
   }
 )

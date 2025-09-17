@@ -15,6 +15,7 @@ import Follow from '@pages/user/Follow'
 import HistoryPage from '@pages/user/History'
 import SearchPage from '@pages/user/Search'
 import StoryDetail from '@pages/user/StoryDetail'
+import ChapterDetail from '@pages/user/ChapterDetail'
 
 function App() {
   const dispatch = useDispatch()
@@ -37,6 +38,7 @@ function App() {
         <Route path={ROUTES.USER.SEARCH} element={<SearchPage />} />
         
         <Route path={ROUTES.USER.STORY} element={<StoryDetail />} />
+        <Route path={ROUTES.USER.CHAPTER} element={<ChapterDetail />} />
       </Route>
 
       {/* <Route element={<AdminLayout />}>

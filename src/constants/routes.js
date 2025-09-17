@@ -4,7 +4,8 @@ export const ROUTES = {
     FOLLOW: '/follow',
     HISTORY: '/history',
     SEARCH: '/search',
-    STORY: '/story/:id'
+    STORY: '/story/:id',
+    CHAPTER: '/chapter/:id',
   },
   ADMIN: {},
   AUTH: {
