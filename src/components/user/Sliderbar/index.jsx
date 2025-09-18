@@ -78,7 +78,7 @@ const Sliderbar = () => {
 
                   {latest ? (
                     <>
-                      <Link to={`/story/${story.id}/chap/${latest.chapter_number}`}>
+                      <Link to={`/chapter/${latest.id}`}>
                         Chapter {latest.chapter_number}
                       </Link>
                       <span>

@@ -72,7 +72,7 @@ const TopStory = () => {
                   </S.Title>
                   <S.Chapter className="chapter top">
                     {latest ? (
-                      <Link to={`/story/${story?.id}/chap/${latest.chapter_number}`}>
+                      <Link to={`/chapter/${latest.id}`}>
                         Chapter {latest.chapter_number}
                       </Link>
                     ) : (

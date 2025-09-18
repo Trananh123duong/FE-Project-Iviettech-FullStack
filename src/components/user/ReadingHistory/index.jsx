@@ -52,7 +52,7 @@ function ReadingHistory() {
               : undefined
 
           const storyHref = `/story/${item.story_id}`
-          const readHref = `/story/${item.story_id}/chapter/${item.chapter_id}`
+          const readHref = `/chapter/${item.chapter_id}`
 
           return (
             <List.Item

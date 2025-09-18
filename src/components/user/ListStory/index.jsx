@@ -54,7 +54,7 @@ const ListStory = ({ stories = [], status, error, onUnfollow, unfollowLoading = 
             <S.ChapterList>
               {chapters.map((c) => (
                 <S.ChapterItem key={c.id}>
-                  <S.ChapterLink href={`/story/${story.id}/chap/${c.chapter_number}`}>
+                  <S.ChapterLink href={`/chapter/${c.id}`}>
                     Chapter {c.chapter_number}
                   </S.ChapterLink>
                   <S.ChapterTime>{timeAgo(c.updatedAt)}</S.ChapterTime>

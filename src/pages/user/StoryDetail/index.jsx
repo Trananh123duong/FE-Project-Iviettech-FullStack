@@ -85,6 +85,26 @@ const StoryDetail = () => {
     })
   }, [chapterList, showAllChapters])
 
+  const sortedChapters = useMemo(() => {
+    const arr = [...chapterList]
+    arr.sort((a, b) => {
+      const na = getChapterNum(a)
+      const nb = getChapterNum(b)
+      if (na == null && nb == null) return (a.id ?? 0) - (b.id ?? 0)
+      if (na == null) return 1
+      if (nb == null) return -1
+      if (na !== nb) return na - nb
+      return (a.id ?? 0) - (b.id ?? 0)
+    })
+    return arr
+  }, [chapterList])
+
+  const firstChapterId = sortedChapters[0]?.id ?? null
+  const lastChapterId = sortedChapters[sortedChapters.length - 1]?.id ?? null
+
+  const goFirst = () => firstChapterId && navigate(`/chapter/${firstChapterId}`)
+  const goLast  = () => lastChapterId  && navigate(`/chapter/${lastChapterId}`)
+
   const lastReadNum = useMemo(() => {
     if (!history?.chapter_id) return null
     const found = chapterList.find((c) => c.id === history.chapter_id)
@@ -246,8 +266,12 @@ const StoryDetail = () => {
                     </Space>
 
                     <Space size="middle" wrap style={{ marginTop: 12 }}>
-                      <S.ReadButton>Đọc từ đầu</S.ReadButton>
-                      <S.ReadButton>Đọc mới nhất</S.ReadButton>
+                      <S.ReadButton onClick={goFirst} disabled={!firstChapterId}>
+                        Đọc từ đầu
+                      </S.ReadButton>
+                      <S.ReadButton onClick={goLast} disabled={!lastChapterId}>
+                        Đọc mới nhất
+                      </S.ReadButton>
                     </Space>
                   </S.ActionRow>
                 </div>

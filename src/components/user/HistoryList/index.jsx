@@ -49,7 +49,7 @@ const HistoryList = ({ items = [], status, error }) => {
               <S.MetaLine>
                 <span>Đọc tới:&nbsp;</span>
                 {chapterNumber !== '-' ? (
-                  <Link to={`/story/${story.id}/chap/${chapterNumber}`}>
+                  <Link to={`/chapter/${chapter.id}`}>
                     Chapter {chapterNumber}
                   </Link>
                 ) : (
@@ -63,7 +63,7 @@ const HistoryList = ({ items = [], status, error }) => {
 
               {chapterNumber !== '-' && (
                 <S.Actions>
-                  <Link className="read-btn" to={`/story/${story.id}/chap/${chapterNumber}`}>
+                  <Link className="read-btn" to={`/chapter/${chapter.id}`}>
                     Tiếp tục đọc
                   </Link>
                 </S.Actions>
