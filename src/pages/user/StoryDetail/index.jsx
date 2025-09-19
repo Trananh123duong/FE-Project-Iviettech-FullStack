@@ -1,49 +1,34 @@
+import { HeartFilled } from '@ant-design/icons'
+import { Button, Divider, Empty, Image, message, Rate, Skeleton, Space, Table, Typography } from 'antd'
+import qs from 'qs'
 import { useEffect, useMemo, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { useParams, useNavigate } from 'react-router-dom'
-import { Button, Rate, Typography, Image, Table, Space, Divider, Skeleton, Empty, message } from 'antd'
-import { HeartFilled } from '@ant-design/icons'
+import { useNavigate, useParams } from 'react-router-dom'
 
-import { getStory } from '@redux/thunks/story.thunk'
-import { followStory, unfollowStory } from '@redux/thunks/follow.thunk'
 import { getChaptersByStory } from '@redux/thunks/chapter.thunk'
+import { followStory, unfollowStory } from '@redux/thunks/follow.thunk'
+import { getStory } from '@redux/thunks/story.thunk'
 
-import TopStory from '@components/user/TopStory'
-import ReadingHistory from '@components/user/ReadingHistory'
 import FollowedStories from '@components/user/FollowedStories'
-import * as S from './styles'
-import qs from 'qs'
+import ReadingHistory from '@components/user/ReadingHistory'
+import TopStory from '@components/user/TopStory'
 import { ROUTES } from '@constants/routes'
+import { fmtDT, timeAgo } from '@utils/date'
+import * as S from './styles'
 
 const { Paragraph } = Typography
 
-// helpers
+/* ===== Helper: map status BE -> tiếng Việt ===== */
 const viStatus = (s) => {
   if (!s) return 'Đang cập nhật'
   const map = { ongoing: 'Đang Tiến Hành', completed: 'Hoàn Thành', hiatus: 'Tạm Dừng' }
   return map[s] || 'Đang cập nhật'
 }
+
+/* ===== Helper: bỏ thẻ HTML khỏi description ===== */
 const stripHtml = (html) => (html || '').replace(/<[^>]*>/g, '').trim()
-const fmtDT = (iso) => {
-  if (!iso) return ''
-  const d = new Date(iso)
-  const pad = (n) => String(n).padStart(2, '0')
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
-}
 
-const timeAgo = (dateString) => {
-  if (!dateString) return '—'
-  const diff = Date.now() - new Date(dateString).getTime()
-  const s = Math.floor(diff / 1000)
-  const m = Math.floor(s / 60)
-  const h = Math.floor(m / 60)
-  const d = Math.floor(h / 24)
-  if (d > 0) return `${d} ngày trước`
-  if (h > 0) return `${h} giờ trước`
-  if (m > 0) return `${m} phút trước`
-  return `${s} giây trước`
-}
-
+/* ===== Helper: rút số chapter từ nhiều trường có thể có ===== */
 const extractNum = (v) => {
   if (v == null) return null
   if (typeof v === 'number') return v
@@ -55,36 +40,41 @@ const getChapterNum = (c) =>
 
 const StoryDetail = () => {
   const dispatch = useDispatch()
-  const navigate = useNavigate() 
+  const navigate = useNavigate()
   const { id } = useParams()
 
-  const { data: user } = useSelector((s) => s.auth.myProfile)
-  const { data: story = {}, status, error } = useSelector((s) => s.story.storyDetail)
+  /* ===== Store slices ===== */
+  const { data: currentUser } = useSelector((s) => s.auth.myProfile)
+  const { data: story = {}, status: storyStatus, error: storyError } = useSelector((s) => s.story.storyDetail)
   const { followAction, unfollowAction } = useSelector((s) => s.follow)
   const { chaptersByStory } = useSelector((s) => s.chapter)
   const { data: chapterList = [], status: chaptersStatus, history } = chaptersByStory
 
+  /* ===== Nạp chi tiết truyện + danh sách chapter ===== */
   useEffect(() => {
-    if (id) {
-      dispatch(getStory({ id }))
-      dispatch(getChaptersByStory({ storyId: id }))
-    }
+    if (!id) return
+    dispatch(getStory({ id }))
+    dispatch(getChaptersByStory({ storyId: id }))
   }, [dispatch, id])
 
+  /* ===== Hiển thị đủ/ít chương ===== */
   const [showAllChapters, setShowAllChapters] = useState(false)
   const MAX_SHOWN = 18
 
+  /* ===== Thể loại (từ quan hệ category_id_categories) ===== */
   const categories = useMemo(() => story?.category_id_categories || [], [story])
 
+  /* ===== Bảng chapter (giới hạn theo showAllChapters) ===== */
   const chapterRows = useMemo(() => {
     const src = showAllChapters ? chapterList : chapterList.slice(0, MAX_SHOWN)
     return src.map((c) => {
       const num = getChapterNum(c)
-      const rel = timeAgo(c.updatedAt || c.createdAt || c.updated_at || c.created_at)
+      const rel = timeAgo(c.updatedAt || c.createdAt || c.updated_at || c.created_at) || '—'
       return { key: c.id, id: c.id, number: num ?? '?', rel, _num: num }
     })
   }, [chapterList, showAllChapters])
 
+  /* ===== Danh sách chapter sort tăng dần để lấy first/last ===== */
   const sortedChapters = useMemo(() => {
     const arr = [...chapterList]
     arr.sort((a, b) => {
@@ -100,17 +90,20 @@ const StoryDetail = () => {
   }, [chapterList])
 
   const firstChapterId = sortedChapters[0]?.id ?? null
-  const lastChapterId = sortedChapters[sortedChapters.length - 1]?.id ?? null
+  const lastChapterId  = sortedChapters[sortedChapters.length - 1]?.id ?? null
 
-  const goFirst = () => firstChapterId && navigate(`/chapter/${firstChapterId}`)
-  const goLast  = () => lastChapterId  && navigate(`/chapter/${lastChapterId}`)
+  /* ===== Điều hướng đọc từ đầu / mới nhất ===== */
+  const goFirst = () => firstChapterId && navigate(ROUTES.USER.CHAPTER.replace(':id', firstChapterId))
+  const goLast  = () => lastChapterId  && navigate(ROUTES.USER.CHAPTER.replace(':id', lastChapterId))
 
+  /* ===== Số chapter đã đọc gần nhất để highlight bảng ===== */
   const lastReadNum = useMemo(() => {
     if (!history?.chapter_id) return null
     const found = chapterList.find((c) => c.id === history.chapter_id)
     return getChapterNum(found)
   }, [history, chapterList])
 
+  /* ===== Cột bảng chapter (click row -> tới chapter) ===== */
   const chapterColumns = [
     {
       title: 'Số chương',
@@ -121,8 +114,9 @@ const StoryDetail = () => {
         <S.ChapterLinkBtn
           role="link"
           tabIndex={0}
-          onClick={() => navigate(`/chapter/${row.id}`)}
-          onKeyDown={(e) => e.key === 'Enter' && navigate(`/chapters/${row.id}`)}
+          onClick={() => navigate(ROUTES.USER.CHAPTER.replace(':id', row.id))}
+          onKeyDown={(e) => e.key === 'Enter' && navigate(ROUTES.USER.CHAPTER.replace(':id', row.id))}
+          aria-label={`Đọc chapter ${n}`}
         >
           Chapter {n}
         </S.ChapterLinkBtn>
@@ -136,20 +130,21 @@ const StoryDetail = () => {
     },
   ]
 
-  // UI fallbacks
-  const cover = story?.thumbnail || 'https://placehold.co/200x270?text=No+Image'
-  const title = story?.name || 'Đang cập nhật'
-  const updatedAt = fmtDT(story?.updatedAt)
-  const author = story?.author?.trim() || 'Đang cập nhật'
-  const statusText = viStatus(story?.status)
-  const follows = story?.total_follow ?? 0
-  const rating = story?.rating ?? 0
-  const ratingCount = story?.ratingCount ?? 0
-  const descriptionText = stripHtml(story?.description)
+  /* ===== Fallback UI fields ===== */
+  const cover          = story?.thumbnail || 'https://placehold.co/200x270?text=No+Image'
+  const title          = story?.name || 'Đang cập nhật'
+  const updatedAtLabel = fmtDT(story?.updatedAt)
+  const author         = (story?.author || '').trim() || 'Đang cập nhật'
+  const statusText     = viStatus(story?.status)
+  const follows        = story?.total_follow ?? 0
+  const rating         = Number(story?.rating || 0)
+  const ratingCount    = story?.ratingCount ?? 0
+  const description    = stripHtml(story?.description)
 
-  const isLoggedIn = !!user?.id
-  const isFollowed = !!story?.is_followed
-  const isActing = followAction.status === 'loading' || unfollowAction.status === 'loading'
+  /* ===== Theo dõi / Bỏ theo dõi ===== */
+  const isLoggedIn  = !!currentUser?.id
+  const isFollowed  = !!story?.is_followed
+  const isActing    = followAction.status === 'loading' || unfollowAction.status === 'loading'
 
   const handleToggleFollow = async () => {
     if (!isLoggedIn || !story?.id) return
@@ -161,13 +156,14 @@ const StoryDetail = () => {
         const res = await dispatch(unfollowStory({ storyId: story.id })).unwrap()
         message.success(res?.message || 'Đã bỏ theo dõi')
       }
-      
+      // Reload lại detail để đồng bộ is_followed & total_follow
       dispatch(getStory({ id }))
     } catch (err) {
       message.error(err?.message || 'Có lỗi xảy ra')
     }
   }
 
+  /* ===== Điều hướng tới trang Search đã lọc theo thể loại ===== */
   const goToCategory = (cat) => {
     const search = qs.stringify(
       { 'categoryIds[]': [cat.id] },
@@ -177,22 +173,25 @@ const StoryDetail = () => {
   }
 
   return (
-    <>
-      <S.MainContainer>
-        <S.Left>
+    <S.Page>
+      {/* Lưới 2 cột: trái nội dung – phải sidebar */}
+      <S.ContentGrid>
+        {/* Cột trái: nội dung chính */}
+        <section>
           <S.TitleBlock>
             <S.PageTitle>{title}</S.PageTitle>
-            <S.UpdatedAt>{updatedAt ? `[Cập nhật lúc: ${updatedAt}]` : ''}</S.UpdatedAt>
+            <S.UpdatedAt>{updatedAtLabel ? `[Cập nhật lúc: ${updatedAtLabel}]` : ''}</S.UpdatedAt>
           </S.TitleBlock>
 
-          {status === 'loading' ? (
+          {storyStatus === 'loading' ? (
             <Skeleton active paragraph={{ rows: 6 }} />
-          ) : error ? (
+          ) : storyError ? (
             <Empty description="Không tải được dữ liệu truyện" />
           ) : (
             <>
-              {/* Summary */}
+              {/* ===== Tóm tắt + meta ===== */}
               <S.TopInfo>
+                {/* Bìa truyện */}
                 <div className="cover">
                   <Image
                     src={cover}
@@ -204,6 +203,7 @@ const StoryDetail = () => {
                   />
                 </div>
 
+                {/* Metadata truyện */}
                 <div className="meta">
                   <S.FieldRow>
                     <i className="fa fa-user icon" />
@@ -241,12 +241,13 @@ const StoryDetail = () => {
                   </S.FieldRow>
 
                   <S.RatingLine>
-                    <a href="#top">{title}</a> Xếp hạng: {rating}/5 - {ratingCount} Lượt đánh giá.
+                    <a href="#top">{title}</a> Xếp hạng: {rating}/5 - {ratingCount} lượt đánh giá.
                   </S.RatingLine>
                   <div style={{ marginTop: 6 }}>
-                    <Rate allowHalf disabled defaultValue={Number(rating) || 0} style={{ color: '#f5a623' }} />
+                    <Rate allowHalf disabled defaultValue={rating} style={{ color: '#f5a623' }} />
                   </div>
 
+                  {/* Hành động: Theo dõi + đọc */}
                   <S.ActionRow>
                     <Space size="middle" wrap>
                       <S.FollowButton
@@ -260,9 +261,9 @@ const StoryDetail = () => {
                       </S.FollowButton>
 
                       <span className="value strong" style={{ fontSize: 18 }}>
-                        {story?.total_follow ?? 0}
+                        {follows}
                       </span>
-                      <span style={{ fontWeight: 600 }}>Người Đã Theo Dõi</span>
+                      <span style={{ fontWeight: 600 }}>Người đã theo dõi</span>
                     </Space>
 
                     <Space size="middle" wrap style={{ marginTop: 12 }}>
@@ -279,23 +280,20 @@ const StoryDetail = () => {
 
               <Divider />
 
-              {/* Nội dung */}
+              {/* ===== Nội dung mô tả ===== */}
               <S.SectionHeader>
                 <S.SectionTitle>
                   <i className="fa fa-list-ul" /> NỘI DUNG TRUYỆN {title.toUpperCase()} TRÊN NETTRUYEN
                 </S.SectionTitle>
               </S.SectionHeader>
 
-              <Paragraph
-                style={{ marginTop: 8 }}
-                ellipsis={{ rows: 3, expandable: true, symbol: 'Xem thêm' }}
-              >
-                {descriptionText || 'Đang cập nhật nội dung...'}
+              <Paragraph style={{ marginTop: 8 }} ellipsis={{ rows: 3, expandable: true, symbol: 'Xem thêm' }}>
+                {description || 'Đang cập nhật nội dung...'}
               </Paragraph>
 
               <Divider />
 
-              {/* Danh sách chương */}
+              {/* ===== Danh sách chương ===== */}
               <S.SectionHeader>
                 <S.SectionTitle>
                   <i className="fa fa-list-ul" /> DANH SÁCH CHƯƠNG
@@ -328,20 +326,20 @@ const StoryDetail = () => {
               )}
             </>
           )}
-        </S.Left>
+        </section>
 
-        {/* RIGHT */}
-        <S.Right>
-          {user?.id && (
+        {/* Cột phải: sidebar */}
+        <aside>
+          {currentUser?.id && (
             <>
               <FollowedStories />
               <ReadingHistory />
             </>
           )}
           <TopStory />
-        </S.Right>
-      </S.MainContainer>
-    </>
+        </aside>
+      </S.ContentGrid>
+    </S.Page>
   )
 }
 

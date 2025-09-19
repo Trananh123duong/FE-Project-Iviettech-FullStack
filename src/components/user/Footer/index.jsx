@@ -1,6 +1,8 @@
-import * as S from './styles';
+import logoImg from '@assets/logo.png'
+import * as S from './styles'
 
-const keywords = [
+// Danh sách từ khoá (href, label)
+const KEYWORDS = [
   ['/', 'Truyện tranh'],
   ['/', 'Truyen tranh online'],
   ['/', 'Đọc truyện tranh'],
@@ -19,40 +21,43 @@ const keywords = [
   ['/', 'blogtruyen'],
   ['/', 'truyentranhaudio'],
   ['/', 'vcomi'],
-];
+]
 
 const Footer = () => {
+  const year = new Date().getFullYear()
+
   return (
     <S.Footer>
       <S.Container>
-        <S.LeftSection>
-          <S.Logo
-            src="https://nettruyenvio.com/assets/images/logo-nettruyen.png"
-            alt="logo"
-          />
-          <S.MarginTop>Chỗ để nhúng iframe fb</S.MarginTop>
-          <S.MarginTop>
-            <S.HalfWidth><S.StyledLink href="#">Liên hệ bản quyền</S.StyledLink></S.HalfWidth>
-            <S.HalfWidth><S.StyledLink href="#">Chính sách bảo mật</S.StyledLink></S.HalfWidth>
-          </S.MarginTop>
-          <S.Text>Copyright © 2022 NetTruyen</S.Text>
-        </S.LeftSection>
+        {/* ===== Cột trái: logo + link chính sách + copy ===== */}
+        <S.BrandCol>
+          <img src={logoImg} alt="NetTruyen" className="logo" />
 
-        <S.RightSection>
-          <S.KeywordBlock>
-            <S.Title>Từ khoá</S.Title>
-            <S.KeywordList>
-              {keywords.map(([href, label]) => (
-                <S.KeywordItem key={label}>
-                  <S.KeywordLink href={href} target="_self">{label}</S.KeywordLink>
-                </S.KeywordItem>
-              ))}
-            </S.KeywordList>
-          </S.KeywordBlock>
-        </S.RightSection>
+          <p className="note">Chỗ để nhúng iframe fb</p>
+
+          <div className="links">
+            <a href="#" target="_self" rel="noopener">Liên hệ bản quyền</a>
+            <span className="dot">•</span>
+            <a href="#" target="_self" rel="noopener">Chính sách bảo mật</a>
+          </div>
+
+          <p className="copy">Copyright © {year} NetTruyen</p>
+        </S.BrandCol>
+
+        {/* ===== Cột phải: từ khoá ===== */}
+        <S.KeywordsCol>
+          <h4 className="title">Từ khoá</h4>
+          <ul className="tags">
+            {KEYWORDS.map(([href, label]) => (
+              <li key={label}>
+                <a href={href} target="_self" rel="noopener">{label}</a>
+              </li>
+            ))}
+          </ul>
+        </S.KeywordsCol>
       </S.Container>
     </S.Footer>
-  );
-};
+  )
+}
 
-export default Footer;
+export default Footer

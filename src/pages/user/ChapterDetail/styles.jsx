@@ -1,13 +1,15 @@
 import styled from 'styled-components'
 import { Button } from 'antd'
 
-export const Wrapper = styled.div`
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: 10px 10px 40px;
+/* ===== Khung trang: đồng bộ site-width với Header/Nav ===== */
+export const Page = styled.main`
+  max-width: var(--site-width, 1000px);
+  margin: 0 auto 28px;
+  padding: 10px 12px 24px;
   background: #fff;
 `
 
+/* ===== Breadcrumb ===== */
 export const BreadcrumbBar = styled.div`
   display: flex;
   align-items: baseline;
@@ -17,7 +19,7 @@ export const BreadcrumbBar = styled.div`
   flex-wrap: wrap;
 `
 export const Crumb = styled.span`
-  color: #2a77c6;
+  color: #1e88e5;
   cursor: pointer;
   &:hover { text-decoration: underline; }
 `
@@ -26,10 +28,12 @@ export const UpdatedAt = styled.span`
   color: #8c8c8c;
 `
 
-/* Sticky tool bar */
+/* ===== Thanh công cụ sticky =====
+ * top: 8px để tránh dính sát cạnh trên & không bị header đè.
+ */
 export const Toolbar = styled.div`
   position: sticky;
-  top: 0;
+  top: 8px;
   z-index: 50;
   display: flex;
   justify-content: space-between;
@@ -38,13 +42,17 @@ export const Toolbar = styled.div`
   padding: 8px;
   background: #f3f4f6;
   border: 1px solid #e5e7eb;
-  border-radius: 6px;
+  border-radius: 10px;
 
   .left { display: flex; align-items: center; gap: 8px; }
   .right { display: flex; align-items: center; gap: 8px; }
 
-  .chapter-select {
-    width: 600px;
+  /* Select responsive bằng clamp để hợp mọi màn */
+  .chapter-select { width: clamp(250px, 50vw, 560px); }
+
+  @media (max-width: 640px) {
+    flex-wrap: wrap;
+    .chapter-select { width: 100%; }
   }
 `
 
@@ -52,7 +60,8 @@ export const NavButton = styled(Button)`
   border: 0;
   background: #d1d5db;
   color: #111;
-  &:hover { background: #cbd5e1 !important; }
+  border-radius: 8px;
+  &:hover { background: #cbd5e1 !important; color: #111 !important; }
   &:disabled { opacity: .6; cursor: not-allowed; }
 `
 
@@ -63,7 +72,7 @@ export const FollowButton = styled(Button)`
   font-weight: 700;
   height: 36px;
   padding: 0 16px;
-  border-radius: 8px;
+  border-radius: 10px;
 
   &:hover, &:focus {
     background-color: #d94a3a !important;
@@ -92,18 +101,15 @@ export const FollowButton = styled(Button)`
   }
 `
 
-/* Reader area */
+/* ===== Khu đọc ảnh ===== */
 export const Reader = styled.div`
-  margin-top: 10px;
-  border-radius: 6px;
+  margin-top: 12px;
 
   .img-wrap {
     max-width: 900px;
-    margin: 0 auto;
+    margin: 0 auto 8px;
   }
-  .img-wrap .ant-image {
-    width: 100%;
-  }
+  .img-wrap .ant-image { width: 100%; }
   .img-wrap img {
     width: 100%;
     height: auto;

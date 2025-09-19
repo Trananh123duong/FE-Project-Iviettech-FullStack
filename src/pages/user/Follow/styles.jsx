@@ -1,71 +1,77 @@
 import styled from 'styled-components'
 
-export const BreadcrumbBar = styled.div`
-  width: 100%;
-  padding-bottom: 16px;
+/**
+ * Container của trang: canh theo --site-width để thẳng hàng
+ * với Header / Sliderbar / Home.
+ */
+export const Page = styled.main`
+  max-width: var(--site-width, 1000px);
+  margin: 0 auto 28px;
+  padding: 0 12px;
 `
 
+/** Breadcrumb gọn gàng */
 export const Breadcrumb = styled.nav`
-  font-size: 18px;
+  font-size: 16px;
   line-height: 1.2;
+  margin: 8px 0 14px;
 
-  a {
-    color: #2f80ed;
-    text-decoration: none;
-  }
-  a:hover {
-    text-decoration: underline;
-  }
+  a { color: #2f6fea; text-decoration: none; }
+  a:hover { text-decoration: underline; }
 
-  .sep {
-    margin: 0 10px;
-    color: #c0c4cc; /* dấu » màu xám nhạt */
-  }
+  .sep { margin: 0 8px; color: #c0c4cc; }
+  .current { color: #9aa1a9; }
+`
 
-  .current {
-    color: #9aa1a9; /* “Theo dõi” màu xám */
+/**
+ * Lưới 2 cột: nội dung (1fr) + sidebar (320px).
+ * Xuống 1 cột khi màn nhỏ.
+ */
+export const ContentGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 24px;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: 1fr;
   }
 `
 
-export const MainContainer = styled.main`
-  width: 100%;
-`
-
-export const ListColumn = styled.div`
-  width: 66%;
-  float: left;
-`
-
-export const SideColumn = styled.div`
-  width: 33.33333333%;
-  float: left;
-`
-
+/** Phần header mỗi section */
 export const SectionHeader = styled.div`
-  width: 100%;
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
+  margin: 6px 0 12px;
 `
 
+/** Tiêu đề section – đồng bộ toàn site */
 export const SectionTitle = styled.h2`
-  font-size: 20px;
-  color: #2980b9;
+  margin: 0;
+  font-size: 22px;
+  font-weight: 800;
+  color: #1e88e5;
+  line-height: 1.25;
+
+  i { margin-left: 4px; }
 `
 
-export const Gate = styled.div`
+/** Gate khi chưa đăng nhập – card đẹp, chính giữa */
+export const GateCard = styled.section`
   max-width: 720px;
   margin: 40px auto;
   padding: 24px;
   background: #fff;
-  border: 1px solid #eee;
-  border-radius: 8px;
+  border: 1px solid #ececee;
+  border-radius: 12px;
+  box-shadow: 0 10px 26px rgba(0,0,0,.06);
+  text-align: center;
 
   h2 {
     margin: 0 0 8px;
-    color: #2980b9;
+    font-size: 22px;
+    font-weight: 800;
+    color: #1e88e5;
   }
-  p {
-    margin: 0 0 16px;
-  }
+  p { margin: 0 0 16px; color: #444; }
 `

@@ -1,17 +1,39 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Link } from 'react-router-dom'
 import Slider from 'react-slick'
-import 'slick-carousel/slick/slick-theme.css'
 import 'slick-carousel/slick/slick.css'
+import 'slick-carousel/slick/slick-theme.css'
 
+import { ROUTES } from '@constants/routes'
 import { getStories } from '@redux/thunks/story.thunk'
+import { timeAgo } from '@utils/date'
 import * as S from './styles'
+
+// Lấy chapter mới nhất theo updatedAt
+const getLatestChapter = (chapters = []) => {
+  if (!chapters?.length) return null
+  return chapters.reduce((a, b) =>
+    new Date(a?.updatedAt || 0) >= new Date(b?.updatedAt || 0) ? a : b
+  )
+}
+
+// Nút điều hướng custom cho react-slick
+const Arrow = ({ direction, onClick }) => (
+  <S.ArrowBtn
+    className={`arrow ${direction}`}
+    aria-label={direction === 'prev' ? 'Trước' : 'Sau'}
+    onClick={onClick}
+    type="button"
+  >
+    {direction === 'prev' ? '‹' : '›'}
+  </S.ArrowBtn>
+)
 
 const Sliderbar = () => {
   const dispatch = useDispatch()
-  const { data: stories, status, error } = useSelector(
-    (state) => state.story.sliderbarList
+  const { data: stories = [], status, error } = useSelector(
+    (s) => s.story.sliderbarList
   )
 
   useEffect(() => {
@@ -20,81 +42,94 @@ const Sliderbar = () => {
     }
   }, [status, dispatch])
 
+  // Chuẩn hoá dữ liệu hiển thị
+  const items = useMemo(
+    () =>
+      (stories || []).map((st) => {
+        const latest = getLatestChapter(st.chapters)
+        return {
+          id: st.id,
+          name: st.name,
+          thumbnail: st.thumbnail,
+          latestId: latest?.id,
+          latestNo: latest?.chapter_number,
+          latestTime: latest?.updatedAt,
+        }
+      }),
+    [stories]
+  )
+
   const settings = {
     dots: false,
     infinite: true,
-    speed: 500,
+    speed: 450,
     slidesToShow: 5,
     slidesToScroll: 1,
     autoplay: true,
-    autoplaySpeed: 3000,
-  }
-
-  const getLatestChapter = (chapters = []) => {
-    if (!chapters.length) return null
-    return chapters.reduce((latest, c) =>
-      new Date(latest.updatedAt) >= new Date(c.updatedAt) ? latest : c
-    )
-  }
-
-  const timeAgo = (dateString) => {
-    const diff = Date.now() - new Date(dateString).getTime()
-    const seconds = Math.floor(diff / 1000)
-    const minutes = Math.floor(seconds / 60)
-    const hours = Math.floor(minutes / 60)
-    const days = Math.floor(hours / 24)
-    const months = Math.floor(days / 30)
-
-    if (months > 0) return `${months} tháng trước`
-    if (days > 0) return `${days} ngày trước`
-    if (hours > 0) return `${hours} giờ trước`
-    if (minutes > 0) return `${minutes} phút trước`
-    return `${seconds} giây trước`
+    autoplaySpeed: 3200,
+    pauseOnHover: true,
+    swipeToSlide: true,
+    nextArrow: <Arrow direction="next" />,
+    prevArrow: <Arrow direction="prev" />,
+    responsive: [
+      { breakpoint: 1280, settings: { slidesToShow: 4 } },
+      { breakpoint: 1024, settings: { slidesToShow: 3 } },
+      { breakpoint: 768,  settings: { slidesToShow: 2 } },
+      { breakpoint: 520,  settings: { slidesToShow: 1 } },
+    ],
   }
 
   return (
-    <>
-      <S.PageTitle>
-        Truyện đề cử <i className="fa-solid fa-angle-right"></i>
-      </S.PageTitle>
+    <S.Container>
+      <S.SectionHeader>
+        Truyện đề cử <i className="fa-solid fa-angle-right" />
+      </S.SectionHeader>
 
-      {status === 'loading' && <div style={{ padding: 8 }}>Đang tải...</div>}
-      {status === 'failed' && <div style={{ padding: 8, color: 'red' }}>Lỗi: {error}</div>}
+      {status === 'loading' && <S.Info>Đang tải…</S.Info>}
+      {status === 'failed' && <S.Info className="error">Lỗi: {String(error)}</S.Info>}
 
       {status === 'succeeded' && (
-        <Slider {...settings}>
-          {stories.map((story) => {
-            const latest = getLatestChapter(story.chapters)
-            return (
-              <S.ComicCard key={story.id}>
-                <Link to={`/story/${story.id}`}>
-                  <img src={story.thumbnail} alt={story.name} />
-                </Link>
+        <S.SliderWrap>
+          <Slider {...settings}>
+            {items.map((it) => {
+              const storyHref = ROUTES.USER.STORY.replace(':id', it.id)
+              const chapterHref = it.latestId
+                ? ROUTES.USER.CHAPTER.replace(':id', it.latestId)
+                : null
 
-                <S.StoryInfo>
-                  <h3>
-                    <Link to={`/story/${story.id}`}>{story.name}</Link>
-                  </h3>
+              return (
+                <S.Card key={it.id}>
+                  <Link to={storyHref} className="thumb" aria-label={it.name}>
+                    <img src={it.thumbnail} alt={it.name} loading="lazy" />
+                  </Link>
 
-                  {latest ? (
-                    <>
-                      <Link to={`/chapter/${latest.id}`}>
-                        Chapter {latest.chapter_number}
-                      </Link>
-                      <span>
-                        <i className="fa fa-clock-o" /> {timeAgo(latest.updatedAt)}
-                      </span>
-                    </>
-                  ) : (
-                    <span>Chưa có chap</span>
-                  )}
-                </S.StoryInfo>
-              </S.ComicCard>
-            )
-          })}
-        </Slider>
+                  <S.Overlay>
+                    <h3 className="title">
+                      <Link to={storyHref}>{it.name}</Link>
+                    </h3>
+
+                    {it.latestId ? (
+                      <div className="meta">
+                        <Link to={chapterHref} className="chapter">
+                          Chapter {it.latestNo}
+                        </Link>
+                        <span className="time">
+                          <i className="fa fa-clock-o" aria-hidden /> {timeAgo(it.latestTime)}
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="meta">
+                        <span className="chapter muted">Chưa có chap</span>
+                      </div>
+                    )}
+                  </S.Overlay>
+                </S.Card>
+              )
+            })}
+          </Slider>
+        </S.SliderWrap>
       )}
-    </>
+    </S.Container>
   )
 }
 

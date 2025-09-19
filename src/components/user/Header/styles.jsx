@@ -1,162 +1,174 @@
 import styled from 'styled-components'
 import bgHeader from '@assets/bg_header.jpg'
 
+/**
+ * HeaderContainer
+ * - Sticky trên cùng
+ * - Nền pháo hoa giống Nettruyen
+ * - Viền bóng nhẹ bên dưới
+ */
 export const HeaderContainer = styled.header`
-  background: url(${bgHeader})
-    top center repeat-x;
+  z-index: 1000;
   width: 100%;
-  height: 55px;
-  color: #fff;
+  background: url(${bgHeader}) top center repeat-x;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.12);
 `
 
-export const Navbar = styled.div`
-  height: 100%;
+/**
+ * Inner
+ * - Lưới 3 cột: Logo | Search | Actions
+ * - Chiều cao 56px để cân cụm search 40px
+ */
+export const Inner = styled.div`
   max-width: 1000px;
   margin: 0 auto;
+  height: 56px;
   padding: 0 12px;
+
   display: grid;
   grid-template-columns: 220px 1fr auto;
   align-items: center;
   column-gap: 12px;
-`
 
-export const LogoBox = styled.div`
-  display: flex;
-  align-items: center;
-  img {
-    height: 38px;
+  /* Cho phép cột giữa co giãn đúng cách, tránh tràn đè */
+  min-width: 0;
+  & > .logo,
+  & > .search-wrap,
+  & > .right {
+    min-width: 0;
+  }
+
+  /* ---------------------- Logo ---------------------- */
+  .logo img {
+    height: 36px;
+    display: block;
     object-fit: contain;
   }
-`
 
-export const SearchBox = styled.div`
-  position: relative;
-  display: flex;
-  align-items: center;
-
-  input {
-    width: 100%;
-    height: 35px;
-    border: none;
-    border-radius: 4px;
-    padding: 0 44px 0 18px;
-    outline: none;
+  /* ---------------------- Search ---------------------- */
+  .search-wrap {
+    position: relative;
+    display: block;
   }
 
-  button {
+  /* Input của antd nhưng style như native để kiểm soát tuyệt đối */
+  .nt-input.ant-input {
+    height: 40px;
+    border-radius: 999px;
+    padding: 0 48px 0 16px; /* chừa chỗ cho nút bên phải */
+    border: 0;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  }
+
+  .nt-input.ant-input:focus {
+    box-shadow: 0 0 0 2px rgba(47, 111, 234, 0.15),
+      0 2px 6px rgba(0, 0, 0, 0.08);
+  }
+
+  /* Nút search đặt absolute để luôn cân giữa theo input */
+  .nt-search-btn {
     position: absolute;
-    right: 6px;
-    height: 32px;
-    width: 32px;
+    top: 50%;
+    right: 2px;
+    transform: translateY(-50%);
+    height: 36px;
+    width: 42px;
     border: none;
-    background: transparent;
-    cursor: pointer;
-    border-radius: 4px;
-  }
-
-  button:hover {
-    background: #ebebeb;
-  }
-
-  i {
-    color: #333;
-    font-size: 16px;
-  }
-`
-
-export const RightGroup = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-`
-
-export const IconGroup = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-right: 6px;
-
-  .toggle-dark {
-    color: #ff9601;
-    font-size: 22px !important;
-    cursor: pointer;
-  }
-  .notifications {
+    border-radius: 999px;
+    background: #2f6fea;
     color: #fff;
-    font-size: 22px !important;
     cursor: pointer;
-  }
-`
-
-export const Account = styled.div`
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-
-  &:hover .menu {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0);
-  }
-`
-
-export const AccountBtn = styled.div`
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 10px;
-  border-radius: 6px;
-  cursor: pointer;
-  user-select: none;
-  font-weight: 600;
-
-  .caret {
-    margin-left: 2px;
-    font-size: 14px;
-  }
-`
-
-export const Menu = styled.div`
-  position: absolute;
-  top: 25px;
-  right: 20;
-  color: #222;
-  min-width: 240px;
-  border-radius: 10px;
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
-  padding: 8px 0;
-  z-index: 10;
-
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(6px);
-  transition: all 0.15s ease;
-
-  a,
-  button {
-    width: 100%;
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: 10px;
-    padding: 10px 14px;
-    color: inherit;
-    text-decoration: none;
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    font-size: 14px;
-    line-height: 1;
-    background: #fff;
+    justify-content: center;
   }
 
-  a:hover,
-  button:hover {
-    background: #f5f5f5;
+  .nt-search-btn:hover {
+    filter: brightness(1.05);
   }
 
-  i {
-    width: 18px;
-    text-align: center;
+  .nt-search-btn .anticon {
+    font-size: 18px;
+  }
+
+  /* ---------------------- Actions bên phải ---------------------- */
+  .right {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap; /* tránh rớt dòng gây chồng chéo */
+  }
+
+  .icon-btn {
+    color: #fff;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border-radius: 8px;
+    flex: 0 0 auto; /* không co giãn */
+  }
+
+  .icon-btn .anticon {
     font-size: 16px;
+  }
+
+  .icon-btn:hover {
+    background: rgba(255, 255, 255, 0.14);
+  }
+
+  /* Trigger mở menu tài khoản */
+  .account-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 32px;
+    padding: 0 8px;
+    border: none;
+    background: transparent;
+    color: #fff;
+    border-radius: 10px;
+    cursor: pointer;
+    flex: 0 0 auto;
+  }
+
+  .account-btn:hover {
+    background: rgba(255, 255, 255, 0.14);
+  }
+
+  .account-btn .name {
+    max-width: 150px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .account-btn .caret {
+    font-size: 12px;
+    opacity: 0.85;
+  }
+
+  /* Dropdown tài khoản */
+  .account-menu .ant-dropdown-menu {
+    min-width: 240px;
+    border-radius: 10px;
+    padding: 8px 0;
+    box-shadow: 0 8px 26px rgba(0, 0, 0, 0.18);
+  }
+
+  /* Giảm viền xám mặc định của antd để sạch mắt hơn */
+  .ant-input {
+    border-color: transparent;
+  }
+
+  /* ---------------------- Responsive ---------------------- */
+  @media (max-width: 900px) {
+    .account-btn .name {
+      display: none; /* thu gọn tên khi hẹp để tránh đè nút */
+    }
+  }
+
+  @media (max-width: 768px) {
+    grid-template-columns: 160px 1fr auto;
   }
 `

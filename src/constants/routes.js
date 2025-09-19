@@ -1,13 +1,15 @@
 export const ROUTES = {
   USER: {
     HOME: '/',
-    FOLLOW: '/follow',
-    HISTORY: '/history',
-    SEARCH: '/search',
-    STORY: '/story/:id',
+    FOLLOW: '/theo-doi',
+    HISTORY: '/lich-su',
+    SEARCH: '/tim-kiem',
+    STORY: '/truyen/:id',
     CHAPTER: '/chapter/:id',
   },
-  ADMIN: {},
+  ADMIN: {
+    DASHBOARD: '/admin/dashboard',
+  },
   AUTH: {
     LOGIN: '/login',
     REGISTER: '/register'

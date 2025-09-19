@@ -1,55 +1,84 @@
 import styled from 'styled-components'
-import { Form, Input, Button, Typography } from 'antd'
+import { Button } from 'antd'
 
-export const Wrapper = styled.div`
+/* Bọc trang để canh thẳng hàng với layout chung */
+export const Page = styled.main`
+  max-width: var(--site-width, 1000px);
+  margin: 24px auto 48px;
+  padding: 0 12px;
+`
+
+/* Card chứa form – đồng bộ Login */
+export const AuthCard = styled.section`
   max-width: 520px;
-  margin: 40px auto;
+  margin: 0 auto;
   background: #fff;
-  padding: 32px 28px;
-  border-radius: 8px;
-  border: 1px solid #e5e7eb;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-`
+  padding: 28px 24px 24px;
+  border: 1px solid #ececee;
+  border-radius: 12px;
+  box-shadow: 0 10px 26px rgba(0,0,0,.06);
 
-export const Title = styled(Typography.Title)`
-  && {
-    text-align: center;
-    font-weight: 800;
-    margin-bottom: 8px;
+  /* ===== Fix lệch chữ input (không ép height) ===== */
+  .ant-input,
+  .ant-input-affix-wrapper { border-radius: 10px; }
+
+  .ant-input-affix-wrapper {
+    display: inline-flex;
+    align-items: center;          /* canh giữa text và icon */
   }
+
+  /* Padding hợp lý cho size="large" */
+  .ant-input-lg { padding-block: 10px; padding-inline: 12px; }
+  .ant-input-affix-wrapper-lg { padding-block: 6px; padding-inline: 12px; }
+  .ant-input-affix-wrapper-lg > input.ant-input { padding: 0; }
+
+  /* Focus ring nhẹ */
+  .ant-input-affix-wrapper-focused {
+    box-shadow: 0 0 0 2px rgba(47,111,234,.18);
+  }
+
+  .ant-form-item { margin-bottom: 14px; }
+  .ant-form-item-label > label { font-weight: 600; }
 `
 
-export const Underline = styled.div`
-  width: 56px;
-  height: 4px;
-  background: #e91e63;
+/* Tiêu đề + gạch chân */
+export const Title = styled.h1`
+  margin: 0 0 6px 0;
+  text-align: center;
+  font-size: 24px;
+  font-weight: 900;
+  letter-spacing: .5px;
+  color: #111;
+`
+export const TitleUnderline = styled.div`
+  width: 56px; height: 4px;
+  background: #7c3aed;
   border-radius: 4px;
-  margin: 0 auto 24px;
+  margin: 0 auto 18px;
 `
 
-export const Actions = styled.div`
+/* Link phụ */
+export const FormExtras = styled.div`
   display: flex;
   justify-content: flex-end;
-  gap: 16px;
-  margin-top: 8px;
+  gap: 10px;
+  margin-top: 4px;
+  margin-bottom: 16px;
 
-  a {
-    color: #3b82f6;
-    text-decoration: none;
-    &:hover { text-decoration: underline; }
-  }
+  a { color: #2f6fea; text-decoration: none; }
+  a:hover { text-decoration: underline; }
 `
 
+/* Nút submit – cùng style với Login */
 export const SubmitButton = styled(Button)`
   && {
     width: 100%;
     height: 44px;
-    background: #ffd54f;
-    border-color: #ffd54f;
-    color: #111;
-    font-weight: 600;
+    border-radius: 10px;
+    font-weight: 700;
+    background: #2f6fea;
+    border-color: #2f6fea;
+    color: #fff;
   }
-  &&:hover {
-    filter: brightness(0.98);
-  }
+  &&:hover { filter: brightness(1.05); }
 `

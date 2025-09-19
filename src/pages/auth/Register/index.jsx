@@ -1,25 +1,25 @@
-import { useMemo, useEffect } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { Form, Input, Alert, notification } from 'antd'
+import { useEffect, useMemo } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import * as S from './styles'
+import { Link, useNavigate } from 'react-router-dom'
+import { Alert, Form, Input, notification } from 'antd'
+import { UserOutlined, MailOutlined, LockOutlined } from '@ant-design/icons'
 
 import { ROUTES } from '@constants/routes'
 import { register } from '@redux/thunks/auth.thunk'
+import * as S from './styles'
 
+// ========================= COMPONENT =========================
 const Register = () => {
   const [form] = Form.useForm()
-  const navigate = useNavigate()
   const dispatch = useDispatch()
+  const navigate = useNavigate()
 
   const { registerData } = useSelector((state) => state.auth)
-  const loading = useMemo(
-    () => registerData.status === 'loading',
-    [registerData.status]
-  )
+  const loading = useMemo(() => registerData.status === 'loading', [registerData.status])
   const error = registerData.error
 
-  const onFinish = (values) => {
+  // Gửi form
+  const handleSubmit = (values) => {
     dispatch(
       register({
         data: {
@@ -38,6 +38,7 @@ const Register = () => {
     )
   }
 
+  // Hiển thị lỗi server vào form
   useEffect(() => {
     if (error) {
       form.setFields([
@@ -49,88 +50,108 @@ const Register = () => {
   }, [error, form])
 
   return (
-    <S.Wrapper>
-      <S.Title level={2}>ĐĂNG KÝ</S.Title>
-      <S.Underline />
+    <S.Page>
+      <S.AuthCard>
+        <S.Title>ĐĂNG KÝ</S.Title>
+        <S.TitleUnderline />
 
-      {error && (
-        <Alert
-          type="error"
-          showIcon
-          message={error}
-          style={{ marginBottom: 16 }}
-        />
-      )}
+        {!!error && (
+          <Alert type="error" showIcon message={error} style={{ marginBottom: 12 }} />
+        )}
 
-      <Form layout="vertical" form={form} onFinish={onFinish}>
-        <Form.Item
-          label="Name"
-          name="username"
-          rules={[{ required: true, message: 'Vui lòng nhập tên' }]}
+        <Form
+          layout="vertical"
+          form={form}
+          onFinish={handleSubmit}
+          autoComplete="on"
         >
-          <Input size="large" placeholder="Name" />
-        </Form.Item>
-
-        <Form.Item
-          label="Email"
-          name="email"
-          rules={[
-            { required: true, message: 'Vui lòng nhập email' },
-            { type: 'email', message: 'Email không hợp lệ' },
-          ]}
-        >
-          <Input size="large" placeholder="Email" />
-        </Form.Item>
-
-        <Form.Item
-          label="Mật khẩu"
-          name="password"
-          rules={[
-            { required: true, message: 'Vui lòng nhập mật khẩu' },
-            { min: 6, message: 'Ít nhất 6 ký tự' },
-          ]}
-          hasFeedback
-        >
-          <Input.Password size="large" placeholder="Mật khẩu" />
-        </Form.Item>
-
-        <Form.Item
-          label="Xác nhận mật khẩu"
-          name="confirm"
-          dependencies={['password']}
-          hasFeedback
-          rules={[
-            { required: true, message: 'Vui lòng xác nhận mật khẩu' },
-            ({ getFieldValue }) => ({
-              validator(_, value) {
-                if (!value || getFieldValue('password') === value)
-                  return Promise.resolve()
-                return Promise.reject(
-                  new Error('Mật khẩu xác nhận không khớp')
-                )
-              },
-            }),
-          ]}
-        >
-          <Input.Password size="large" placeholder="Xác nhận mật khẩu" />
-        </Form.Item>
-
-        <S.Actions>
-          <Link to={ROUTES.AUTH.LOGIN}>Đăng nhập</Link>
-        </S.Actions>
-
-        <Form.Item style={{ marginTop: 16 }}>
-          <S.SubmitButton
-            type="primary"
-            htmlType="submit"
-            size="large"
-            loading={loading}
+          {/* Tên */}
+          <Form.Item
+            label="Name"
+            name="username"
+            rules={[{ required: true, message: 'Vui lòng nhập tên' }]}
           >
-            Đăng ký
-          </S.SubmitButton>
-        </Form.Item>
-      </Form>
-    </S.Wrapper>
+            <Input
+              size="large"
+              placeholder="Name"
+              prefix={<UserOutlined />}
+              autoComplete="name"
+            />
+          </Form.Item>
+
+          {/* Email */}
+          <Form.Item
+            label="Email"
+            name="email"
+            rules={[
+              { required: true, message: 'Vui lòng nhập email' },
+              { type: 'email', message: 'Email không hợp lệ' },
+            ]}
+          >
+            <Input
+              size="large"
+              placeholder="Email"
+              prefix={<MailOutlined />}
+              autoComplete="email"
+            />
+          </Form.Item>
+
+          {/* Mật khẩu */}
+          <Form.Item
+            label="Mật khẩu"
+            name="password"
+            rules={[
+              { required: true, message: 'Vui lòng nhập mật khẩu' },
+              { min: 6, message: 'Ít nhất 6 ký tự' },
+            ]}
+            hasFeedback
+          >
+            <Input.Password
+              size="large"
+              placeholder="Mật khẩu"
+              prefix={<LockOutlined />}
+              autoComplete="new-password"
+            />
+          </Form.Item>
+
+          {/* Xác nhận mật khẩu */}
+          <Form.Item
+            label="Xác nhận mật khẩu"
+            name="confirm"
+            dependencies={['password']}
+            hasFeedback
+            rules={[
+              { required: true, message: 'Vui lòng xác nhận mật khẩu' },
+              ({ getFieldValue }) => ({
+                validator(_, value) {
+                  if (!value || getFieldValue('password') === value) return Promise.resolve()
+                  return Promise.reject(new Error('Mật khẩu xác nhận không khớp'))
+                },
+              }),
+            ]}
+          >
+            <Input.Password
+              size="large"
+              placeholder="Xác nhận mật khẩu"
+              prefix={<LockOutlined />}
+              autoComplete="new-password"
+            />
+          </Form.Item>
+
+          {/* Link phụ */}
+          <S.FormExtras>
+            <Link to={ROUTES.AUTH.LOGIN}>Đăng nhập</Link>
+          </S.FormExtras>
+
+          {/* Nút submit */}
+          <Form.Item style={{ marginTop: 8, marginBottom: 0 }}>
+            <S.SubmitButton type="primary" htmlType="submit" size="large" loading={loading}>
+              Đăng ký
+            </S.SubmitButton>
+          </Form.Item>
+        </Form>
+      </S.AuthCard>
+    </S.Page>
   )
 }
 

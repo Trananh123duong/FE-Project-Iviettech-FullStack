@@ -1,27 +1,46 @@
 import styled from 'styled-components'
 
-export const MainContainer = styled.main`
-  width: 100%;
+/**
+ * Trang Home
+ * - Canh theo --site-width để thẳng hàng với Header/Navbar/Footer
+ * - Khoảng đệm đều 12px
+ */
+export const Page = styled.main`
+  max-width: var(--site-width, 1000px);
+  margin: 0 auto 28px;
+  padding: 0 12px;
 `
 
-export const ListStory = styled.div`
-  width: 66%;
-  float: left;
+/**
+ * Lưới 2 cột: nội dung (1fr) + sidebar (320px)
+ * - Khoảng cách 24px
+ * - Xuống 1 cột khi màn hình nhỏ
+ */
+export const ContentGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 24px;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: 1fr;   /* sidebar xuống dưới */
+  }
 `
 
-export const DeadlineStory = styled.div`
-  width: 33.33333333%;
-  float: left;
-`
-
+/** Header của từng section */
 export const SectionHeader = styled.div`
-  width: 100%;
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
+  margin: 6px 0 12px;
 `
 
+/** Tiêu đề section – đồng bộ toàn site */
 export const SectionTitle = styled.h2`
-  font-size: 20px;
-  color: #2980b9;
+  margin: 0;
+  font-size: 22px;
+  font-weight: 800;
+  color: #1e88e5;
+  line-height: 1.25;
+
+  i { margin-left: 4px; }
 `

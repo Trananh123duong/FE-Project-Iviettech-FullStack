@@ -1,14 +1,16 @@
 import styled from 'styled-components'
 
+/* --- Container chính chứa toàn bộ list --- */
 export const Container = styled.div`
   display: flex;
   flex-direction: column;
   gap: 12px;
 `
 
+/* --- Mỗi item trong danh sách --- */
 export const Row = styled.div`
   display: grid;
-  grid-template-columns: 110px 1fr;
+  grid-template-columns: 110px 1fr; /* Ảnh bên trái, nội dung bên phải */
   gap: 12px;
   padding: 8px;
   border: 1px solid #eee;
@@ -16,12 +18,14 @@ export const Row = styled.div`
   background: #fff;
 `
 
+/* --- Ảnh thumbnail --- */
 export const Thumb = styled.div`
   width: 110px;
   height: 150px;
   border: 1px solid #ddd;
   border-radius: 4px;
   overflow: hidden;
+
   img {
     width: 100%;
     height: 100%;
@@ -30,36 +34,54 @@ export const Thumb = styled.div`
   }
 `
 
+/* --- Cột thông tin bên phải --- */
 export const Info = styled.div`
   display: flex;
   flex-direction: column;
   gap: 6px;
 `
 
+/* --- Tên truyện --- */
 export const StoryTitle = styled.h3`
   margin: 0;
   font-size: 18px;
   font-weight: 600;
+
   a {
     color: #000;
     text-decoration: none;
   }
-  a:hover { color: #0074cc; }
+
+  a:hover {
+    color: #0074cc;
+  }
 `
 
+/* --- Dòng hiển thị "Đọc tới: Chapter X" --- */
 export const MetaLine = styled.div`
   font-size: 14px;
-  a { color: #2980b9; text-decoration: none; }
-  a:hover { text-decoration: underline; color: #70c1f7; }
+
+  a {
+    color: #2980b9;
+    text-decoration: none;
+  }
+
+  a:hover {
+    text-decoration: underline;
+    color: #70c1f7;
+  }
 `
 
+/* --- Dòng thời gian "Lần cuối đọc" --- */
 export const TimeLine = styled.div`
   font-size: 12px;
   color: #888;
 `
 
+/* --- Nút "Tiếp tục đọc" --- */
 export const Actions = styled.div`
   margin-top: 6px;
+
   .read-btn {
     display: inline-block;
     padding: 6px 10px;
@@ -68,6 +90,7 @@ export const Actions = styled.div`
     color: #2f80ed;
     text-decoration: none;
   }
+
   .read-btn:hover {
     background: #2f80ed;
     color: #fff;

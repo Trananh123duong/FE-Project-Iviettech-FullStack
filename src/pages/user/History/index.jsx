@@ -1,13 +1,13 @@
+import { Button, Empty } from 'antd'
+import qs from 'qs'
 import { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { useLocation, useNavigate, Link } from 'react-router-dom'
-import { Empty, Button } from 'antd'
-import qs from 'qs'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 
+import FollowedStories from '@components/user/FollowedStories'
 import HistoryList from '@components/user/HistoryList'
 import Paginate from '@components/user/Paginate'
 import TopStory from '@components/user/TopStory'
-import FollowedStories from '@components/user/FollowedStories'
 
 import { STORY_LIMIT } from '@constants/paging'
 import { ROUTES } from '@constants/routes'
@@ -15,98 +15,110 @@ import { getMyHistory } from '@redux/thunks/history.thunk'
 import * as S from './styles'
 
 const HistoryPage = () => {
+  // ===== Hook core =====
   const dispatch = useDispatch()
   const location = useLocation()
   const navigate = useNavigate()
 
-  const { data: user } = useSelector((s) => s.auth.myProfile)
+  // ===== Thông tin user để bật/tắt gate đăng nhập =====
+  const { data: currentUser } = useSelector((s) => s.auth.myProfile)
+
+  // ===== Dữ liệu lịch sử từ slice =====
   const {
-    data: items = [],
+    data: historyItems = [],
     meta = {},
     status,
     error,
   } = useSelector((s) => s.history.historyList)
 
-  const query = qs.parse(location.search, { ignoreQueryPrefix: true })
-  const urlPage = parseInt(query.page || 1, 10)
-  const urlLimit = parseInt(query.limit || STORY_LIMIT, 10)
+  // ===== Đọc page/limit từ URL =====
+  const queryObj = qs.parse(location.search, { ignoreQueryPrefix: true })
+  const urlPage = Number(queryObj.page || 1)
+  const urlLimit = Number(queryObj.limit || STORY_LIMIT)
 
+  // ===== Load lịch sử khi đã đăng nhập =====
   useEffect(() => {
-    if (user?.id) {
+    if (currentUser?.id) {
       dispatch(getMyHistory({ page: urlPage, limit: urlLimit, more: false }))
     }
-  }, [dispatch, user?.id, urlPage, urlLimit])
+  }, [dispatch, currentUser?.id, urlPage, urlLimit])
 
-  const current = meta.page || urlPage
+  // ===== Phân trang =====
+  const currentPage = meta.page || urlPage
   const pageSize = meta.limit || urlLimit
-  const total = meta.total || 0
+  const totalItems = meta.total || 0
 
   const handlePaginate = (page, size) => {
-    const newQuery = qs.stringify({ ...query, page, limit: size }, { addQueryPrefix: true })
-    navigate(`${location.pathname}${newQuery}`, { replace: false })
+    const newQuery = qs.stringify({ ...queryObj, page, limit: size }, { addQueryPrefix: true })
+    navigate(`${location.pathname}${newQuery}`)
   }
 
-  if (!user?.id) {
+  // ===== Gate khi chưa đăng nhập =====
+  if (!currentUser?.id) {
     return (
-      <>
-        <S.BreadcrumbBar>
-          <S.Breadcrumb>
-            <Link to="/">Trang chủ</Link>
-            <span className="sep">»</span>
-            <span className="current">Lịch sử</span>
-          </S.Breadcrumb>
-        </S.BreadcrumbBar>
+      <S.Page>
+        <S.Breadcrumb>
+          <Link to={ROUTES.USER.HOME}>Trang chủ</Link>
+          <span className="sep">»</span>
+          <span className="current">Lịch sử</span>
+        </S.Breadcrumb>
 
-        <S.Gate>
+        <S.GateCard>
           <h2>Lịch sử đọc truyện</h2>
           <p>Bạn cần đăng nhập để xem lịch sử đọc.</p>
           <Link to={ROUTES.AUTH.LOGIN}>
             <Button type="primary" size="large">Đăng nhập</Button>
           </Link>
-        </S.Gate>
-      </>
+        </S.GateCard>
+      </S.Page>
     )
   }
 
+  // ===== Trạng thái đã đăng nhập =====
   return (
-    <>
-      <S.BreadcrumbBar>
-        <S.Breadcrumb>
-          <Link to="/">Trang chủ</Link>
-          <span className="sep">»</span>
-          <span className="current">Lịch sử</span>
-        </S.Breadcrumb>
-      </S.BreadcrumbBar>
+    <S.Page>
+      <S.Breadcrumb>
+        <Link to={ROUTES.USER.HOME}>Trang chủ</Link>
+        <span className="sep">»</span>
+        <span className="current">Lịch sử</span>
+      </S.Breadcrumb>
 
-      <S.MainContainer>
-        <S.ListColumn>
+      <S.ContentGrid>
+        {/* Cột trái: lịch sử đọc */}
+        <section>
           <S.SectionHeader>
             <S.SectionTitle>
               Lịch sử đọc truyện <i className="fa-solid fa-angle-right" />
             </S.SectionTitle>
           </S.SectionHeader>
 
-          {status === 'succeeded' && items.length === 0 ? (
+          {status === 'loading' && <div style={{ padding: 8 }}>Đang tải...</div>}
+          {status === 'failed' && (
+            <div style={{ padding: 8, color: 'red' }}>Lỗi: {String(error)}</div>
+          )}
+
+          {status === 'succeeded' && historyItems.length === 0 ? (
             <Empty style={{ margin: '16px 0' }} description="Bạn chưa có lịch sử đọc." />
           ) : (
             <>
-              <HistoryList items={items} status={status} error={error} />
+              <HistoryList items={historyItems} status={status} error={error} />
               <Paginate
-                current={current}
+                current={currentPage}
                 pageSize={pageSize}
-                total={total}
+                total={totalItems}
                 onChange={handlePaginate}
               />
             </>
           )}
-        </S.ListColumn>
+        </section>
 
-        <S.SideColumn>
+        {/* Sidebar: tiện ích/gợi ý */}
+        <aside>
           <FollowedStories />
           <TopStory />
-        </S.SideColumn>
-      </S.MainContainer>
-    </>
+        </aside>
+      </S.ContentGrid>
+    </S.Page>
   )
 }
 

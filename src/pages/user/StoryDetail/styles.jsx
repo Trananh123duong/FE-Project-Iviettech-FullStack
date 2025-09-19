@@ -1,36 +1,34 @@
 import styled from 'styled-components'
 import { Button } from 'antd'
 
-export const MainContainer = styled.main`
-  width: 100%;
-  max-width: 1000px;
+/* ===== Khung trang & lưới 2 cột ===== */
+export const Page = styled.main`
+  max-width: var(--site-width, 1000px);
   margin: 0 auto;
-  padding: 10px;
-  background-color: white;
+  padding: 10px 12px 20px;
+  background: #fff;
   overflow-x: hidden;
-  display: flow-root; /* clear floats */
 `
 
-export const Left = styled.div`
-  width: 66%;
-  float: left;
+export const ContentGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 24px;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: 1fr;
+  }
 `
 
-export const Right = styled.div`
-  width: 33.33333333%;
-  float: left;
-  padding-left: 12px;
-`
-
-/* Title centered */
+/* ===== Tiêu đề ===== */
 export const TitleBlock = styled.div`
   text-align: center;
-  margin-bottom: 8px;
+  margin: 4px 0 8px;
 `
 
 export const PageTitle = styled.h1`
   margin: 0;
-  font-size: 30px;
+  font-size: 28px;
   font-weight: 800;
   letter-spacing: .2px;
   color: #1f2937;
@@ -42,21 +40,24 @@ export const UpdatedAt = styled.div`
   color: #8c8c8c;
 `
 
+/* ===== Section heading ===== */
 export const SectionHeader = styled.div`
-  width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
 `
 
 export const SectionTitle = styled.h2`
-  font-size: 20px;
-  color: #2a77c6;
   margin: 0;
+  font-size: 22px;
+  font-weight: 800;
+  color: #1e88e5;
   letter-spacing: .2px;
+
+  i { margin-right: 6px; }
 `
 
-/* Summary */
+/* ===== Summary + meta ===== */
 export const TopInfo = styled.div`
   display: grid;
   grid-template-columns: 200px 1fr;
@@ -68,43 +69,38 @@ export const TopInfo = styled.div`
 
   .muted { color: #8c8c8c; }
   .strong { font-weight: 700; }
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+    .cover, .meta { grid-column: auto; }
+  }
 `
 
-/* Rows with icon + label + value */
+/* Hàng icon + label + value */
 export const FieldRow = styled.div`
   display: flex;
   align-items: center;
   gap: 10px;
   margin-bottom: 10px;
 
-  .icon {
-    color: #9ca3af;
-    width: 18px;
-    text-align: center;
-  }
-  .label {
-    color: #6b7280;
-    font-weight: 700;
-  }
-  .value {
-    color: #111827;
-    font-weight: 600;
-  }
+  .icon { color: #9ca3af; width: 18px; text-align: center; }
+  .label { color: #6b7280; font-weight: 700; }
+  .value { color: #111827; font-weight: 600; }
 `
 
 export const CategoryLink = styled.span`
-  color: #2a77c6;
+  color: #1e88e5;
   cursor: pointer;
   text-decoration: none;
-  &:hover { text-decoration: underline; }
-  &:focus { outline: none; text-decoration: underline; }
-`;
+  &:hover, &:focus { text-decoration: underline; outline: none; }
+`
 
 export const RatingLine = styled.div`
   margin-top: 4px;
   color: #111827;
+
   a {
-    color: #2a77c6;
+    color: #1e88e5;
     text-decoration: none;
   }
   a:hover { text-decoration: underline; }
@@ -117,7 +113,7 @@ export const ActionRow = styled.div`
   gap: 4px;
 `
 
-/* Buttons similar to sample */
+/* ===== Buttons ===== */
 export const FollowButton = styled(Button)`
   background-color: #e74c3c;
   border-color: #e74c3c;
@@ -125,7 +121,7 @@ export const FollowButton = styled(Button)`
   font-weight: 700;
   height: 40px;
   padding: 0 18px;
-  border-radius: 8px;
+  border-radius: 10px;
 
   &:hover, &:focus {
     background-color: #d94a3a !important;
@@ -144,7 +140,7 @@ export const FollowButton = styled(Button)`
     border-color: #15803d !important;
   }
 
-  /* Disabled (chưa đăng nhập / đang gọi API) */
+  /* Disabled */
   &:disabled,
   &[disabled],
   &.ant-btn[disabled] {
@@ -165,7 +161,7 @@ export const ReadButton = styled(Button)`
   font-weight: 700;
   height: 40px;
   padding: 0 18px;
-  border-radius: 8px;
+  border-radius: 10px;
 
   &:hover, &:focus {
     background-color: #e79b1e !important;
@@ -174,38 +170,18 @@ export const ReadButton = styled(Button)`
   }
 `
 
-/* Chapter links: black, no underline */
-export const ChapterLink = styled.a`
-  color: #111;
-  text-decoration: none;
-
-  &:hover,
-  &:focus {
-    text-decoration: none;
-  }
-`
-
+/* ===== Bảng chapter ===== */
 export const ChapterTableWrap = styled.div`
   /* Mốc đã đọc gần nhất: nền vàng nhạt */
-  .ant-table-tbody > tr.is-last-read > td {
-    background: #fffbe6;
-  }
-  /* Tất cả chương đã đọc (<= mốc): chữ xám */
-  .ant-table-tbody > tr.is-read > td {
-    color: #6b7280; /* gray-500 */
-  }
-  .ant-table-tbody > tr.is-read .chapter-link-btn {
-    color: #6b7280;
-  }
+  .ant-table-tbody > tr.is-last-read > td { background: #fffbe6; }
+  /* Các chương đã đọc: chữ xám */
+  .ant-table-tbody > tr.is-read > td { color: #6b7280; }
+  .ant-table-tbody > tr.is-read .chapter-link-btn { color: #6b7280; }
 `
 
 export const ChapterLinkBtn = styled.span.attrs({ className: 'chapter-link-btn' })`
   color: #111;
   text-decoration: none;
   cursor: pointer;
-
-  &:hover,
-  &:focus {
-    text-decoration: none;
-  }
+  &:hover, &:focus { text-decoration: none; }
 `

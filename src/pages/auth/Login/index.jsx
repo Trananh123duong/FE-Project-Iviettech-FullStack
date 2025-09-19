@@ -1,34 +1,39 @@
 import { useEffect } from 'react'
-import { Form, Input, Alert, notification } from 'antd'
-import { Link, useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
+import { Link, useNavigate } from 'react-router-dom'
+import { Alert, Form, Input, notification } from 'antd'
+import { MailOutlined, LockOutlined } from '@ant-design/icons'
 
-import * as S from './styles'
 import { ROUTES } from '@constants/routes'
 import { login } from '@redux/thunks/auth.thunk'
+import * as S from './styles'
 
+// ========================= COMPONENT =========================
 const Login = () => {
   const [form] = Form.useForm()
   const dispatch = useDispatch()
   const navigate = useNavigate()
 
+  // Lấy state đăng nhập từ Redux
   const { loginData } = useSelector((state) => state.auth)
 
-  const onFinish = (values) => {
+  // Gửi form
+  const handleSubmit = (values) => {
     dispatch(
       login({
         data: values,
-        callback: (role) => {
+        callback: () => {
           notification.success({
             message: 'Đăng nhập thành công',
             description: 'Bạn đã đăng nhập vào hệ thống.',
           })
-          navigate(role === 'admin' ? '/admin/dashboard' : ROUTES.USER.HOME)
+          navigate(ROUTES.USER.HOME)
         },
       })
     )
   }
 
+  // Hiển thị lỗi server lên form
   useEffect(() => {
     if (loginData.error) {
       form.setFields([
@@ -39,58 +44,81 @@ const Login = () => {
   }, [loginData.error, form])
 
   return (
-    <S.Card>
-      <S.Title level={2}>ĐĂNG NHẬP</S.Title>
-      <S.Underline />
+    <S.Page>
+      <S.AuthCard>
+        {/* Tiêu đề */}
+        <S.Title>ĐĂNG NHẬP</S.Title>
+        <S.TitleUnderline />
 
-      {loginData.error && (
-        <Alert
-          type="error"
-          showIcon
-          message={loginData.error}
-          style={{ marginBottom: 16 }}
-        />
-      )}
+        {/* Lỗi tổng (nếu có) */}
+        {!!loginData.error && (
+          <Alert
+            type="error"
+            showIcon
+            message={loginData.error}
+            style={{ marginBottom: 12 }}
+          />
+        )}
 
-      <Form layout="vertical" form={form} onFinish={onFinish}>
-        <Form.Item
-          label="Email"
-          name="email"
-          rules={[
-            { required: true, message: 'Vui lòng nhập email' },
-            { type: 'email', message: 'Email không hợp lệ' },
-          ]}
+        {/* Form */}
+        <Form
+          layout="vertical"
+          form={form}
+          onFinish={handleSubmit}
+          autoComplete="on"
         >
-          <Input size="large" placeholder="Email" />
-        </Form.Item>
-
-        <Form.Item
-          label="Mật khẩu"
-          name="password"
-          rules={[{ required: true, message: 'Vui lòng nhập mật khẩu' }]}
-        >
-          <Input.Password size="large" placeholder="Mật khẩu" />
-        </Form.Item>
-
-        <S.Actions>
-          <Link to={ROUTES.AUTH.FORGOT_PASSWORD || '/quen-mat-khau'}>
-            Quên mật khẩu
-          </Link>
-          <Link to={ROUTES.AUTH.REGISTER}>Đăng ký</Link>
-        </S.Actions>
-
-        <Form.Item style={{ marginTop: 16 }}>
-          <S.SubmitButton
-            type="primary"
-            htmlType="submit"
-            size="large"
-            loading={loginData.status === 'loading'}
+          {/* Email */}
+          <Form.Item
+            label="Email"
+            name="email"
+            rules={[
+              { required: true, message: 'Vui lòng nhập email' },
+              { type: 'email', message: 'Email không hợp lệ' },
+            ]}
           >
-            Đăng nhập
-          </S.SubmitButton>
-        </Form.Item>
-      </Form>
-    </S.Card>
+            <Input
+              size="large"
+              placeholder="Email"
+              prefix={<MailOutlined />}
+              autoComplete="email"
+            />
+          </Form.Item>
+
+          {/* Mật khẩu */}
+          <Form.Item
+            label="Mật khẩu"
+            name="password"
+            rules={[{ required: true, message: 'Vui lòng nhập mật khẩu' }]}
+          >
+            <Input.Password
+              size="large"
+              placeholder="Mật khẩu"
+              prefix={<LockOutlined />}
+              autoComplete="current-password"
+            />
+          </Form.Item>
+
+          {/* Link phụ */}
+          <S.FormExtras>
+            <Link to={ROUTES.AUTH.FORGOT_PASSWORD}>Quên mật khẩu</Link>
+            <span className="sep">•</span>
+            <Link to={ROUTES.AUTH.REGISTER}>Đăng ký</Link>
+          </S.FormExtras>
+
+          {/* Nút submit */}
+          <Form.Item style={{ marginTop: 8, marginBottom: 0 }}>
+            <S.SubmitButton
+              type="primary"
+              htmlType="submit"
+              size="large"
+              loading={loginData.status === 'loading'}
+            >
+              Đăng nhập
+            </S.SubmitButton>
+          </Form.Item>
+        </Form>
+      </S.AuthCard>
+    </S.Page>
   )
 }
 

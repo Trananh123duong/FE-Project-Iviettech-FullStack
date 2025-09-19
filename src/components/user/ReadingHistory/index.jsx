@@ -1,11 +1,11 @@
+import { ROUTES } from '@constants/routes'
+import { Avatar, Button, Empty, List, Popconfirm, Typography } from 'antd'
 import { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { List, Avatar, Popconfirm, Button, Typography, Empty } from 'antd'
 import { Link } from 'react-router-dom'
-import { ROUTES } from '@constants/routes'
 
+import { deleteHistoryItem, getMyHistory } from '@redux/thunks/history.thunk'
 import { END_POINT } from '@services/api'
-import { getMyHistory, deleteHistoryItem } from '@redux/thunks/history.thunk'
 import * as S from './styles'
 
 function ReadingHistory() {
@@ -51,8 +51,8 @@ function ReadingHistory() {
                 : `${END_POINT}${story.thumbnail.startsWith('/') ? '' : '/'}${story.thumbnail}`
               : undefined
 
-          const storyHref = `/story/${item.story_id}`
-          const readHref = `/chapter/${item.chapter_id}`
+          const storyHref = ROUTES.USER.STORY.replace(':id', item.story_id)
+          const readHref = ROUTES.USER.CHAPTER.replace(':id', item.chapter_id)
 
           return (
             <List.Item
@@ -72,7 +72,11 @@ function ReadingHistory() {
               <List.Item.Meta
                 avatar={<Avatar shape="square" size={48} src={thumb} />}
                 title={<Link to={storyHref}>{story?.name}</Link>}
-                description={<Link to={readHref}>Đọc tiếp Chapter {chapter?.chapter_number ?? '-'}</Link>}
+                description={
+                  <Link to={readHref}>
+                    Đọc tiếp Chapter {chapter?.chapter_number ?? '-'}
+                  </Link>
+                }
               />
             </List.Item>
           )

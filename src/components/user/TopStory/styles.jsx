@@ -1,143 +1,162 @@
-import styled from 'styled-components';
+import styled from 'styled-components'
 
-export const BoxTab = styled.div`
-  border: 1px solid #ddd;
-  color: #333;
-  margin-bottom: 15px;
-`;
+/* Card chứa toàn bộ TopStory */
+export const Card = styled.section`
+  border: 1px solid #e9e9e9;
+  border-radius: 12px;
+  background: #fff;
+  overflow: hidden;
+  margin-bottom: 16px;
+  box-shadow: 0 6px 18px rgba(0,0,0,.04);
+`
 
-export const NavTab = styled.ul`
-  padding: 0;
-  margin: 0;
-  list-style: none;
-  display: flex;
+/* Tabs: 3 nút chia đều, không xuống dòng */
+export const Tabs = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  align-items: stretch;
+  border-bottom: 1px solid #eee;
 
-  li {
-    width: 33.3%;
-    height: 42px;
-  }
-`;
-
-export const TabLink = styled.a`
-  display: block;
-  width: 100%;
-  height: 100%;
-  background: #f7f7f7;
-  color: #333;
-  text-align: center;
-  font-size: 15px;
-  font-weight: 500;
-  line-height: 40px;
-  border: 1px solid #ddd;
-  border-bottom: none;
-  text-decoration: none;
-
-  &.active {
-    background: #fff;
-    border-top: 2px solid #721799;
-    font-weight: bold;
-  }
-  &:hover {
-    color: #2980b9;
+  .tab {
+    height: 44px;
+    padding: 0 16px;
+    background: #fafafa;
+    border: none;
+    border-right: 1px solid #eee;
+    color: #222;
+    font-size: 15.5px;
+    font-weight: 700;
     cursor: pointer;
+    outline: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap; /* >>> không cho xuống dòng */
+    line-height: 1;      /* tránh cao thấp kỳ lạ với dấu tiếng Việt */
   }
-`;
+  .tab:last-child { border-right: none; }
 
-export const TabPane = styled.div`
-  padding: 10px;
-  border: 1px solid #eaeaea;
-  border-top: none;
+  .tab:hover { background: #f2f2f2; color: #7c3aed; }
 
-  ul {
+  .tab.active {
+    background: #fff;
+    color: #000;
+    position: relative;
+  }
+  .tab.active::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 3px;
+    background: #7c3aed;
+  }
+
+  /* Màn nhỏ: co chữ & padding để luôn 1 dòng */
+  @media (max-width: 640px) {
+    .tab { font-size: 14.5px; padding: 0 12px; }
+  }
+  @media (max-width: 420px) {
+    .tab { font-size: 13.5px; padding: 0 10px; }
+  }
+`
+
+/* Panel danh sách */
+export const Panel = styled.div`
+  padding: 6px 10px;
+
+  .list {
+    margin: 0;
     padding: 0;
+    list-style: none;
   }
-`;
 
-export const ComicItem = styled.li`
-  border-bottom: 1px solid #eaeaea;
-  padding: 10px 0;
-  margin: 0;
-  list-style: none;
-  display: flex;
-`;
+  .row {
+    display: grid;
+    grid-template-columns: 42px 56px 1fr; /* rank | thumb | meta */
+    gap: 10px;
+    align-items: center;
+    padding: 10px 4px;
+    border-bottom: 1px solid #f2f2f2;
+  }
+  .row:last-child { border-bottom: none; }
+  .row:hover { background: #fafafa; }
 
-export const Rank = styled.span`
-  width: 40px;
-  line-height: 45px;
+  /* Thumb */
+  .thumb {
+    width: 56px; height: 56px;
+    border-radius: 6px;
+    overflow: hidden;
+    display: block;
+    box-shadow: 0 1px 4px rgba(0,0,0,.06);
+  }
+  .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  /* Meta */
+  .meta { min-width: 0; }
+  .title {
+    margin: 0 0 2px 0;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.25;
+    color: #111;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .title a { color: inherit; text-decoration: none; }
+  .title a:hover { color: #2f6fea; }
+
+  .subline {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .chapter-link {
+    font-size: 13.5px;
+    color: #333;
+    text-decoration: none;
+  }
+  .chapter-link:hover { color: #2f6fea; }
+  .chapter-link.muted { color: #999; cursor: default; }
+
+  .views {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: #666;
+    font-size: 13px;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 640px) {
+    .row { grid-template-columns: 40px 52px 1fr; }
+    .title { font-size: 15px; }
+  }
+`
+
+/* Số hạng */
+export const RankBadge = styled.span`
+  width: 42px;
   text-align: center;
-  font-size: 18px;
-  font-weight: bold;
+  font-weight: 900;
+  font-size: 20px;
+  line-height: 1;
+  user-select: none;
 
-  color: ${({ index }) => {
-    if (index === 0) return '#3498db';     // Top 1: xanh
-    if (index === 1) return '#2ecc71';     // Top 2: lục
-    if (index === 2) return '#e67e22';     // Top 3: cam
-    return '#888';                         // Các hạng còn lại
+  color: ${({ rank }) => {
+    if (rank === 1) return '#2f80ed';
+    if (rank === 2) return '#27ae60';
+    if (rank === 3) return '#f2994a';
+    return '#9ca3af';
   }};
-`;
+`
 
-export const ComicBox = styled.div`
-  width: calc(100% - 40px);
-`;
-
-export const Thumb = styled.a`
-  width: 50px;
-  height: 50px;
-  overflow: hidden;
-  float: left;
-  margin-right: 10px;
-  border-radius: 4px;
-
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-`;
-
-export const Title = styled.h3`
-  font-size: 15px;
-  font-weight: 600;
-  margin: 0 0 2px 0;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-
-  a {
-    color: #333;
-    text-decoration: none;
-  }
-
-  a:hover {
-    color: #2980b9;
-  }
-`;
-
-export const Chapter = styled.p`
-  font-size: 13px;
-  margin: 0;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-
-  a {
-    color: #333;
-    text-decoration: none;
-  }
-
-  a:hover {
-    color: #2980b9;
-  }
-`;
-
-export const View = styled.span`
-  font-style: italic;
-  font-size: 12px;
-  color: #666;
-  display: flex;
-  align-items: center;
-
-  i {
-    margin-right: 3px;
-  }
-`;
+/* Dòng thông báo loading/error */
+export const InfoLine = styled.div`
+  padding: 8px 10px;
+  font-size: 13.5px;
+  color: #555;
+  &.error { color: #d32f2f; }
+`
