@@ -1,19 +1,21 @@
+import qs from 'qs'
 import { useEffect, useMemo, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { useLocation, useNavigate, Link } from 'react-router-dom'
-import qs from 'qs'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 
+import FollowedStories from '@components/user/FollowedStories'
 import ListStory from '@components/user/ListStory'
 import Paginate from '@components/user/Paginate'
-import TopStory from '@components/user/TopStory'
 import ReadingHistory from '@components/user/ReadingHistory'
-import FollowedStories from '@components/user/FollowedStories'
+import TopStory from '@components/user/TopStory'
 
 import { STORY_LIMIT } from '@constants/paging'
-import { getStories } from '@redux/thunks/story.thunk'
+import { ROUTES } from '@constants/routes'; // ⬅️ Dùng ROUTES thay cho path cứng
 import { getCategories } from '@redux/thunks/category.thunk'
+import { getStories } from '@redux/thunks/story.thunk'
 import * as S from './styles'
 
+// --- Tabs trạng thái
 const STATUS_TABS = [
   { key: 'all',         label: 'Tất cả' },
   { key: 'coming_soon', label: 'Sắp ra mắt' },
@@ -21,15 +23,18 @@ const STATUS_TABS = [
   { key: 'completed',   label: 'Hoàn thành' },
 ]
 
+// --- Tùy chọn sắp xếp hiển thị ở UI
 const SORT_OPTIONS = [
-  { key: 'updated',   label: 'Mới cập nhật', icon: 'fa-rotate' },
-  { key: 'new',       label: 'Truyện mới',    icon: 'fa-calendar-plus' },
-  { key: 'top_all',   label: 'Top all',       icon: 'fa-chart-line' },
-  { key: 'top_month', label: 'Top tháng',     icon: 'fa-chart-column' },
-  { key: 'top_week',  label: 'Top tuần',      icon: 'fa-eye' },
-  { key: 'top_day',   label: 'Top ngày',      icon: 'fa-eye' },
-  { key: 'top_follow',label: 'Top Follow',    icon: 'fa-users' },
+  { key: 'updated',    label: 'Mới cập nhật', icon: 'fa-rotate' },
+  { key: 'new',        label: 'Truyện mới',    icon: 'fa-calendar-plus' },
+  { key: 'top_all',    label: 'Top all',       icon: 'fa-chart-line' },
+  { key: 'top_month',  label: 'Top tháng',     icon: 'fa-chart-column' },
+  { key: 'top_week',   label: 'Top tuần',      icon: 'fa-eye' },
+  { key: 'top_day',    label: 'Top ngày',      icon: 'fa-eye' },
+  { key: 'top_follow', label: 'Top Follow',    icon: 'fa-users' },
 ]
+
+// --- Map khóa UI -> khóa BE
 const SORT_MAP = {
   updated: 'updated_at',
   new: 'created_at',
@@ -39,23 +44,37 @@ const SORT_MAP = {
   top_day: 'view_day',
   top_follow: 'total_follow',
 }
+
+// --- Map ngược BE -> UI (để đọc từ URL)
 const REVERSE_SORT_MAP = Object.fromEntries(
   Object.entries(SORT_MAP).map(([ui, be]) => [be, ui])
 )
 
 const SearchPage = () => {
+  // --- Hook core
   const dispatch = useDispatch()
   const location = useLocation()
   const navigate = useNavigate()
 
+  // --- Thông tin user (dùng để hiển thị sidebar)
   const { data: user } = useSelector((s) => s.auth.myProfile)
-  const { data: categories = [], status: cateStatus, error: cateError } =
-    useSelector((s) => s.category.categoryList)
 
-  const { data: stories = [], meta = {}, status, error } = useSelector((s) =>
-    s.story.searchList ? s.story.searchList : s.story.updatedList
-  )
+  // --- Danh mục thể loại
+  const {
+    data: categories = [],
+    status: cateStatus,
+    error: cateError,
+  } = useSelector((s) => s.category.categoryList)
 
+  // --- Kết quả tìm kiếm (hoặc fallback updatedList nếu slice searchList chưa có)
+  const {
+    data: stories = [],
+    meta = {},
+    status,
+    error,
+  } = useSelector((s) => (s.story.searchList ? s.story.searchList : s.story.updatedList))
+
+  // --- Đọc query string hiện tại
   const query = useMemo(
     () => qs.parse(location.search, { ignoreQueryPrefix: true }),
     [location.search]
@@ -63,9 +82,11 @@ const SearchPage = () => {
   const urlPage  = parseInt(query.page  || 1, 10)
   const urlLimit = parseInt(query.limit || STORY_LIMIT, 10)
 
+  // --- Lấy từ khóa, sort UI đọc từ URL
   const keywordFromURL = (query.keyword ?? query.q ?? '').toString()
-  const sortUIFromURL = REVERSE_SORT_MAP[query.sort] || ''
+  const sortUIFromURL  = REVERSE_SORT_MAP[query.sort] || ''
 
+  // --- Chuẩn hóa categoryIds từ URL (hỗ trợ nhiều biến thể)
   const catsFromURL = Array.isArray(query.categoryIds)
     ? query.categoryIds
     : Array.isArray(query['categoryIds[]'])
@@ -74,6 +95,7 @@ const SearchPage = () => {
     ? query.categoryIds.split(',')
     : []
 
+  // --- State bộ lọc tại UI
   const [statusTab, setStatusTab] = useState(query.status || 'all')
   const [sortBy, setSortBy] = useState(sortUIFromURL)
   const [selectedCategories, setSelectedCategories] = useState(
@@ -81,30 +103,29 @@ const SearchPage = () => {
   )
   const [keyword, setKeyword] = useState(keywordFromURL)
 
+  // --- Đồng bộ state filter khi URL thay đổi (không đổi logic gốc)
   useEffect(() => {
     setKeyword(keywordFromURL)
     setStatusTab(query.status || 'all')
     setSortBy(sortUIFromURL)
-    setSelectedCategories(
-      catsFromURL.map((v) => Number(v)).filter(Number.isInteger)
-    )
+    setSelectedCategories(catsFromURL.map((v) => Number(v)).filter(Number.isInteger))
   }, [keywordFromURL, query.status, sortUIFromURL, location.search]) // eslint-disable-line
 
+  // --- Load danh mục thể loại
   useEffect(() => {
     if (cateStatus === 'idle') dispatch(getCategories())
   }, [cateStatus, dispatch])
 
+  // --- Gọi API tìm truyện theo tham số từ URL
   useEffect(() => {
-    const params = {
-      page: urlPage,
-      limit: urlLimit
-    }
+    const params = { page: urlPage, limit: urlLimit }
 
-    if (query.sort) params.sort = query.sort
+    if (query.sort)  params.sort  = query.sort
     if (query.order) params.order = query.order
-    
+
     const kw = query.keyword ?? query.q
     if (kw) params.keyword = kw
+
     if (query.status) params.status = query.status
 
     const catIds = Array.isArray(query.categoryIds)
@@ -114,11 +135,13 @@ const SearchPage = () => {
       : typeof query.categoryIds === 'string'
       ? query.categoryIds.split(',')
       : []
+
     if (catIds.length) params.categoryIds = catIds
 
     dispatch(getStories({ scope: 'search', ...params }))
   }, [dispatch, location.search, urlPage, urlLimit, query.sort, query.order]) // eslint-disable-line
 
+  // --- Chuyển trang: cập nhật query string (giữ pathname hiện tại)
   const handlePaginate = (page, size) => {
     const newQuery = qs.stringify(
       { ...query, page, limit: size },
@@ -127,24 +150,30 @@ const SearchPage = () => {
     navigate(`${location.pathname}${newQuery}`, { replace: false })
   }
 
+  // --- Toggle chọn thể loại
   const toggleCategory = (id) => {
     setSelectedCategories((prev) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
     )
   }
 
+  // --- Áp dụng bộ lọc -> đẩy lên URL (trang 1)
   const applyFilters = () => {
     const qObj = { page: 1, limit: urlLimit }
 
+    // trạng thái
     if (statusTab && statusTab !== 'all') qObj.status = statusTab
 
+    // sort (map UI -> BE)
     if (sortBy) {
       qObj.sort  = SORT_MAP[sortBy]
       qObj.order = 'desc'
     }
 
+    // thể loại
     if (selectedCategories.length > 0) qObj.categoryIds = selectedCategories
 
+    // từ khóa
     const qTrim = (keyword || '').trim()
     if (qTrim) qObj.keyword = qTrim
 
@@ -156,6 +185,7 @@ const SearchPage = () => {
     navigate(`${location.pathname}${newQuery}`, { replace: false })
   }
 
+  // --- Xóa bộ lọc -> xóa query string
   const clearFilters = () => {
     setStatusTab('all')
     setSortBy('')
@@ -164,21 +194,24 @@ const SearchPage = () => {
     navigate(location.pathname, { replace: false })
   }
 
+  // --- Thông tin phân trang
   const current  = meta.page  || urlPage
   const pageSize = meta.limit || urlLimit
   const total    = meta.total || 0
 
   return (
     <>
+      {/* --- Breadcrumb: dùng ROUTES thay vì path cứng --- */}
       <S.BreadcrumbBar>
         <S.Breadcrumb>
-          <Link to="/">Trang chủ</Link>
+          <Link to={ROUTES.USER.HOME}>Trang chủ</Link>
           <span className="sep">»</span>
           <span className="current">Tìm truyện</span>
         </S.Breadcrumb>
       </S.BreadcrumbBar>
 
       <S.MainContainer>
+        {/* --- Cột nội dung chính --- */}
         <S.ListStory>
           <S.SectionHeader>
             <S.SectionTitle>
@@ -189,6 +222,7 @@ const SearchPage = () => {
 
           {/* --- FILTER BAR --- */}
           <S.FilterBar>
+            {/* Từ khóa */}
             <S.GroupRow>
               <S.GroupLabel>Từ khóa:</S.GroupLabel>
               <S.KeywordInput
@@ -200,6 +234,7 @@ const SearchPage = () => {
               />
             </S.GroupRow>
 
+            {/* Trạng thái */}
             <S.GroupRow>
               <S.GroupLabel>Trạng thái:</S.GroupLabel>
               <S.ButtonWrap>
@@ -216,6 +251,7 @@ const SearchPage = () => {
               </S.ButtonWrap>
             </S.GroupRow>
 
+            {/* Sắp xếp */}
             <S.GroupRow>
               <S.GroupLabel>Sắp xếp theo:</S.GroupLabel>
               <S.ButtonWrap>
@@ -233,11 +269,12 @@ const SearchPage = () => {
               </S.ButtonWrap>
             </S.GroupRow>
 
+            {/* Thể loại */}
             <S.GroupRow>
               <S.GroupLabel>Thể loại:</S.GroupLabel>
               <S.ButtonWrap>
                 {cateStatus === 'loading' && <S.Hint>Đang tải thể loại...</S.Hint>}
-                {cateStatus === 'failed' && <S.ErrorText>{cateError || 'Không tải được thể loại'}</S.ErrorText>}
+                {cateStatus === 'failed'  && <S.ErrorText>{cateError || 'Không tải được thể loại'}</S.ErrorText>}
                 {cateStatus === 'succeeded' &&
                   categories.map((c) => (
                     <S.PillButton
@@ -253,6 +290,7 @@ const SearchPage = () => {
               </S.ButtonWrap>
             </S.GroupRow>
 
+            {/* Hành động áp dụng / xóa filter */}
             <S.ActionRow>
               <S.ApplyButton type="button" onClick={applyFilters}>
                 <i className="fa-solid fa-magnifying-glass" /> Tìm kiếm
@@ -266,8 +304,8 @@ const SearchPage = () => {
             </S.ActionRow>
           </S.FilterBar>
 
+          {/* Danh sách kết quả + phân trang */}
           <ListStory stories={stories} status={status} error={error} />
-
           <Paginate
             current={current}
             pageSize={pageSize}
@@ -276,6 +314,7 @@ const SearchPage = () => {
           />
         </S.ListStory>
 
+        {/* --- Sidebar: theo dõi + lịch sử (nếu đã đăng nhập) + top story --- */}
         <S.DeadlineStory>
           {user?.id && (
             <>

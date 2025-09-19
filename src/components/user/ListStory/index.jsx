@@ -1,18 +1,7 @@
+import { ROUTES } from '@constants/routes'
+import { timeAgo } from '@utils/date'
 import { Link } from 'react-router-dom'
 import * as S from './styles'
-
-const timeAgo = (dateString) => {
-  if (!dateString) return ''
-  const diff = Date.now() - new Date(dateString).getTime()
-  const s = Math.floor(diff / 1000)
-  const m = Math.floor(s / 60)
-  const h = Math.floor(m / 60)
-  const d = Math.floor(h / 24)
-  if (d > 0) return `${d} ngày trước`
-  if (h > 0) return `${h} giờ trước`
-  if (m > 0) return `${m} phút trước`
-  return `${s} giây trước`
-}
 
 const compact = (n) =>
   new Intl.NumberFormat('en', { notation: 'compact' }).format(Number(n || 0))
@@ -35,7 +24,7 @@ const ListStory = ({ stories = [], status, error, onUnfollow, unfollowLoading = 
         return (
           <S.Item key={story.id}>
             <S.ImageWrapper>
-              <Link to={`/story/${story.id}`}>
+              <Link to={ROUTES.USER.STORY.replace(':id', story.id)}>
                 <S.Image src={story.thumbnail} alt={story.name} />
               </Link>
               <S.View>
@@ -48,13 +37,15 @@ const ListStory = ({ stories = [], status, error, onUnfollow, unfollowLoading = 
             </S.ImageWrapper>
 
             <S.TitleH3>
-              <Link to={`/story/${story.id}`}>{story.name}</Link>
+              <Link to={ROUTES.USER.STORY.replace(':id', story.id)}>
+                {story.name}
+              </Link>
             </S.TitleH3>
 
             <S.ChapterList>
               {chapters.map((c) => (
                 <S.ChapterItem key={c.id}>
-                  <S.ChapterLink href={`/chapter/${c.id}`}>
+                  <S.ChapterLink href={ROUTES.USER.CHAPTER.replace(':id', c.id)}>
                     Chapter {c.chapter_number}
                   </S.ChapterLink>
                   <S.ChapterTime>{timeAgo(c.updatedAt)}</S.ChapterTime>

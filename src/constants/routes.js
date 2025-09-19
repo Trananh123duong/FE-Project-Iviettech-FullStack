@@ -7,7 +7,9 @@ export const ROUTES = {
     STORY: '/story/:id',
     CHAPTER: '/chapter/:id',
   },
-  ADMIN: {},
+  ADMIN: {
+    DASHBOARD: '/admin/dashboard',
+  },
   AUTH: {
     LOGIN: '/login',
     REGISTER: '/register'

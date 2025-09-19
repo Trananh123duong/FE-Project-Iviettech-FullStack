@@ -1,8 +1,8 @@
-import { Link, useNavigate } from 'react-router-dom'
-import { useDispatch, useSelector } from 'react-redux'
+import logoImg from '@assets/logo.png'
 import { ROUTES } from '@constants/routes'
 import { logout } from '@redux/slices/auth.slice'
-import logoImg from '@assets/logo.png'
+import { useDispatch, useSelector } from 'react-redux'
+import { Link, useNavigate } from 'react-router-dom'
 import * as S from './styles'
 
 const Header = () => {

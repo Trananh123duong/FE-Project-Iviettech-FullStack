@@ -1,7 +1,8 @@
+import { ROUTES } from '@constants/routes'
+import { getStories } from '@redux/thunks/story.thunk'
 import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Link } from 'react-router-dom'
-import { getStories } from '@redux/thunks/story.thunk'
 import * as S from './styles'
 
 const TAB_LABELS = ['Top Tháng', 'Top Tuần', 'Top Ngày']
@@ -63,16 +64,18 @@ const TopStory = () => {
                 <S.Rank index={idx}>{String(idx + 1).padStart(2, '0')}</S.Rank>
                 <S.ComicBox>
                   <S.Thumb>
-                    <Link to={`/story/${story?.id}`}>
+                    <Link to={ROUTES.USER.STORY.replace(':id', story?.id)}>
                       <img src={story?.thumbnail} alt={story?.name} />
                     </Link>
                   </S.Thumb>
                   <S.Title>
-                    <Link to={`/story/${story?.id}`}>{story?.name}</Link>
+                    <Link to={ROUTES.USER.STORY.replace(':id', story?.id)}>
+                      {story?.name}
+                    </Link>
                   </S.Title>
                   <S.Chapter className="chapter top">
                     {latest ? (
-                      <Link to={`/chapter/${latest.id}`}>
+                      <Link to={ROUTES.USER.CHAPTER.replace(':id', latest.id)}>
                         Chapter {latest.chapter_number}
                       </Link>
                     ) : (

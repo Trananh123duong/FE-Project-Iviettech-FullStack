@@ -1,31 +1,26 @@
-import { useEffect, useMemo, useCallback } from 'react'
+import {
+  HeartFilled,
+  HomeFilled,
+  LeftOutlined,
+  RedoOutlined,
+  RightOutlined,
+  UnorderedListOutlined,
+} from '@ant-design/icons'
+import { Alert, Button, Empty, Image, message, Select, Skeleton, Typography } from 'antd'
+import { useCallback, useEffect, useMemo } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate, useParams } from 'react-router-dom'
-import { Button, Select, Typography, Alert, Image, Skeleton, Empty, message } from 'antd'
-import {
-  HomeFilled,
-  UnorderedListOutlined,
-  RedoOutlined,
-  LeftOutlined,
-  RightOutlined,
-  HeartFilled,
-} from '@ant-design/icons'
 
+import { ROUTES } from '@constants/routes'
 import { getChapter, getChaptersByStory } from '@redux/thunks/chapter.thunk'
-import { getStory } from '@redux/thunks/story.thunk'
 import { followStory, unfollowStory } from '@redux/thunks/follow.thunk'
-
+import { getStory } from '@redux/thunks/story.thunk'
+import { fmtDT } from '@utils/date'
 import * as S from './styles'
 
 const { Text } = Typography
 
-// Helpers
-const fmtDT = (iso) => {
-  if (!iso) return ''
-  const d = new Date(iso)
-  const p = (n) => String(n).padStart(2, '0')
-  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`
-}
+// --- Helpers lấy số chương từ nhiều khả năng key khác nhau
 const extractNum = (v) => {
   if (v == null) return null
   if (typeof v === 'number') return v
@@ -36,14 +31,18 @@ const getChapterNum = (c) =>
   extractNum(c?.chapter_number ?? c?.number ?? c?.order ?? c?.index ?? c?.name)
 
 const ChapterDetail = () => {
+  // --- Lấy id chapter từ URL params
   const { id: chapterIdParam } = useParams()
   const chapterId = Number(chapterIdParam)
+
+  // --- Hook điều hướng, dispatch
   const navigate = useNavigate()
   const dispatch = useDispatch()
 
+  // --- Lấy thông tin user đăng nhập
   const { data: user } = useSelector((s) => s.auth.myProfile)
 
-  // --- lấy detail chapter (đã có previous/next & is_following)
+  // --- Lấy detail chapter (store đã “flatten” previous/next & is_following)
   const {
     data: chapter = {},
     previousChapterId,
@@ -53,27 +52,32 @@ const ChapterDetail = () => {
     error: chapError,
   } = useSelector((s) => s.chapter.chapterDetail)
 
-  // --- lấy list chapters của story để đổ Select
+  // --- Lấy danh sách chapter theo story (để render Select chuyển nhanh)
   const { chaptersByStory } = useSelector((s) => s.chapter)
   const { data: chapterList = [], status: chaptersStatus } = chaptersByStory
 
-  // --- lấy story để có tên hiển thị
+  // --- Lấy detail story (để hiện tên breadcrumb)
   const storyDetail = useSelector((s) => s.story.storyDetail.data)
 
+  // --- Trạng thái follow/unfollow
   const { followAction, unfollowAction } = useSelector((s) => s.follow)
 
+  // --- Khi đổi chapterId -> gọi API lấy chi tiết chapter
   useEffect(() => {
     if (chapterId) dispatch(getChapter({ id: chapterId }))
   }, [dispatch, chapterId])
 
+  // --- Khi đã có chapter.story_id -> load danh sách chapter của story + detail story (nếu cần)
   useEffect(() => {
     const sid = chapter?.story_id
     if (!sid) return
     dispatch(getChaptersByStory({ storyId: sid }))
-    if (!storyDetail?.id || storyDetail.id !== sid) dispatch(getStory({ id: String(sid) }))
-  }, [dispatch, chapter?.story_id])
+    if (!storyDetail?.id || storyDetail.id !== sid) {
+      dispatch(getStory({ id: String(sid) }))
+    }
+  }, [dispatch, chapter?.story_id]) // cố ý giữ phụ thuộc như cũ, không đổi logic
 
-  // Options cho Select (sort tăng dần theo số chương)
+  // --- Sắp xếp danh sách chương tăng dần theo số chương (phục vụ Select)
   const sortedChapters = useMemo(() => {
     const arr = [...chapterList]
     arr.sort((a, b) => {
@@ -85,6 +89,7 @@ const ChapterDetail = () => {
     return arr
   }, [chapterList])
 
+  // --- Options cho Select: hiển thị "Chapter X - title"
   const options = useMemo(
     () =>
       sortedChapters.map((c) => ({
@@ -94,6 +99,7 @@ const ChapterDetail = () => {
     [sortedChapters]
   )
 
+  // --- Tính previous/next dựa vào store hoặc fallback theo vị trí trong sortedChapters
   const currentIndex = useMemo(
     () => sortedChapters.findIndex((c) => Number(c.id) === Number(chapterId)),
     [sortedChapters, chapterId]
@@ -101,31 +107,46 @@ const ChapterDetail = () => {
   const prevId =
     previousChapterId ??
     (currentIndex > 0 ? sortedChapters[currentIndex - 1]?.id : null)
+
   const nextId =
     nextChapterId ??
     (currentIndex >= 0 && currentIndex < sortedChapters.length - 1
       ? sortedChapters[currentIndex + 1]?.id
       : null)
 
-  const goChapter = useCallback((id) => id && navigate(`/chapter/${id}`), [navigate])
+  // --- Hàm điều hướng tới chapter cụ thể (DÙNG ROUTES)
+  const goChapter = useCallback(
+    (id) => {
+      if (!id) return
+      navigate(ROUTES.USER.CHAPTER.replace(':id', id))
+    },
+    [navigate]
+  )
   const goPrev = () => goChapter(prevId)
   const goNext = () => goChapter(nextId)
 
-  // keyboard ← →
+  // --- Keyboard ← → để chuyển chapter
   useEffect(() => {
     const onKey = (e) => {
-      if (e.key === 'ArrowLeft') { e.preventDefault(); goPrev() }
-      if (e.key === 'ArrowRight') { e.preventDefault(); goNext() }
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault()
+        goPrev()
+      }
+      if (e.key === 'ArrowRight') {
+        e.preventDefault()
+        goNext()
+      }
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [prevId, nextId]) // eslint-disable-line
+  }, [prevId, nextId]) // giữ nguyên dependency và disable-lint như code gốc
 
-  // Follow/unfollow theo flag ở chapterDetail (is_following)
+  // --- Follow/unfollow theo flag ở chapterDetail (is_following)
   const isLoggedIn = !!user?.id
   const acting = followAction.status === 'loading' || unfollowAction.status === 'loading'
   const isFollowed = !!chapterIsFollowing
 
+  // --- Toggle theo dõi truyện của chapter hiện tại
   const onToggleFollow = async () => {
     if (!isLoggedIn || !chapter?.story_id) return
     try {
@@ -145,26 +166,29 @@ const ChapterDetail = () => {
     }
   }
 
-  // derive UI fields
+  // --- Dữ liệu hiển thị cơ bản
   const chapNum = getChapterNum(chapter)
   const storyName = storyDetail?.name || 'Truyện'
   const updatedAt = fmtDT(chapter?.updated_at || chapter?.updatedAt)
 
-  // ảnh: lấy từ chapter_images, sắp theo sort_order; trường URL là img_path
+  // --- Ảnh trong chapter: sắp theo sort_order; trường URL là img_path
   const images = useMemo(() => {
     const arr = Array.isArray(chapter?.chapter_images) ? [...chapter.chapter_images] : []
     arr.sort((a, b) => (a?.sort_order ?? 0) - (b?.sort_order ?? 0))
     return arr
   }, [chapter])
 
-  // breadcrumb handlers
-  const goHome = () => navigate('/')
-  const goStory = () => chapter?.story_id && navigate(`/story/${chapter.story_id}`)
-  const goStoryChapters = goStory // nếu có trang riêng cho danh sách chương, đổi ở đây
+  // --- Breadcrumb handlers (DÙNG ROUTES)
+  const goHome = () => navigate(ROUTES.USER.HOME)
+  const goStory = () => {
+    if (!chapter?.story_id) return
+    navigate(ROUTES.USER.STORY.replace(':id', chapter.story_id))
+  }
+  const goStoryChapters = goStory // nếu có trang riêng cho danh sách chương, thay đổi tại đây
 
   return (
     <S.Wrapper>
-      {/* Breadcrumb + title */}
+      {/* --- Breadcrumb + title */}
       <S.BreadcrumbBar>
         <S.Crumb onClick={goHome}>Trang chủ</S.Crumb>
         <span>›</span>
@@ -174,7 +198,7 @@ const ChapterDetail = () => {
         {updatedAt && <S.UpdatedAt>&nbsp;[Cập nhật lúc: {updatedAt}]</S.UpdatedAt>}
       </S.BreadcrumbBar>
 
-      {/* help note */}
+      {/* --- Gợi ý phím tắt */}
       <Alert
         type="info"
         showIcon
@@ -182,12 +206,16 @@ const ChapterDetail = () => {
         style={{ marginBottom: 8 }}
       />
 
-      {/* sticky toolbar */}
+      {/* --- Thanh công cụ cố định (sticky toolbar) */}
       <S.Toolbar>
         <div className="left">
           <Button type="text" icon={<HomeFilled />} onClick={goHome} />
           <Button type="text" icon={<UnorderedListOutlined />} onClick={goStoryChapters} />
-          <Button type="text" icon={<RedoOutlined />} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} />
+          <Button
+            type="text"
+            icon={<RedoOutlined />}
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          />
           <S.NavButton icon={<LeftOutlined />} onClick={goPrev} disabled={!prevId} />
           <Select
             className="chapter-select"
@@ -197,7 +225,9 @@ const ChapterDetail = () => {
             loading={chaptersStatus === 'loading'}
             options={options}
             showSearch
-            filterOption={(input, opt) => (opt?.label ?? '').toLowerCase().includes(input.toLowerCase())}
+            filterOption={(input, opt) =>
+              (opt?.label ?? '').toLowerCase().includes(input.toLowerCase())
+            }
           />
           <S.NavButton icon={<RightOutlined />} onClick={goNext} disabled={!nextId} />
         </div>
@@ -215,7 +245,7 @@ const ChapterDetail = () => {
         </div>
       </S.Toolbar>
 
-      {/* content */}
+      {/* --- Nội dung: render ảnh của chapter */}
       {chapStatus === 'loading' ? (
         <Skeleton active paragraph={{ rows: 8 }} />
       ) : chapError ? (
@@ -227,7 +257,12 @@ const ChapterDetail = () => {
           ) : (
             images.map((img, idx) => (
               <div key={img?.id || idx} className="img-wrap">
-                <Image src={img?.img_path || ''} alt={`page-${idx + 1}`} preview={false} loading="lazy" />
+                <Image
+                  src={img?.img_path || ''}
+                  alt={`page-${idx + 1}`}
+                  preview={false}
+                  loading="lazy"
+                />
               </div>
             ))
           )}

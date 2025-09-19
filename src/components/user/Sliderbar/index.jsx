@@ -5,7 +5,9 @@ import Slider from 'react-slick'
 import 'slick-carousel/slick/slick-theme.css'
 import 'slick-carousel/slick/slick.css'
 
+import { ROUTES } from '@constants/routes'
 import { getStories } from '@redux/thunks/story.thunk'
+import { timeAgo } from '@utils/date'; // ⬅️ dùng từ utils
 import * as S from './styles'
 
 const Sliderbar = () => {
@@ -37,21 +39,6 @@ const Sliderbar = () => {
     )
   }
 
-  const timeAgo = (dateString) => {
-    const diff = Date.now() - new Date(dateString).getTime()
-    const seconds = Math.floor(diff / 1000)
-    const minutes = Math.floor(seconds / 60)
-    const hours = Math.floor(minutes / 60)
-    const days = Math.floor(hours / 24)
-    const months = Math.floor(days / 30)
-
-    if (months > 0) return `${months} tháng trước`
-    if (days > 0) return `${days} ngày trước`
-    if (hours > 0) return `${hours} giờ trước`
-    if (minutes > 0) return `${minutes} phút trước`
-    return `${seconds} giây trước`
-  }
-
   return (
     <>
       <S.PageTitle>
@@ -67,18 +54,20 @@ const Sliderbar = () => {
             const latest = getLatestChapter(story.chapters)
             return (
               <S.ComicCard key={story.id}>
-                <Link to={`/story/${story.id}`}>
+                <Link to={ROUTES.USER.STORY.replace(':id', story.id)}>
                   <img src={story.thumbnail} alt={story.name} />
                 </Link>
 
                 <S.StoryInfo>
                   <h3>
-                    <Link to={`/story/${story.id}`}>{story.name}</Link>
+                    <Link to={ROUTES.USER.STORY.replace(':id', story.id)}>
+                      {story.name}
+                    </Link>
                   </h3>
 
                   {latest ? (
                     <>
-                      <Link to={`/chapter/${latest.id}`}>
+                      <Link to={ROUTES.USER.CHAPTER.replace(':id', latest.id)}>
                         Chapter {latest.chapter_number}
                       </Link>
                       <span>

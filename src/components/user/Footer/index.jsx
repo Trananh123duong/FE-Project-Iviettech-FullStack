@@ -1,3 +1,4 @@
+import logoImg from '@assets/logo.png';
 import * as S from './styles';
 
 const keywords = [
@@ -27,7 +28,7 @@ const Footer = () => {
       <S.Container>
         <S.LeftSection>
           <S.Logo
-            src="https://nettruyenvio.com/assets/images/logo-nettruyen.png"
+            src={logoImg}
             alt="logo"
           />
           <S.MarginTop>Chỗ để nhúng iframe fb</S.MarginTop>

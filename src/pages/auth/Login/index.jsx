@@ -1,11 +1,11 @@
+import { Alert, Form, Input, notification } from 'antd'
 import { useEffect } from 'react'
-import { Form, Input, Alert, notification } from 'antd'
-import { Link, useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
+import { Link, useNavigate } from 'react-router-dom'
 
-import * as S from './styles'
 import { ROUTES } from '@constants/routes'
 import { login } from '@redux/thunks/auth.thunk'
+import * as S from './styles'
 
 const Login = () => {
   const [form] = Form.useForm()
@@ -18,12 +18,12 @@ const Login = () => {
     dispatch(
       login({
         data: values,
-        callback: (role) => {
+        callback: () => {
           notification.success({
             message: 'Đăng nhập thành công',
             description: 'Bạn đã đăng nhập vào hệ thống.',
           })
-          navigate(role === 'admin' ? '/admin/dashboard' : ROUTES.USER.HOME)
+          navigate(ROUTES.USER.HOME)
         },
       })
     )
@@ -73,9 +73,7 @@ const Login = () => {
         </Form.Item>
 
         <S.Actions>
-          <Link to={ROUTES.AUTH.FORGOT_PASSWORD || '/quen-mat-khau'}>
-            Quên mật khẩu
-          </Link>
+          <Link to={ROUTES.AUTH.FORGOT_PASSWORD}>Quên mật khẩu</Link>
           <Link to={ROUTES.AUTH.REGISTER}>Đăng ký</Link>
         </S.Actions>
 
