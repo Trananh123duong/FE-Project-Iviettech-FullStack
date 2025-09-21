@@ -55,7 +55,7 @@ const Header = () => {
           key: 'profile',
           icon: <UserOutlined />,
           label: 'Trang cá nhân',
-          onClick: () => navigate('/profile'),
+          onClick: () => navigate(ROUTES.USER.PROFILE),
         },
         {
           key: 'follow',

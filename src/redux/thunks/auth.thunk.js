@@ -1,5 +1,5 @@
 import { createAsyncThunk } from '@reduxjs/toolkit'
-import api from '@services/api'
+import api from '../../services/api'
 
 export const register = createAsyncThunk('auth/register', async (params) => {
   const { data, callback } = params
@@ -29,5 +29,35 @@ export const refreshAccessToken = createAsyncThunk(
 
     const res = await api.post('/auth/refresh-token', { token: refreshToken })
     return res.data
+  }
+)
+
+export const updateProfile = createAsyncThunk(
+  'auth/updateProfile',
+  async (params, { rejectWithValue }) => {
+    try {
+      const { data, callback } = params || {} // data: { username: '...' }
+      const res = await api.patch('/auth/my-profile', data)
+      callback?.(res.data?.user)
+      return res.data // backend: { message, user }
+    } catch (err) {
+      const msg =
+        err?.response?.data?.message ||
+        err?.response?.data?.error ||
+        err?.message ||
+        'Update profile failed'
+      return rejectWithValue(msg)
+    }
+  }
+)
+
+export const uploadAvatar = createAsyncThunk(
+  'auth/uploadAvatar',
+  async (params) => {
+    const res = await api.post('/auth/upload-avatar', params.data, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+    params.callback && params.callback()
+    return res.data // { message, user }
   }
 )

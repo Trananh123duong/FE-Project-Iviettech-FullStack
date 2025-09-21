@@ -16,6 +16,7 @@ import HistoryPage from '@pages/user/History'
 import SearchPage from '@pages/user/Search'
 import StoryDetail from '@pages/user/StoryDetail'
 import ChapterDetail from '@pages/user/ChapterDetail'
+import ProfilePage from '@pages/auth/Profile'
 
 function App() {
   const dispatch = useDispatch()
@@ -31,6 +32,7 @@ function App() {
       <Route element={<UserLayout />}>
         <Route path={ROUTES.AUTH.LOGIN} element={<Login />} />
         <Route path={ROUTES.AUTH.REGISTER} element={<Register />} />
+        <Route path={ROUTES.USER.PROFILE} element={<ProfilePage />} />
 
         <Route path={ROUTES.USER.HOME} element={<Home />}/>
         <Route path={ROUTES.USER.FOLLOW} element={<Follow />}/>

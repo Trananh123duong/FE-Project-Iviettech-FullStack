@@ -6,12 +6,13 @@ export const ROUTES = {
     SEARCH: '/tim-kiem',
     STORY: '/truyen/:id',
     CHAPTER: '/chapter/:id',
+    PROFILE: '/tai-khoan',
   },
   ADMIN: {
     DASHBOARD: '/admin/dashboard',
   },
   AUTH: {
-    LOGIN: '/login',
-    REGISTER: '/register'
+    LOGIN: '/dang-nhap',
+    REGISTER: '/dang-ky'
   }
 }

@@ -45,7 +45,7 @@ api.interceptors.response.use(
       } catch (err) {
         localStorage.removeItem('accessToken')
         localStorage.removeItem('refreshToken')
-        window.location.href = '/login' // Redirect to login page
+        window.location.href = '/dang-nhap' // Redirect to login page
         return Promise.reject(err)
       }
     }

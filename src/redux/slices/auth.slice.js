@@ -4,6 +4,8 @@ import {
   login,
   getMyProfile,
   refreshAccessToken,
+  updateProfile,
+  uploadAvatar
 } from '../thunks/auth.thunk'
 
 export const authSlice = createSlice({
@@ -25,6 +27,14 @@ export const authSlice = createSlice({
     refreshData: {
       status: 'idle',
       error: null,
+    },
+    updateData: {
+      status: 'idle',
+      error: null,
+    },
+    avatarData: {
+      status: 'idle',
+      error: null
     },
   },
   reducers: {
@@ -96,6 +106,37 @@ export const authSlice = createSlice({
       .addCase(refreshAccessToken.rejected, (state, action) => {
         state.refreshData.status = 'failed'
         state.refreshData.error = action.payload || action.error.message
+      })
+      // updateProfile
+      .addCase(updateProfile.pending, (state) => {
+        state.updateData.status = 'loading'
+        state.updateData.error = null
+      })
+      .addCase(updateProfile.fulfilled, (state, action) => {
+        state.updateData.status = 'succeeded'
+        const updatedUser = action.payload?.user || action.payload || {}
+        state.myProfile.data = {
+          ...state.myProfile.data,
+          ...updatedUser,
+        }
+      })
+      .addCase(updateProfile.rejected, (state, action) => {
+        state.updateData.status = 'failed'
+        state.updateData.error = action.payload || action.error.message
+      })
+      // uploadAvatar
+      .addCase(uploadAvatar.pending, (state) => {
+        state.avatarData.status = 'loading'
+        state.avatarData.error = null
+      })
+      .addCase(uploadAvatar.fulfilled, (state, action) => {
+        state.avatarData.status = 'succeeded'
+        const updatedUser = action.payload?.user || {}
+        state.myProfile.data = { ...state.myProfile.data, ...updatedUser }
+      })
+      .addCase(uploadAvatar.rejected, (state, action) => {
+        state.avatarData.status = 'failed'
+        state.avatarData.error = action.payload || action.error.message
       })
   },
 })
