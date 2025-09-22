@@ -6,7 +6,7 @@ import styled from 'styled-components'
  * - Khoảng đệm đều 12px
  */
 export const Page = styled.main`
-  max-width: var(--site-width, 1000px);
+  max-width: var(--site-width, 1100px);
   margin: 0 auto 28px;
   padding: 0 12px;
 `

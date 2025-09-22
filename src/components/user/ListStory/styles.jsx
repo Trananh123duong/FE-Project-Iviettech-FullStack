@@ -89,6 +89,7 @@ export const Title = styled.h3`
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  height: 38px;
 
   a {
     color: inherit;
@@ -110,7 +111,7 @@ export const ChapterList = styled.ul`
     align-items: center;
     justify-content: space-between;
     gap: 8px;
-    padding: 4px 0;
+    padding: 3px 0;
     border-top: 1px dashed #f1f1f1;
   }
   .chapter-row:first-child { border-top: none; }
@@ -127,7 +128,7 @@ export const ChapterList = styled.ul`
   .chapter-link.muted { color: #999; cursor: default; text-decoration: none; }
 
   .chapter-time {
-    font-size: 5px;
+    font-size: 10px;
     color: #8b9099;
     white-space: nowrap;
     font-style: italic;

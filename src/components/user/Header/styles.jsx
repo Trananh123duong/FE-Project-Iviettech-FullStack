@@ -20,7 +20,7 @@ export const HeaderContainer = styled.header`
  * - Chiều cao 56px để cân cụm search 40px
  */
 export const Inner = styled.div`
-  max-width: 1000px;
+  max-width: 1100px;
   margin: 0 auto;
   height: 56px;
   padding: 0 12px;

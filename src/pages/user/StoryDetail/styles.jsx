@@ -3,7 +3,7 @@ import { Button } from 'antd'
 
 /* ===== Khung trang & lưới 2 cột ===== */
 export const Page = styled.main`
-  max-width: var(--site-width, 1000px);
+  max-width: var(--site-width, 1100px);
   margin: 0 auto;
   padding: 10px 12px 20px;
   background: #fff;

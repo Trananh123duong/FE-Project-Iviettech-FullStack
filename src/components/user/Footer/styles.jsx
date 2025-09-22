@@ -10,7 +10,7 @@ export const Footer = styled.footer`
 
 /* Container theo site width chung, chia 2 cột linh hoạt */
 export const Container = styled.div`
-  max-width: var(--site-width, 1000px);
+  max-width: var(--site-width, 1100px);
   margin: 0 auto;
   padding: 0 12px;
 

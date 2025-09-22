@@ -3,7 +3,7 @@ import { Button } from 'antd'
 
 /* Bọc trang để canh thẳng hàng với layout chung */
 export const Page = styled.main`
-  max-width: var(--site-width, 1000px);
+  max-width: var(--site-width, 1100px);
   margin: 24px auto 48px;
   padding: 0 12px;
 `

@@ -1,7 +1,7 @@
 import styled from 'styled-components'
 
 export const Container = styled.div`
-  max-width: var(--site-width, 1000px);
+  max-width: var(--site-width, 1100px);
   margin: 0 auto;
   padding: 0 12px;
   margin-bottom: 16px;
@@ -128,7 +128,7 @@ export const Overlay = styled.div`
 
   .time {
     color: #eaeaea;
-    font-size: 8px;
+    font-size: 12px;
     white-space: nowrap;
     display: inline-flex;
     align-items: center;

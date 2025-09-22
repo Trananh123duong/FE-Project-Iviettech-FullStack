@@ -12,7 +12,7 @@ export const NavbarContainer = styled.nav`
 /* ===================== Navbar: khối bên trong (layout 3 phần) ===================== */
 export const NavInner = styled.div`
   /* -- Layout & canh hàng với Header/Main -- */
-  max-width: var(--site-width, 1000px);
+  max-width: var(--site-width, 1100px);
   height: 44px;
   margin: 0 auto;
   display: flex;

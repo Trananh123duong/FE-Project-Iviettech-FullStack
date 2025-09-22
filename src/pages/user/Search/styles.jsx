@@ -2,7 +2,7 @@ import styled from 'styled-components'
 
 /* ============= Khung trang & breadcrumb ============= */
 export const Page = styled.main`
-  max-width: var(--site-width, 1000px);
+  max-width: var(--site-width, 1100px);
   margin: 0 auto 28px;
   padding: 0 12px;
 `

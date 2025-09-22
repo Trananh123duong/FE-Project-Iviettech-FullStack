@@ -3,7 +3,7 @@ import { Button } from 'antd'
 
 /* ===== Khung trang: đồng bộ site-width với Header/Nav ===== */
 export const Page = styled.main`
-  max-width: var(--site-width, 1000px);
+  max-width: var(--site-width, 1100px);
   margin: 0 auto 28px;
   padding: 10px 12px 24px;
   background: #fff;

@@ -8,9 +8,9 @@ export const Main = styled.div`
 
 export const MainContainer = styled.div`
   width: 100%;
-  max-width: 1000px;
+  max-width: 1100px;
   margin: 0 auto;
   padding: 10px;
-  background-color: white;
+  background-color: #fafafa;
   overflow-x: hidden;
 `
