@@ -1,24 +1,52 @@
 import {
+  CloseCircleOutlined,
+  DeleteOutlined,
   HeartFilled,
   HomeFilled,
   LeftOutlined,
+  LikeFilled,
+  LikeOutlined,
+  LoginOutlined,
+  MessageOutlined,
   RedoOutlined,
   RightOutlined,
+  SendOutlined,
   UnorderedListOutlined,
 } from '@ant-design/icons'
-import { Alert, Button, Empty, Image, message, Select, Skeleton, Typography } from 'antd'
-import { useCallback, useEffect, useMemo } from 'react'
+import {
+  Alert,
+  Avatar,
+  Button,
+  Empty,
+  Image,
+  Input,
+  message,
+  Popconfirm,
+  Select,
+  Skeleton,
+  Tooltip,
+  Typography,
+} from 'antd'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate, useParams } from 'react-router-dom'
 
 import { ROUTES } from '@constants/routes'
-import { getChapter, getChaptersByStory } from '@redux/thunks/chapter.thunk'
+import {
+  createChapterComment,
+  deleteComment as deleteCommentThunk,
+  getChapter,
+  getChapterComments,
+  getChaptersByStory,
+  toggleLikeComment,
+} from '@redux/thunks/chapter.thunk'
 import { followStory, unfollowStory } from '@redux/thunks/follow.thunk'
 import { getStory } from '@redux/thunks/story.thunk'
 import { fmtDT } from '@utils/date'
 import * as S from './styles'
 
 const { Text } = Typography
+const { TextArea } = Input
 
 /* =========================
  * Helpers về số chapter
@@ -43,6 +71,7 @@ const ChapterDetail = () => {
 
   /* ====== Thông tin user đăng nhập ====== */
   const { data: currentUser } = useSelector((s) => s.auth.myProfile)
+  const isLoggedIn = !!currentUser?.id
 
   /* ====== Detail chapter (đã flatten prev/next/is_following) ====== */
   const {
@@ -55,18 +84,36 @@ const ChapterDetail = () => {
   } = useSelector((s) => s.chapter.chapterDetail)
 
   /* ====== Danh sách chapter theo story để render Select ====== */
-  const { chaptersByStory } = useSelector((s) => s.chapter)
+  const { chaptersByStory, chapterComments } = useSelector((s) => s.chapter)
   const { data: chapterList = [], status: chaptersStatus } = chaptersByStory
+
+  /* ====== Comments theo chapter ====== */
+  const {
+    data: comments = [],
+    meta: cmMeta = {},
+    status: cmStatus,
+    error: cmError,
+  } = chapterComments
+  const [page, setPage] = useState(1)
+  const [commentBody, setCommentBody] = useState('')
+  const [replyTo, setReplyTo] = useState(null) // id comment cha (nếu reply)
 
   /* ====== Detail story (hiện tên, dùng breadcrumb) ====== */
   const storyDetail = useSelector((s) => s.story.storyDetail.data)
 
   /* ====== Trạng thái follow/unfollow ====== */
   const { followAction, unfollowAction } = useSelector((s) => s.follow)
+  const isActing = followAction.status === 'loading' || unfollowAction.status === 'loading'
+  const isFollowed = !!chapterIsFollowing
 
   /* ====== Khi đổi chapterId -> gọi API lấy chi tiết ====== */
   useEffect(() => {
-    if (chapterId) dispatch(getChapter({ id: chapterId }))
+    if (chapterId) {
+      dispatch(getChapter({ id: chapterId }))
+      // reset comments state theo chapter mới
+      setPage(1)
+      dispatch(getChapterComments({ chapterId, page: 1, limit: 20 }))
+    }
   }, [dispatch, chapterId])
 
   /* ====== Khi có story_id -> tải danh sách chapter của story + story detail nếu cần ====== */
@@ -120,7 +167,6 @@ const ChapterDetail = () => {
     (id) => {
       if (!id) return
       navigate(ROUTES.USER.CHAPTER.replace(':id', id))
-      // Một số app giữ nguyên scroll; chủ động kéo lên đầu cho chắc
       window.scrollTo({ top: 0, behavior: 'instant' })
     },
     [navigate]
@@ -139,10 +185,6 @@ const ChapterDetail = () => {
   }, [goPrev, goNext])
 
   /* ====== Follow/unfollow ====== */
-  const isLoggedIn = !!currentUser?.id
-  const isActing = followAction.status === 'loading' || unfollowAction.status === 'loading'
-  const isFollowed = !!chapterIsFollowing
-
   const onToggleFollow = async () => {
     if (!isLoggedIn || !chapter?.story_id) return
     try {
@@ -177,8 +219,63 @@ const ChapterDetail = () => {
   /* ====== Breadcrumb handlers ====== */
   const goHome = () => navigate(ROUTES.USER.HOME)
   const goStory = () => chapter?.story_id && navigate(ROUTES.USER.STORY.replace(':id', chapter.story_id))
-  const goStoryChapters = goStory // nếu sau có trang "danh sách chương", đổi handler tại đây
+  const goStoryChapters = goStory
 
+  /* ====== Comments: helpers ====== */
+  const hasMore =
+    (cmMeta?.totalPages || 1) > page
+
+  const loadMore = () => {
+    const next = page + 1
+    setPage(next)
+    dispatch(getChapterComments({ chapterId, page: next, limit: 20, more: true }))
+  }
+
+  const onReply = (parentId) => setReplyTo(parentId)
+  const cancelReply = () => setReplyTo(null)
+
+  const onLike = async (commentId) => {
+    try {
+      await dispatch(toggleLikeComment({ commentId })).unwrap()
+    } catch (e) {
+      message.error(e?.message || 'Không thể thực hiện thao tác')
+    }
+  }
+
+  const onDelete = async (commentId) => {
+    try {
+      await dispatch(deleteCommentThunk({ commentId })).unwrap()
+      message.success('Đã xoá bình luận')
+    } catch (e) {
+      message.error(e?.message || 'Không thể xoá bình luận')
+    }
+  }
+
+  const submitComment = async () => {
+    if (!isLoggedIn) {
+      return message.info('Bạn cần đăng nhập để bình luận')
+    }
+    const content = String(commentBody || '').trim()
+    if (!content) return
+
+    try {
+      await dispatch(
+        createChapterComment({
+          chapterId,
+          body: content,
+          parent_id: replyTo || null,
+          is_spoiler: false,
+        })
+      ).unwrap()
+      setCommentBody('')
+      setReplyTo(null)
+      message.success('Đã gửi bình luận')
+    } catch (e) {
+      message.error(e?.message || 'Không gửi được bình luận')
+    }
+  }
+
+  /* ====== Render ====== */
   return (
     <S.Page>
       {/* ===== Breadcrumb + tiêu đề rút gọn ===== */}
@@ -267,6 +364,172 @@ const ChapterDetail = () => {
           )}
         </S.Reader>
       )}
+
+      {/* ====== BÌNH LUẬN ====== */}
+      <S.Comments>
+        <S.CommentsHeader>
+          <Text strong>Bình luận</Text>
+          {cmMeta?.total != null && (
+            <span className="count">({cmMeta.total} bình luận)</span>
+          )}
+        </S.CommentsHeader>
+
+        {!isLoggedIn && (
+          <Alert
+            type="warning"
+            showIcon
+            icon={<LoginOutlined />}
+            message="Bạn cần đăng nhập để bình luận và thích."
+            style={{ marginBottom: 12 }}
+          />
+        )}
+
+        {/* Form comment */}
+        <S.CommentForm>
+          {replyTo && (
+            <S.ReplyTag>
+              <MessageOutlined />
+              <span>Đang trả lời bình luận #{replyTo}</span>
+              <Button
+                type="text"
+                size="small"
+                icon={<CloseCircleOutlined />}
+                onClick={cancelReply}
+              />
+            </S.ReplyTag>
+          )}
+          <TextArea
+            value={commentBody}
+            onChange={(e) => setCommentBody(e.target.value)}
+            placeholder={isLoggedIn ? 'Nhập bình luận của bạn...' : 'Đăng nhập để bình luận'}
+            autoSize={{ minRows: 3, maxRows: 6 }}
+            disabled={!isLoggedIn}
+            maxLength={2000}
+          />
+          <div className="actions">
+            <Button
+              type="primary"
+              icon={<SendOutlined />}
+              onClick={submitComment}
+              disabled={!isLoggedIn || !commentBody.trim()}
+            >
+              Gửi
+            </Button>
+          </div>
+        </S.CommentForm>
+
+        {/* Danh sách bình luận */}
+        {cmStatus === 'loading' && comments.length === 0 ? (
+          <Skeleton active paragraph={{ rows: 4 }} />
+        ) : cmError ? (
+          <Empty description="Không tải được bình luận" />
+        ) : comments.length === 0 ? (
+          <Empty description="Chưa có bình luận nào — hãy là người đầu tiên!" />
+        ) : (
+          <S.CommentList>
+            {comments.map((c) => (
+              <S.CommentItem key={c.id}>
+                <div className="avatar">
+                  <Avatar size={36} src={c.user?.avatar} alt={c.user?.username} />
+                </div>
+                <div className="content">
+                  <div className="meta">
+                    <span className="author">{c.user?.username || 'Ẩn danh'}</span>
+                    <span className="dot">•</span>
+                    <Tooltip title={fmtDT(c.created_at || c.createdAt)}>
+                      <span className="time">{fmtDT(c.created_at || c.createdAt)}</span>
+                    </Tooltip>
+                  </div>
+                  <div className="body">{c.body}</div>
+                  <div className="actions">
+                    <Button
+                      type="text"
+                      icon={c.is_liked ? <LikeFilled /> : <LikeOutlined />}
+                      onClick={() => onLike(c.id)}
+                      disabled={!isLoggedIn}
+                    >
+                      {c.likes_count ?? 0}
+                    </Button>
+                    <Button
+                      type="text"
+                      icon={<MessageOutlined />}
+                      onClick={() => onReply(c.id)}
+                      disabled={!isLoggedIn}
+                    >
+                      Trả lời
+                    </Button>
+                    {(isLoggedIn && (c.user_id === currentUser?.id || currentUser?.role)) && (
+                      <Popconfirm
+                        title="Xoá bình luận này?"
+                        okText="Xoá"
+                        cancelText="Huỷ"
+                        onConfirm={() => onDelete(c.id)}
+                      >
+                        <Button type="text" danger icon={<DeleteOutlined />}>
+                          Xoá
+                        </Button>
+                      </Popconfirm>
+                    )}
+                  </div>
+
+                  {/* Replies */}
+                  {!!c.replies?.length && (
+                    <div className="replies">
+                      {c.replies.map((r) => (
+                        <div key={r.id} className="reply">
+                          <div className="avatar">
+                            <Avatar size={28} src={r.user?.avatar} alt={r.user?.username} />
+                          </div>
+                          <div className="content">
+                            <div className="meta">
+                              <span className="author">{r.user?.username || 'Ẩn danh'}</span>
+                              <span className="dot">•</span>
+                              <Tooltip title={fmtDT(r.created_at || r.createdAt)}>
+                                <span className="time">{fmtDT(r.created_at || r.createdAt)}</span>
+                              </Tooltip>
+                            </div>
+                            <div className="body">{r.body}</div>
+                            <div className="actions">
+                              <Button
+                                type="text"
+                                icon={r.is_liked ? <LikeFilled /> : <LikeOutlined />}
+                                onClick={() => onLike(r.id)}
+                                disabled={!isLoggedIn}
+                              >
+                                {r.likes_count ?? 0}
+                              </Button>
+                              {(isLoggedIn && (r.user_id === currentUser?.id || currentUser?.role)) && (
+                                <Popconfirm
+                                  title="Xoá bình luận này?"
+                                  okText="Xoá"
+                                  cancelText="Huỷ"
+                                  onConfirm={() => onDelete(r.id)}
+                                >
+                                  <Button type="text" danger icon={<DeleteOutlined />}>
+                                    Xoá
+                                  </Button>
+                                </Popconfirm>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </S.CommentItem>
+            ))}
+
+            {hasMore && (
+              <div className="load-more">
+                <Button onClick={loadMore} loading={cmStatus === 'loading'}>
+                  Tải thêm bình luận
+                </Button>
+              </div>
+            )}
+          </S.CommentList>
+        )}
+      </S.Comments>
     </S.Page>
   )
 }

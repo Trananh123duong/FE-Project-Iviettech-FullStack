@@ -17,3 +17,40 @@ export const getChapter = createAsyncThunk(
     return data
   }
 )
+
+// COMMENT THEO CHAPTER
+export const getChapterComments = createAsyncThunk(
+  'chapter/getChapterComments',
+  async ({ chapterId, page = 1, limit = 20, order = 'desc', more = false }) => {
+    const { data } = await api.get(`/chapters/${chapterId}/comments`, {
+      params: { page, limit, order }
+    })
+    return { chapterId, ...data, page, limit, more }
+  }
+)
+
+export const createChapterComment = createAsyncThunk(
+  'chapter/createChapterComment',
+  async ({ chapterId, body, parent_id = null, is_spoiler = false }) => {
+    const { data } = await api.post(`/chapters/${chapterId}/comments`, {
+      body, parent_id, is_spoiler
+    })
+    return { chapterId, comment: data }
+  }
+)
+
+export const deleteComment = createAsyncThunk(
+  'chapter/deleteComment',
+  async ({ commentId }) => {
+    await api.delete(`/chapters/comments/${commentId}`)
+    return { commentId }
+  }
+)
+
+export const toggleLikeComment = createAsyncThunk(
+  'chapter/toggleLikeComment',
+  async ({ commentId }) => {
+    const { data } = await api.post(`/chapters/comments/${commentId}/like`)
+    return { commentId, liked: !!data?.liked }
+  }
+)

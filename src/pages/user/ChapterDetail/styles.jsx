@@ -1,5 +1,5 @@
-import styled from 'styled-components'
 import { Button } from 'antd'
+import styled from 'styled-components'
 
 /* ===== Khung trang: đồng bộ site-width với Header/Nav ===== */
 export const Page = styled.main`
@@ -28,9 +28,7 @@ export const UpdatedAt = styled.span`
   color: #8c8c8c;
 `
 
-/* ===== Thanh công cụ sticky =====
- * top: 8px để tránh dính sát cạnh trên & không bị header đè.
- */
+/* ===== Thanh công cụ sticky ===== */
 export const Toolbar = styled.div`
   position: sticky;
   top: 8px;
@@ -47,7 +45,6 @@ export const Toolbar = styled.div`
   .left { display: flex; align-items: center; gap: 8px; }
   .right { display: flex; align-items: center; gap: 8px; }
 
-  /* Select responsive bằng clamp để hợp mọi màn */
   .chapter-select { width: clamp(250px, 50vw, 560px); }
 
   @media (max-width: 640px) {
@@ -114,5 +111,144 @@ export const Reader = styled.div`
     width: 100%;
     height: auto;
     display: block;
+  }
+`
+
+/* ====== COMMENTS ====== */
+export const Comments = styled.section`
+  margin-top: 20px;
+  padding-top: 12px;
+  border-top: 1px dashed #e5e7eb;
+`
+
+export const CommentsHeader = styled.div`
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 12px;
+
+  .count { color: #6b7280; }
+`
+
+export const CommentForm = styled.div`
+  margin-bottom: 16px;
+
+  .actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 8px;
+    gap: 8px;
+  }
+`
+
+export const ReplyTag = styled.div`
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #eef2ff;
+  color: #3730a3;
+  padding: 6px 8px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+
+  .ant-btn {
+    color: #6b7280;
+  }
+`
+
+export const CommentList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+
+  .load-more {
+    display: flex;
+    justify-content: center;
+    margin-top: 8px;
+  }
+`
+
+export const CommentItem = styled.div`
+  display: flex;
+  gap: 10px;
+
+  .avatar { flex: 0 0 36px; }
+
+  .content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #6b7280;
+    margin-bottom: 2px;
+
+    .author {
+      color: #111827;
+      font-weight: 600;
+    }
+    .dot { color: #9ca3af; }
+  }
+
+  .body {
+    color: #111827;
+    white-space: pre-wrap;
+  }
+
+  .actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 4px;
+
+    .ant-btn {
+      padding: 0 6px;
+      height: 28px;
+    }
+  }
+
+  .replies {
+    margin-top: 10px;
+    padding-left: 14px;
+    border-left: 2px solid #e5e7eb;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    .reply {
+      display: flex;
+      gap: 8px;
+
+      .avatar { flex: 0 0 28px; }
+
+      .content { flex: 1; }
+
+      .meta {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: #6b7280;
+        margin-bottom: 2px;
+
+        .author {
+          color: #111827;
+          font-weight: 600;
+        }
+        .dot { color: #9ca3af; }
+      }
+
+      .actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 4px;
+
+        .ant-btn {
+          padding: 0 6px;
+          height: 28px;
+        }
+      }
+    }
   }
 `

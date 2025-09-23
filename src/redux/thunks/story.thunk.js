@@ -23,3 +23,33 @@ export const getStory = createAsyncThunk(
     return response.data
   }
 )
+
+// rating
+export const rateStory = createAsyncThunk(
+  'story/rateStory',
+  async ({ storyId, rating }) => {
+    await api.post(`/stories/${storyId}/rating`, { rating })
+    // sau khi upsert xong, gọi summary để cập nhật UI
+    const { data } = await api.get(`/stories/${storyId}/ratings/summary`)
+    return { storyId, summary: data }
+  }
+)
+
+export const getStoryRatingSummary = createAsyncThunk(
+  'story/getStoryRatingSummary',
+  async ({ storyId }) => {
+    const { data } = await api.get(`/stories/${storyId}/ratings/summary`)
+    return { storyId, summary: data }
+  }
+)
+
+// comments theo truyện (gom tất cả chapter)
+export const getStoryComments = createAsyncThunk(
+  'story/getStoryComments',
+  async ({ storyId, page = 1, limit = 20, order = 'desc', more = false }) => {
+    const { data } = await api.get(`/stories/${storyId}/comments`, {
+      params: { page, limit, order }
+    })
+    return { storyId, ...data, page, limit, more }
+  }
+)

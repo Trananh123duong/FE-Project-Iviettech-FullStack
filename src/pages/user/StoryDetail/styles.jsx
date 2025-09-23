@@ -1,5 +1,5 @@
-import styled from 'styled-components'
 import { Button } from 'antd'
+import styled from 'styled-components'
 
 /* ===== Khung trang & lưới 2 cột ===== */
 export const Page = styled.main`
@@ -113,6 +113,84 @@ export const ActionRow = styled.div`
   gap: 4px;
 `
 
+/* ===== Rating box ===== */
+export const RatingWrap = styled.div`
+  margin-top: 8px;
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 16px;
+  align-items: center;
+  padding: 10px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+
+  .left {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+
+    .avg {
+      font-size: 32px;
+      font-weight: 800;
+      line-height: 1;
+      color: #111827;
+    }
+    .sub {
+      color: #6b7280;
+      font-size: 12px;
+      margin-top: -2px;
+    }
+    .count {
+      color: #374151;
+      font-weight: 600;
+      margin: 2px 0 4px;
+    }
+    .hint {
+      color: #9ca3af;
+      font-size: 12px;
+    }
+    .ant-rate {
+      font-size: 20px;
+    }
+  }
+
+  .right {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
+`
+
+export const DistRow = styled.div`
+  display: grid;
+  grid-template-columns: 40px 1fr 90px;
+  align-items: center;
+  gap: 8px;
+
+  .label { color: #374151; font-weight: 600; width: 40px; }
+  .value { color: #6b7280; text-align: right; }
+`
+
+export const DistBar = styled.div`
+  position: relative;
+  height: 10px;
+  background: #e5e7eb;
+  border-radius: 999px;
+  overflow: hidden;
+
+  .bar {
+    position: absolute;
+    inset: 0 100% 0 0; /* right: 100% */
+    background: #f59e0b;
+  }
+`
+
 /* ===== Buttons ===== */
 export const FollowButton = styled(Button)`
   background-color: #e74c3c;
@@ -129,7 +207,6 @@ export const FollowButton = styled(Button)`
     color: #fff !important;
   }
 
-  /* Khi đã theo dõi */
   &.is-followed {
     background-color: #16a34a;
     border-color: #16a34a;
@@ -140,7 +217,6 @@ export const FollowButton = styled(Button)`
     border-color: #15803d !important;
   }
 
-  /* Disabled */
   &:disabled,
   &[disabled],
   &.ant-btn[disabled] {
@@ -172,9 +248,7 @@ export const ReadButton = styled(Button)`
 
 /* ===== Bảng chapter ===== */
 export const ChapterTableWrap = styled.div`
-  /* Mốc đã đọc gần nhất: nền vàng nhạt */
   .ant-table-tbody > tr.is-last-read > td { background: #fffbe6; }
-  /* Các chương đã đọc: chữ xám */
   .ant-table-tbody > tr.is-read > td { color: #6b7280; }
   .ant-table-tbody > tr.is-read .chapter-link-btn { color: #6b7280; }
 `
