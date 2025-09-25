@@ -1,6 +1,28 @@
 import { Button } from 'antd'
 import styled from 'styled-components'
 
+/* =========================
+ * Bảng màu/tokens đơn giản
+ * ========================= */
+const palette = {
+  text: '#111827',
+  textMuted: '#6b7280',
+  textLighter: '#9ca3af',
+  textLabel: '#374151',
+  primary: '#1e88e5',
+  primaryHover: '#187bd0',
+  warn: '#f59e0b',
+  bgSubtle: '#f9fafb',
+  border: '#e5e7eb',
+  danger: '#e74c3c',
+  dangerHover: '#d94a3a',
+  success: '#16a34a',
+  successHover: '#15803d',
+  btnRead: '#f5a623',
+  btnReadHover: '#e79b1e',
+  tableReadBg: '#fffbe6',
+}
+
 /* ===== Khung trang & lưới 2 cột ===== */
 export const Page = styled.main`
   max-width: var(--site-width, 1100px);
@@ -8,6 +30,17 @@ export const Page = styled.main`
   padding: 10px 12px 20px;
   background: #fff;
   overflow-x: hidden;
+  color: ${palette.text};
+
+  .muted { color: ${palette.textLighter}; }
+  .strong { font-weight: 700; }
+
+  /* Focus ring nhất quán */
+  *:focus-visible {
+    outline: 2px solid ${palette.primary};
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
 `
 
 export const ContentGrid = styled.div`
@@ -28,10 +61,12 @@ export const TitleBlock = styled.div`
 
 export const PageTitle = styled.h1`
   margin: 0;
-  font-size: 28px;
+  font-size: clamp(22px, 2.2vw, 28px);
   font-weight: 800;
   letter-spacing: .2px;
   color: #1f2937;
+  line-height: 1.2;
+  word-break: break-word;
 `
 
 export const UpdatedAt = styled.div`
@@ -45,16 +80,20 @@ export const SectionHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
+  margin: 10px 0 6px;
 `
 
 export const SectionTitle = styled.h2`
   margin: 0;
   font-size: 22px;
   font-weight: 800;
-  color: #1e88e5;
+  color: ${palette.primary};
   letter-spacing: .2px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 
-  i { margin-right: 6px; }
+  i { margin-right: 2px; }
 `
 
 /* ===== Summary + meta ===== */
@@ -66,9 +105,6 @@ export const TopInfo = styled.div`
 
   .cover { grid-column: 1 / 2; }
   .meta  { grid-column: 2 / 3; }
-
-  .muted { color: #8c8c8c; }
-  .strong { font-weight: 700; }
 
   @media (max-width: 640px) {
     grid-template-columns: 1fr;
@@ -84,12 +120,12 @@ export const FieldRow = styled.div`
   margin-bottom: 10px;
 
   .icon { color: #9ca3af; width: 18px; text-align: center; }
-  .label { color: #6b7280; font-weight: 700; }
-  .value { color: #111827; font-weight: 600; }
+  .label { color: ${palette.textMuted}; font-weight: 700; }
+  .value { color: ${palette.text}; font-weight: 600; word-break: break-word; }
 `
 
 export const CategoryLink = styled.span`
-  color: #1e88e5;
+  color: ${palette.primary};
   cursor: pointer;
   text-decoration: none;
   &:hover, &:focus { text-decoration: underline; outline: none; }
@@ -97,10 +133,10 @@ export const CategoryLink = styled.span`
 
 export const RatingLine = styled.div`
   margin-top: 4px;
-  color: #111827;
+  color: ${palette.text};
 
   a {
-    color: #1e88e5;
+    color: ${palette.primary};
     text-decoration: none;
   }
   a:hover { text-decoration: underline; }
@@ -121,8 +157,8 @@ export const RatingWrap = styled.div`
   gap: 16px;
   align-items: center;
   padding: 10px;
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
+  background: ${palette.bgSubtle};
+  border: 1px solid ${palette.border};
   border-radius: 10px;
 
   .left {
@@ -135,24 +171,25 @@ export const RatingWrap = styled.div`
       font-size: 32px;
       font-weight: 800;
       line-height: 1;
-      color: #111827;
+      color: ${palette.text};
     }
     .sub {
-      color: #6b7280;
+      color: ${palette.textMuted};
       font-size: 12px;
       margin-top: -2px;
     }
     .count {
-      color: #374151;
+      color: ${palette.textLabel};
       font-weight: 600;
       margin: 2px 0 4px;
     }
     .hint {
-      color: #9ca3af;
+      color: ${palette.textLighter};
       font-size: 12px;
     }
     .ant-rate {
       font-size: 20px;
+      gap: 2px; /* thu nhỏ khoảng cách các sao */
     }
   }
 
@@ -173,28 +210,30 @@ export const DistRow = styled.div`
   align-items: center;
   gap: 8px;
 
-  .label { color: #374151; font-weight: 600; width: 40px; }
-  .value { color: #6b7280; text-align: right; }
+  .label { color: ${palette.textLabel}; font-weight: 600; width: 40px; }
+  .value { color: ${palette.textMuted}; text-align: right; font-variant-numeric: tabular-nums; }
 `
 
 export const DistBar = styled.div`
   position: relative;
   height: 10px;
-  background: #e5e7eb;
+  background: ${palette.border};
   border-radius: 999px;
   overflow: hidden;
 
   .bar {
     position: absolute;
-    inset: 0 100% 0 0; /* right: 100% */
-    background: #f59e0b;
+    left: 0; top: 0; bottom: 0;
+    width: 0%;
+    background: ${palette.warn};
+    transition: width .25s ease; /* animation mượt khi phân phối thay đổi */
   }
 `
 
 /* ===== Buttons ===== */
 export const FollowButton = styled(Button)`
-  background-color: #e74c3c;
-  border-color: #e74c3c;
+  background-color: ${palette.danger};
+  border-color: ${palette.danger};
   color: #fff;
   font-weight: 700;
   height: 40px;
@@ -202,19 +241,19 @@ export const FollowButton = styled(Button)`
   border-radius: 10px;
 
   &:hover, &:focus {
-    background-color: #d94a3a !important;
-    border-color: #d94a3a !important;
+    background-color: ${palette.dangerHover} !important;
+    border-color: ${palette.dangerHover} !important;
     color: #fff !important;
   }
 
   &.is-followed {
-    background-color: #16a34a;
-    border-color: #16a34a;
+    background-color: ${palette.success};
+    border-color: ${palette.success};
   }
   &.is-followed:hover,
   &.is-followed:focus {
-    background-color: #15803d !important;
-    border-color: #15803d !important;
+    background-color: ${palette.successHover} !important;
+    border-color: ${palette.successHover} !important;
   }
 
   &:disabled,
@@ -231,8 +270,8 @@ export const FollowButton = styled(Button)`
 `
 
 export const ReadButton = styled(Button)`
-  background-color: #f5a623;
-  border-color: #f5a623;
+  background-color: ${palette.btnRead};
+  border-color: ${palette.btnRead};
   color: #fff;
   font-weight: 700;
   height: 40px;
@@ -240,22 +279,78 @@ export const ReadButton = styled(Button)`
   border-radius: 10px;
 
   &:hover, &:focus {
-    background-color: #e79b1e !important;
-    border-color: #e79b1e !important;
+    background-color: ${palette.btnReadHover} !important;
+    border-color: ${palette.btnReadHover} !important;
     color: #fff !important;
   }
 `
 
 /* ===== Bảng chapter ===== */
 export const ChapterTableWrap = styled.div`
-  .ant-table-tbody > tr.is-last-read > td { background: #fffbe6; }
-  .ant-table-tbody > tr.is-read > td { color: #6b7280; }
-  .ant-table-tbody > tr.is-read .chapter-link-btn { color: #6b7280; }
+  .ant-table {
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .ant-table-thead > tr > th {
+    background: ${palette.bgSubtle};
+    color: ${palette.textLabel};
+    font-weight: 700;
+  }
+  .ant-table-tbody > tr.is-last-read > td { background: ${palette.tableReadBg}; }
+  .ant-table-tbody > tr.is-read > td { color: ${palette.textMuted}; }
+  .ant-table-tbody > tr.is-read .chapter-link-btn { color: ${palette.textMuted}; }
+  .ant-table-tbody > tr > td {
+    transition: background-color .15s ease;
+  }
+  .ant-table-tbody > tr:hover > td {
+    background: #fafafa;
+  }
 `
 
 export const ChapterLinkBtn = styled.span.attrs({ className: 'chapter-link-btn' })`
-  color: #111;
+  color: ${palette.text};
   text-decoration: none;
   cursor: pointer;
-  &:hover, &:focus { text-decoration: none; }
+  &:hover, &:focus { text-decoration: underline; color: ${palette.primary}; }
+`
+
+/* ===== BÌNH LUẬN (Story comments) ===== */
+export const CommentsWrap = styled.div`
+  margin-top: 8px;
+
+  /* Ô nhập */
+  .ant-input-textarea {
+    border-radius: 8px;
+  }
+
+  /* Comment card */
+  .ant-comment {
+    padding: 10px 0;
+    border-bottom: 1px solid ${palette.border};
+  }
+  .ant-comment-inner { padding: 0; }
+  .ant-comment-content-author-name {
+    font-weight: 700;
+    color: ${palette.text};
+  }
+  .ant-comment-content-detail {
+    color: ${palette.text};
+    line-height: 1.6;
+    word-break: break-word;
+  }
+  .ant-comment-actions { margin-top: 6px; }
+  .ant-comment-actions > li { margin-right: 12px; }
+  .ant-avatar { border: 1px solid ${palette.border}; }
+
+  /* Replies thụt vào */
+  .ant-comment-nested { margin-left: 42px; }
+  @media (max-width: 640px) {
+    .ant-comment-nested { margin-left: 36px; }
+  }
+
+  /* Load more */
+  .load-more {
+    text-align: center;
+    margin-top: 12px;
+  }
 `

@@ -15,8 +15,8 @@ const listState = () => ({
 })
 
 const pagedState = () => ({
-  data: [],          // mảng bình luận (comment gốc + replies đã include)
-  meta: {},          // { total, page, limit, totalPages }
+  data: [],
+  meta: {},
   status: 'idle',
   error: null,
 })
@@ -38,7 +38,7 @@ export const storySlice = createSlice({
       error: null,
     },
     ratingSummary: {
-      // { story_id, avg_rating, ratings_count, distribution: {1..5} }
+      // { story_id, avg_rating, ratings_count, distribution: {1..5}, user_rating }
       data: null,
       status: 'idle',
       error: null,
@@ -50,7 +50,7 @@ export const storySlice = createSlice({
     const pickTarget = (state, scope, sort) => {
       switch (scope) {
         case 'sliderbar': return state.sliderbarList
-        case 'updated': return state.updatedList
+        case 'updated':   return state.updatedList
         case 'search':    return state.searchList
         case 'top':       return state.topLists[sort] || state.topLists.view_day
         default:          return state.updatedList
@@ -58,7 +58,7 @@ export const storySlice = createSlice({
     }
 
     builder
-      // getStories
+      // ===== getStories =====
       .addCase(getStories.pending, (state, action) => {
         const { scope = 'updated', sort = null } = action.meta.arg || {}
         const target = pickTarget(state, scope, sort)
@@ -80,7 +80,7 @@ export const storySlice = createSlice({
         target.error = action.error.message
       })
 
-      // getStory
+      // ===== getStory =====
       .addCase(getStory.pending, (state) => {
         state.storyDetail.status = 'loading'
         state.storyDetail.error = null
@@ -93,12 +93,16 @@ export const storySlice = createSlice({
         state.storyDetail.status = 'failed'
         state.storyDetail.error = action.error.message
       })
-      // RATE STORY (upsert) → cập nhật summary & đồng bộ storyDetail nếu trùng id
+
+      // ===== RATING: upsert + summary =====
+      .addCase(rateStory.pending, (state) => {
+        state.ratingSummary.status = 'loading'
+        state.ratingSummary.error = null
+      })
       .addCase(rateStory.fulfilled, (state, action) => {
         state.ratingSummary.status = 'succeeded'
         state.ratingSummary.data = action.payload.summary
-        state.ratingSummary.data = { ...action.payload.summary, my_rating: action.payload.myRating }
-        // đồng bộ avg/count vào storyDetail nếu trùng
+        // đồng bộ avg/count vào storyDetail nếu đang mở đúng story
         if (state.storyDetail?.data?.id === action.payload.storyId) {
           state.storyDetail.data = {
             ...state.storyDetail.data,
@@ -107,7 +111,12 @@ export const storySlice = createSlice({
           }
         }
       })
-      // STORY COMMENTS
+      .addCase(rateStory.rejected, (state, action) => {
+        state.ratingSummary.status = 'failed'
+        state.ratingSummary.error = action.error.message
+      })
+
+      // ===== STORY COMMENTS =====
       .addCase(getStoryComments.pending, (state, action) => {
         const more = action.meta.arg?.more
         if (!more) {
@@ -127,14 +136,15 @@ export const storySlice = createSlice({
         state.storyComments.status = 'failed'
         state.storyComments.error = action.error.message
       })
-      // ====== RATING SUMMARY ======
+
+      // ===== RATING SUMMARY (fetch riêng) =====
       .addCase(getStoryRatingSummary.pending, (state) => {
         state.ratingSummary.status = 'loading'
         state.ratingSummary.error = null
       })
       .addCase(getStoryRatingSummary.fulfilled, (state, action) => {
         state.ratingSummary.status = 'succeeded'
-        state.ratingSummary.data = action.payload.summary   // { story_id, avg_rating, ratings_count, distribution }
+        state.ratingSummary.data = action.payload.summary
       })
       .addCase(getStoryRatingSummary.rejected, (state, action) => {
         state.ratingSummary.status = 'failed'

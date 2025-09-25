@@ -1,13 +1,46 @@
-import { HeartFilled } from '@ant-design/icons'
-import { Button, Divider, Empty, Image, message, Rate, Skeleton, Space, Table, Typography } from 'antd'
+import {
+  DeleteOutlined,
+  HeartFilled,
+  LikeFilled,
+  LikeOutlined,
+  LoginOutlined,
+  MessageOutlined,
+} from '@ant-design/icons'
+import {
+  Avatar,
+  Button,
+  Divider,
+  Empty,
+  Image,
+  Input,
+  message,
+  Popconfirm,
+  Rate,
+  Skeleton,
+  Space,
+  Spin,
+  Table,
+  Tooltip,
+  Typography,
+} from 'antd'
 import qs from 'qs'
 import { useEffect, useMemo, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate, useParams } from 'react-router-dom'
 
-import { getChaptersByStory } from '@redux/thunks/chapter.thunk'
+import {
+  createChapterComment as createChapterCommentThunk,
+  deleteComment as deleteCommentThunk,
+  getChaptersByStory,
+  toggleLikeComment as toggleLikeCommentThunk,
+} from '@redux/thunks/chapter.thunk'
 import { followStory, unfollowStory } from '@redux/thunks/follow.thunk'
-import { getStory, getStoryRatingSummary, rateStory } from '@redux/thunks/story.thunk'
+import {
+  getStory,
+  getStoryComments as getStoryCommentsThunk,
+  getStoryRatingSummary,
+  rateStory,
+} from '@redux/thunks/story.thunk'
 
 import FollowedStories from '@components/user/FollowedStories'
 import ReadingHistory from '@components/user/ReadingHistory'
@@ -16,19 +49,25 @@ import { ROUTES } from '@constants/routes'
 import { fmtDT, timeAgo } from '@utils/date'
 import * as S from './styles'
 
-const { Paragraph } = Typography
+const { Paragraph, Text } = Typography
+const { TextArea } = Input
 
 /* ===== Helper: map status BE -> tiếng Việt ===== */
 const viStatus = (s) => {
   if (!s) return 'Đang cập nhật'
-  const map = { ongoing: 'Đang Tiến Hành', completed: 'Hoàn Thành', hiatus: 'Tạm Dừng' }
+  const map = {
+    ongoing: 'Đang Tiến Hành',
+    completed: 'Hoàn Thành',
+    hiatus: 'Tạm Dừng',
+    coming_soon: 'Sắp Ra Mắt',
+  }
   return map[s] || 'Đang cập nhật'
 }
 
 /* ===== Helper: bỏ thẻ HTML khỏi description ===== */
 const stripHtml = (html) => (html || '').replace(/<[^>]*>/g, '').trim()
 
-/* ===== Helper: rút số chapter từ nhiều trường có thể có ===== */
+/* ===== Helpers về số chapter ===== */
 const extractNum = (v) => {
   if (v == null) return null
   if (typeof v === 'number') return v
@@ -46,17 +85,25 @@ const StoryDetail = () => {
   /* ===== Store slices ===== */
   const { data: currentUser } = useSelector((s) => s.auth.myProfile)
   const { data: story = {}, status: storyStatus, error: storyError } = useSelector((s) => s.story.storyDetail)
-  const ratingSummary = useSelector((s) => s.story.ratingSummary)         // 👈 {data,status,error}
+  const ratingSummary = useSelector((s) => s.story.ratingSummary)         // { data, status, error }
+  const storyComments = useSelector((s) => s.story.storyComments)         // { data, meta, status, error }
+  const { data: comments = [], meta: cmeta = {}, status: cstatus, error: cerror } = storyComments
   const { followAction, unfollowAction } = useSelector((s) => s.follow)
   const { chaptersByStory } = useSelector((s) => s.chapter)
   const { data: chapterList = [], status: chaptersStatus, history } = chaptersByStory
 
-  /* ===== Nạp chi tiết truyện + danh sách chapter + rating summary ===== */
+  const isLoggedIn  = !!currentUser?.id
+  const isFollowed  = !!story?.is_followed
+  const isActing    = followAction.status === 'loading' || unfollowAction.status === 'loading'
+  const ratingBusy  = ratingSummary?.status === 'loading'
+
+  /* ===== Nạp dữ liệu ===== */
   useEffect(() => {
     if (!id) return
     dispatch(getStory({ id }))
     dispatch(getChaptersByStory({ storyId: id }))
-    dispatch(getStoryRatingSummary({ storyId: id })) // tải tổng quan rating
+    dispatch(getStoryRatingSummary({ storyId: id }))
+    dispatch(getStoryCommentsThunk({ storyId: id, page: 1, limit: 20, order: 'desc' }))
   }, [dispatch, id])
 
   /* ===== Hiển thị đủ/ít chương ===== */
@@ -145,12 +192,7 @@ const StoryDetail = () => {
   const avgRating    = Number(sum?.avg_rating ?? story?.avg_rating ?? 0)
   const ratingsCount = Number(sum?.ratings_count ?? story?.ratings_count ?? 0)
   const dist         = sum?.distribution || { 5:0, 4:0, 3:0, 2:0, 1:0 }
-
-  /* ===== Chấm sao của riêng user (state cục bộ) ===== */
-  const [myRating, setMyRating] = useState(0) // chưa có API get "my rating", tạm để 0
-  const isLoggedIn  = !!currentUser?.id
-  const isFollowed  = !!story?.is_followed
-  const isActing    = followAction.status === 'loading' || unfollowAction.status === 'loading'
+  const userRating   = Number(sum?.user_rating ?? 0)
 
   const handleToggleFollow = async () => {
     if (!isLoggedIn || !story?.id) return
@@ -175,10 +217,12 @@ const StoryDetail = () => {
       return
     }
     if (!story?.id) return
+    if (!Number.isInteger(value) || value < 1 || value > 5) {
+      message.warning('Hãy chọn từ 1 đến 5 sao.')
+      return
+    }
     try {
-      setMyRating(value) // UX: phản hồi ngay
-      const res = await dispatch(rateStory({ storyId: story.id, rating: value })).unwrap()
-      // res.summary đã cập nhật avg & count trong store.ratingSummary; storyDetail cũng sync từ extraReducer
+      await dispatch(rateStory({ storyId: story.id, rating: value })).unwrap()
       message.success('Đã ghi nhận đánh giá')
     } catch (e) {
       message.error(e?.message || 'Không thể gửi đánh giá')
@@ -197,6 +241,109 @@ const StoryDetail = () => {
   /* ===== Helper % phân phối ===== */
   const distTotal = Object.values(dist).reduce((a, b) => a + Number(b || 0), 0) || 1
   const pct = (n) => Math.round((Number(n || 0) * 100) / distTotal)
+
+  /* ===== Bình luận — state & handlers (đồng bộ cách làm với ChapterDetail) ===== */
+  const [newCommentText, setNewCommentText] = useState('')
+  const [isPostingComment, setIsPostingComment] = useState(false)
+  const [replyBoxOpenMap, setReplyBoxOpenMap] = useState({}) // { [cid]: bool }
+  const [replyTextMap, setReplyTextMap] = useState({})       // { [cid]: string }
+  const [replyBusyMap, setReplyBusyMap] = useState({})       // { [cid]: bool }
+
+  const toggleReplyBox = (cid) => setReplyBoxOpenMap(m => ({ ...m, [cid]: !m[cid] }))
+  const handleChangeReplyText = (cid, val) => setReplyTextMap(m => ({ ...m, [cid]: val }))
+
+  // Đăng bình luận mới: gắn vào chapter mới nhất để tương thích API
+  const submitComment = async () => {
+    if (!isLoggedIn) return message.info('Bạn cần đăng nhập để bình luận.')
+    if (!lastChapterId) return message.warning('Chưa có chapter để bình luận.')
+    const body = String(newCommentText || '').trim()
+    if (!body) return
+
+    try {
+      setIsPostingComment(true)
+      await dispatch(createChapterCommentThunk({ chapterId: lastChapterId, body })).unwrap()
+      setNewCommentText('')
+      // refresh danh sách bình luận theo truyện (trả về page 1)
+      await dispatch(getStoryCommentsThunk({ storyId: id, page: 1, limit: cmeta?.limit || 20, order: 'desc' }))
+      message.success('Đã đăng bình luận')
+    } catch (e) {
+      message.error(e?.message || 'Không thể đăng bình luận')
+    } finally {
+      setIsPostingComment(false)
+    }
+  }
+
+  // Trả lời bình luận gốc
+  const handlePostReply = async (rootCmt) => {
+    if (!isLoggedIn) return message.info('Bạn cần đăng nhập để trả lời.')
+    const body = String(replyTextMap[rootCmt.id] || '').trim()
+    if (!body) return message.warning('Nhập nội dung trả lời.')
+    if (!rootCmt.chapter_id) return message.error('Thiếu chapter_id cho bình luận này.')
+
+    try {
+      setReplyBusyMap(m => ({ ...m, [rootCmt.id]: true }))
+      await dispatch(
+        createChapterCommentThunk({
+          chapterId: rootCmt.chapter_id,
+          body,
+          parent_id: rootCmt.id,
+        })
+      ).unwrap()
+      setReplyTextMap(m => ({ ...m, [rootCmt.id]: '' }))
+      setReplyBoxOpenMap(m => ({ ...m, [rootCmt.id]: false }))
+      await dispatch(getStoryCommentsThunk({ storyId: id, page: 1, limit: cmeta?.limit || 20, order: 'desc' }))
+      message.success('Đã trả lời')
+    } catch (e) {
+      message.error(e?.message || 'Không thể gửi trả lời')
+    } finally {
+      setReplyBusyMap(m => ({ ...m, [rootCmt.id]: false }))
+    }
+  }
+
+  // Like/Unlike bình luận → refresh để đồng bộ likes_count
+  const handleToggleLike = async (commentId) => {
+    if (!isLoggedIn) return message.info('Bạn cần đăng nhập để thích bình luận.')
+    try {
+      await dispatch(toggleLikeCommentThunk({ commentId })).unwrap()
+      await dispatch(getStoryCommentsThunk({
+        storyId: id,
+        page: cmeta?.page || 1,
+        limit: cmeta?.limit || 20,
+        order: 'desc',
+        more: false,
+      }))
+    } catch (e) {
+      message.error(e?.message || 'Không thể thực hiện')
+    }
+  }
+
+  // Xoá bình luận
+  const handleDeleteComment = async (commentId) => {
+    if (!isLoggedIn) return message.info('Bạn cần đăng nhập.')
+    try {
+      await dispatch(deleteCommentThunk({ commentId })).unwrap()
+      await dispatch(getStoryCommentsThunk({ storyId: id, page: 1, limit: cmeta?.limit || 20, order: 'desc' }))
+      message.success('Đã xoá bình luận')
+    } catch (e) {
+      message.error(e?.message || 'Không thể xoá')
+    }
+  }
+
+  // Load more
+  const handleLoadMore = async () => {
+    const page = Number(cmeta?.page || 1)
+    const totalPages = Number(cmeta?.totalPages || 1)
+    if (page >= totalPages) return
+    await dispatch(
+      getStoryCommentsThunk({
+        storyId: id,
+        page: page + 1,
+        limit: cmeta?.limit || 20,
+        order: 'desc',
+        more: true,
+      })
+    )
+  }
 
   return (
     <S.Page>
@@ -272,13 +419,17 @@ const StoryDetail = () => {
                       <div className="avg">{avgRating.toFixed(2)}</div>
                       <div className="sub">/ 5 điểm</div>
                       <div className="count">{ratingsCount} lượt</div>
+
                       <Rate
-                        value={myRating || 0}
+                        value={userRating || 0}
                         onChange={onRate}
-                        allowClear
-                        disabled={!isLoggedIn}
+                        allowClear={false}
+                        disabled={!isLoggedIn || ratingBusy}
                       />
                       {!isLoggedIn && <div className="hint">Đăng nhập để chấm sao</div>}
+                      {isLoggedIn && userRating > 0 && (
+                        <div className="hint">Bạn đã đánh giá: <strong>{userRating}★</strong></div>
+                      )}
                     </div>
 
                     <div className="right">
@@ -371,6 +522,205 @@ const StoryDetail = () => {
                   </Button>
                 </div>
               )}
+
+              <Divider />
+
+              {/* ===== BÌNH LUẬN ===== */}
+              <S.SectionHeader>
+                <S.SectionTitle>
+                  <i className="fa fa-comments" /> BÌNH LUẬN
+                </S.SectionTitle>
+              </S.SectionHeader>
+
+              {/* Ô nhập bình luận mới */}
+              <div style={{ margin: '8px 0 16px' }}>
+                {!isLoggedIn && (
+                  <div style={{ marginBottom: 8 }}>
+                    <Text type="secondary">
+                      <LoginOutlined /> Bạn cần đăng nhập để bình luận và thích.
+                    </Text>
+                  </div>
+                )}
+                <TextArea
+                  value={newCommentText}
+                  onChange={(e) => setNewCommentText(e.target.value)}
+                  autoSize={{ minRows: 3, maxRows: 6 }}
+                  maxLength={2000}
+                  placeholder={isLoggedIn ? 'Viết bình luận của bạn…' : 'Đăng nhập để bình luận'}
+                  disabled={!isLoggedIn || isPostingComment}
+                />
+                <div style={{ marginTop: 8, display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+                  <Button
+                    type="primary"
+                    onClick={submitComment}
+                    loading={isPostingComment}
+                    disabled={!isLoggedIn || !newCommentText.trim()}
+                  >
+                    Gửi bình luận
+                  </Button>
+                  {!lastChapterId && (
+                    <span className="muted" style={{ alignSelf: 'center' }}>
+                      (Chưa có chapter → không thể gắn bình luận)
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <S.CommentsWrap>
+                {cstatus === 'loading' && comments.length === 0 && <Spin style={{ margin: '12px 0' }} />}
+
+                {cerror ? (
+                  <Empty description="Không tải được bình luận" />
+                ) : (comments || []).length === 0 ? (
+                  <Empty description="Chưa có bình luận" />
+                ) : (
+                  <div>
+                    {(comments || []).map((c) => {
+                      const me = currentUser?.id
+                      const canDelete = me && (me === c.user_id || currentUser?.role === 'admin')
+
+                      return (
+                        <div key={c.id} style={{ padding: '10px 0', borderBottom: '1px solid #e5e7eb' }}>
+                          <div style={{ display: 'flex', gap: 10 }}>
+                            <Avatar size={36} src={c.user?.avatar} alt={c.user?.username} />
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+                                <span style={{ fontWeight: 700 }}>{c.user?.username || 'Ẩn danh'}</span>
+                                <span className="muted">•</span>
+                                <Tooltip title={fmtDT(c.created_at || c.createdAt)}>
+                                  <span className="muted">{fmtDT(c.created_at || c.createdAt)}</span>
+                                </Tooltip>
+                              </div>
+
+                              <div style={{ whiteSpace: 'pre-wrap' }}>{c.body}</div>
+
+                              <div style={{ display: 'flex', gap: 12, marginTop: 6 }}>
+                                <Button
+                                  type="text"
+                                  icon={c.is_liked ? <LikeFilled /> : <LikeOutlined />}
+                                  onClick={() => handleToggleLike(c.id)}
+                                  disabled={!isLoggedIn}
+                                  style={{ padding: 0, height: 28 }}
+                                >
+                                  {c.likes_count ?? 0}
+                                </Button>
+
+                                <Button
+                                  type="text"
+                                  icon={<MessageOutlined />}
+                                  onClick={() => toggleReplyBox(c.id)}
+                                  disabled={!isLoggedIn}
+                                  style={{ padding: 0, height: 28 }}
+                                >
+                                  Trả lời
+                                </Button>
+
+                                {canDelete && (
+                                  <Popconfirm
+                                    title="Xoá bình luận này?"
+                                    okText="Xoá"
+                                    cancelText="Huỷ"
+                                    onConfirm={() => handleDeleteComment(c.id)}
+                                  >
+                                    <Button type="text" danger icon={<DeleteOutlined />} style={{ padding: 0, height: 28 }}>
+                                      Xoá
+                                    </Button>
+                                  </Popconfirm>
+                                )}
+                              </div>
+
+                              {/* Form trả lời */}
+                              {replyBoxOpenMap[c.id] && (
+                                <div style={{ marginTop: 8 }}>
+                                  <TextArea
+                                    value={replyTextMap[c.id] || ''}
+                                    onChange={(e) => handleChangeReplyText(c.id, e.target.value)}
+                                    autoSize={{ minRows: 2, maxRows: 6 }}
+                                    maxLength={2000}
+                                    placeholder="Nhập trả lời…"
+                                    disabled={!isLoggedIn || !!replyBusyMap[c.id]}
+                                  />
+                                  <div style={{ marginTop: 6, display: 'flex', gap: 8 }}>
+                                    <Button
+                                      type="primary"
+                                      size="small"
+                                      loading={!!replyBusyMap[c.id]}
+                                      disabled={!isLoggedIn}
+                                      onClick={() => handlePostReply(c)}
+                                    >
+                                      Gửi trả lời
+                                    </Button>
+                                    <Button size="small" onClick={() => toggleReplyBox(c.id)}>
+                                      Huỷ
+                                    </Button>
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Replies */}
+                              {!!(c.story_comments || []).length && (
+                                <div style={{ marginTop: 10, paddingLeft: 14, borderLeft: '2px solid #e5e7eb', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                                  {c.story_comments.map((r) => {
+                                    const canDeleteReply = me && (me === r.user_id || currentUser?.role === 'admin')
+                                    return (
+                                      <div key={r.id} style={{ display: 'flex', gap: 8 }}>
+                                        <Avatar size={28} src={r.user?.avatar} alt={r.user?.username} />
+                                        <div style={{ flex: 1 }}>
+                                          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+                                            <span style={{ fontWeight: 700 }}>{r.user?.username || 'Ẩn danh'}</span>
+                                            <span className="muted">•</span>
+                                            <Tooltip title={fmtDT(r.created_at || r.createdAt)}>
+                                              <span className="muted">{fmtDT(r.created_at || r.createdAt)}</span>
+                                            </Tooltip>
+                                          </div>
+                                          <div style={{ whiteSpace: 'pre-wrap' }}>{r.body}</div>
+                                          <div style={{ display: 'flex', gap: 12, marginTop: 6 }}>
+                                            <Button
+                                              type="text"
+                                              icon={r.is_liked ? <LikeFilled /> : <LikeOutlined />}
+                                              onClick={() => handleToggleLike(r.id)}
+                                              disabled={!isLoggedIn}
+                                              style={{ padding: 0, height: 28 }}
+                                            >
+                                              {r.likes_count ?? 0}
+                                            </Button>
+
+                                            {canDeleteReply && (
+                                              <Popconfirm
+                                                title="Xoá bình luận này?"
+                                                okText="Xoá"
+                                                cancelText="Huỷ"
+                                                onConfirm={() => handleDeleteComment(r.id)}
+                                              >
+                                                <Button type="text" danger icon={<DeleteOutlined />} style={{ padding: 0, height: 28 }}>
+                                                  Xoá
+                                                </Button>
+                                              </Popconfirm>
+                                            )}
+                                          </div>
+                                        </div>
+                                      </div>
+                                    )
+                                  })}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    })}
+
+                    {/* Load more */}
+                    {Number(cmeta?.page || 1) < Number(cmeta?.totalPages || 1) && (
+                      <div className="load-more" style={{ textAlign: 'center', marginTop: 12 }}>
+                        <Button onClick={handleLoadMore} loading={cstatus === 'loading'}>
+                          Tải thêm
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </S.CommentsWrap>
             </>
           )}
         </section>

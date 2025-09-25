@@ -24,13 +24,13 @@ export const getStory = createAsyncThunk(
   }
 )
 
-// rating
+// Upsert rating rồi lấy summary (đã có user_rating từ API)
 export const rateStory = createAsyncThunk(
   'story/rateStory',
   async ({ storyId, rating }) => {
     await api.post(`/stories/${storyId}/rating`, { rating })
-    // sau khi upsert xong, gọi summary để cập nhật UI
     const { data } = await api.get(`/stories/${storyId}/ratings/summary`)
+    // data: { story_id, avg_rating, ratings_count, distribution, user_rating }
     return { storyId, summary: data }
   }
 )
