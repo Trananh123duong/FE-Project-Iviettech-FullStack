@@ -31,9 +31,9 @@ export const getChapterComments = createAsyncThunk(
 
 export const createChapterComment = createAsyncThunk(
   'chapter/createChapterComment',
-  async ({ chapterId, body, parent_id = null, is_spoiler = false }) => {
+  async ({ chapterId, body, parent_id = null }) => {
     const { data } = await api.post(`/chapters/${chapterId}/comments`, {
-      body, parent_id, is_spoiler
+      body, parent_id
     })
     return { chapterId, comment: data }
   }

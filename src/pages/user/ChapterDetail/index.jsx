@@ -252,7 +252,6 @@ const ChapterDetail = () => {
           chapterId,
           body: content,
           parent_id: null,
-          is_spoiler: false,
         })
       ).unwrap()
       setNewCommentText('')
@@ -281,7 +280,6 @@ const ChapterDetail = () => {
           chapterId: rootComment.chapter_id,
           body,
           parent_id: rootComment.id,
-          is_spoiler: false,
         })
       ).unwrap()
       setReplyTextMap((m) => ({ ...m, [rootComment.id]: '' }))
@@ -435,7 +433,6 @@ const ChapterDetail = () => {
               chapterId,
               body,
               parent_id: null,
-              is_spoiler: false,
             })).unwrap()
             await dispatch(getChapterComments({ chapterId, page: 1, limit: 20 }))
           }}
@@ -445,7 +442,6 @@ const ChapterDetail = () => {
               chapterId: rootCmt.chapter_id,
               body,
               parent_id: rootCmt.id,
-              is_spoiler: false,
             })).unwrap()
             await dispatch(getChapterComments({ chapterId, page: 1, limit: 20 }))
           }}
