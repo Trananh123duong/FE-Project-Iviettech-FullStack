@@ -1,62 +1,73 @@
 import styled from 'styled-components'
 
 export const Wrap = styled.section`
-  margin-top: 20px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed #e5e7eb;
+`
 
-  .header {
-    display: flex;
-    align-items: baseline;
-    gap: 8px;
-    margin-bottom: 12px;
-  }
+export const Header = styled.div`
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 12px;
+
   .count { color: #6b7280; }
+`
 
-  .form {
-    margin-bottom: 16px;
-  }
-  .form .actions {
+export const Form = styled.div`
+  margin-bottom: 16px;
+
+  .actions {
     display: flex;
     justify-content: flex-end;
     margin-top: 8px;
     gap: 8px;
   }
+`
 
-  .item {
-    padding: 10px 0;
-    border-bottom: 1px solid #e5e7eb;
-  }
-  .top {
+export const List = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+
+  .load-more {
     display: flex;
-    gap: 10px;
+    justify-content: center;
+    margin-top: 8px;
   }
+`
+
+export const Item = styled.div`
+  display: flex;
+  gap: 10px;
+
+  .avatar { flex: 0 0 36px; }
+
+  .content { flex: 1; min-width: 0; }
+
   .meta {
     display: flex;
     align-items: center;
     gap: 6px;
     color: #6b7280;
     margin-bottom: 2px;
+
+    .author { color: #111827; font-weight: 600; }
+    .dot { color: #9ca3af; }
   }
-  .author { color: #111827; font-weight: 600; }
-  .time { color: #6b7280; }
-  .dot { color: #9ca3af; }
 
   .body {
-    white-space: pre-wrap;
     color: #111827;
+    white-space: pre-wrap;
   }
 
   .actions {
     display: flex;
-    gap: 12px;
-    margin-top: 6px;
-  }
-  .actions .ant-btn {
-    padding: 0 6px;
-    height: 28px;
-  }
+    gap: 8px;
+    margin-top: 4px;
 
-  .reply-form {
-    margin-top: 8px;
+    .ant-btn { padding: 0 6px; height: 28px; }
   }
 
   .replies {
@@ -66,23 +77,32 @@ export const Wrap = styled.section`
     display: flex;
     flex-direction: column;
     gap: 10px;
-  }
-  .reply {
-    display: flex;
-    gap: 8px;
-  }
-  .reply .meta {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    color: #6b7280;
-    margin-bottom: 2px;
-  }
-  .reply .author { color: #111827; font-weight: 600; }
 
-  .load-more {
-    display: flex;
-    justify-content: center;
-    margin-top: 12px;
+    .reply {
+      display: flex;
+      gap: 8px;
+
+      .avatar { flex: 0 0 28px; }
+      .content { flex: 1; }
+
+      .meta {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: #6b7280;
+        margin-bottom: 2px;
+
+        .author { color: #111827; font-weight: 600; }
+        .dot { color: #9ca3af; }
+      }
+
+      .actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 4px;
+
+        .ant-btn { padding: 0 6px; height: 28px; }
+      }
+    }
   }
 `

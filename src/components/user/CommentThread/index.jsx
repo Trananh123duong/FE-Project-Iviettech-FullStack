@@ -7,134 +7,99 @@ import {
   SendOutlined,
 } from '@ant-design/icons'
 import { fmtDT } from '@utils/date'
-import {
-  Alert,
-  Avatar,
-  Button,
-  Empty,
-  Input,
-  Popconfirm,
-  Skeleton,
-  Tooltip,
-  Typography,
-  message,
-} from 'antd'
-import { useCallback, useMemo, useState } from 'react'
-import { Wrap } from './styles'
+import { Alert, Avatar, Button, Empty, Input, Popconfirm, Skeleton, Tooltip, Typography } from 'antd'
+import { useMemo, useState } from 'react'
+import * as S from './styles'
 
 const { Text } = Typography
 const { TextArea } = Input
 
 /**
- * CommentThread
- * UI hiển thị danh sách bình luận + soạn thảo bình luận/reply.
- * - Không biết logic API; chỉ nhận data & callback từ parent (StoryDetail/ChapterDetail).
+ * CommentThread – UI hiển thị & thao tác bình luận (gốc + reply)
  *
  * Props:
- *  - comments: Array các bình luận (bao gồm replies tại c.story_comments hoặc c.replies)
- *  - meta: { page, totalPages, total, limit }
- *  - status: 'idle' | 'loading' | 'succeeded' | 'failed'
- *  - error: string | null
- *  - isLoggedIn: boolean
- *  - currentUser: thông tin user hiện tại (để check quyền xoá)
- *  - onPostComment(body)
- *  - onPostReply(rootComment, body)
- *  - onToggleLike(commentId)
- *  - onDeleteComment(commentId)
- *  - onLoadMore()
- *  - posting: boolean (đang gửi bình luận mới)
+ * - isLoggedIn         : boolean
+ * - currentUser        : object | null
+ * - comments           : array các comment (mỗi comment có thể có story_comments là replies)
+ * - meta               : { page, totalPages, total, limit } | {}
+ * - status             : 'idle' | 'loading' | 'succeeded' | 'failed'
+ * - error              : string | null
+ * - onCreate(body)     : () => Promise   // tạo bình luận gốc
+ * - onReply(root, body): (rootComment) => Promise
+ * - onToggleLike(id)   : (commentId) => Promise
+ * - onDelete(id)       : (commentId) => Promise
+ * - onLoadMore()       : () => Promise   // tải trang kế tiếp (khi còn)
+ * - title?             : string          // tiêu đề khối, mặc định: 'Bình luận'
+ * - placeholder?       : string          // placeholder ô nhập
  */
-export default function CommentThread({
+const CommentThread = ({
+  isLoggedIn = false,
+  currentUser,
   comments = [],
   meta = {},
   status = 'idle',
   error = null,
-
-  isLoggedIn = false,
-  currentUser = null,
-
-  onPostComment,
-  onPostReply,
+  onCreate,
+  onReply,
   onToggleLike,
-  onDeleteComment,
+  onDelete,
   onLoadMore,
-
-  posting = false,
-}) {
-  /* ===== State soạn thảo ===== */
+  title = 'Bình luận',
+  placeholder = 'Nhập bình luận của bạn...',
+}) => {
+  // state cục bộ
   const [newText, setNewText] = useState('')
-  const [replyOpen, setReplyOpen] = useState({})   // { [commentId]: boolean }
+  const [posting, setPosting] = useState(false)
+  const [replyOpen, setReplyOpen] = useState({})   // { [commentId]: bool }
   const [replyText, setReplyText] = useState({})   // { [commentId]: string }
-  const [replyBusy, setReplyBusy] = useState({})   // { [commentId]: boolean }
+  const [replyBusy, setReplyBusy] = useState({})   // { [commentId]: bool }
 
-  /* ===== Tính toán phân trang ===== */
-  const page       = Number(meta?.page || 1)
-  const totalPages = Number(meta?.totalPages || 1)
-  const hasMore    = page < totalPages
-
-  /* ===== Helpers ===== */
-  const safeReplies = (c) => c?.story_comments || c?.replies || []
-
-  const canDelete = useCallback(
-    (cmt) => {
-      const userId = currentUser?.id
-      return !!userId && (userId === cmt?.user_id || !!currentUser?.role)
-    },
-    [currentUser]
+  const hasMore = useMemo(
+    () => Number(meta?.page || 1) < Number(meta?.totalPages || 1),
+    [meta?.page, meta?.totalPages]
   )
 
-  const toggleReply = (cid) => setReplyOpen((m) => ({ ...m, [cid]: !m[cid] }))
-  const changeReplyText = (cid, val) => setReplyText((m) => ({ ...m, [cid]: val }))
+  const canDeleteBy = (ownerId) => {
+    const me = currentUser?.id
+    return !!me && (me === ownerId || currentUser?.role === 'admin')
+  }
 
-  /* ===== Handlers ===== */
-  const submitComment = async () => {
-    if (!isLoggedIn) return message.info('Bạn cần đăng nhập để bình luận.')
+  const createComment = async () => {
     const body = String(newText || '').trim()
+    if (!isLoggedIn) return
     if (!body) return
+    if (!onCreate) return
     try {
-      await onPostComment?.(body)
+      setPosting(true)
+      await onCreate(body)
       setNewText('')
-    } catch (e) {
-      message.error(e?.message || 'Không thể đăng bình luận')
-    }
-  }
-
-  const submitReply = async (root) => {
-    if (!isLoggedIn) return message.info('Bạn cần đăng nhập để trả lời.')
-    const body = String(replyText[root.id] || '').trim()
-    if (!body) return
-    try {
-      setReplyBusy((m) => ({ ...m, [root.id]: true }))
-      await onPostReply?.(root, body)
-      setReplyText((m) => ({ ...m, [root.id]: '' }))
-      setReplyOpen((m) => ({ ...m, [root.id]: false }))
-    } catch (e) {
-      message.error(e?.message || 'Không thể gửi trả lời')
     } finally {
-      setReplyBusy((m) => ({ ...m, [root.id]: false }))
+      setPosting(false)
     }
   }
 
-  const like = (id) => onToggleLike?.(id)
-  const del  = (id) => onDeleteComment?.(id)
-  const loadMore = () => onLoadMore?.()
+  const postReply = async (rootCmt) => {
+    const body = String(replyText[rootCmt.id] || '').trim()
+    if (!isLoggedIn) return
+    if (!body) return
+    if (!onReply) return
+    try {
+      setReplyBusy((m) => ({ ...m, [rootCmt.id]: true }))
+      await onReply(rootCmt, body)
+      setReplyText((m) => ({ ...m, [rootCmt.id]: '' }))
+      setReplyOpen((m) => ({ ...m, [rootCmt.id]: false }))
+    } finally {
+      setReplyBusy((m) => ({ ...m, [rootCmt.id]: false }))
+    }
+  }
 
-  const showEmpty = useMemo(() => {
-    if (status === 'loading' && (comments?.length ?? 0) === 0) return false
-    if (error) return true
-    return (comments?.length ?? 0) === 0
-  }, [status, comments, error])
-
-  /* ===== Render ===== */
   return (
-    <Wrap>
-      {/* Header + tổng số bình luận */}
-      <div className="header">
-        <Text strong>Bình luận</Text>
+    <S.Wrap>
+      <S.Header>
+        <Text strong>{title}</Text>
         {meta?.total != null && <span className="count">({meta.total} bình luận)</span>}
-      </div>
+      </S.Header>
 
-      {/* Nhắc đăng nhập */}
       {!isLoggedIn && (
         <Alert
           type="warning"
@@ -146,11 +111,11 @@ export default function CommentThread({
       )}
 
       {/* Form bình luận mới */}
-      <div className="form">
+      <S.Form>
         <TextArea
           value={newText}
           onChange={(e) => setNewText(e.target.value)}
-          placeholder={isLoggedIn ? 'Nhập bình luận của bạn...' : 'Đăng nhập để bình luận'}
+          placeholder={isLoggedIn ? placeholder : 'Đăng nhập để bình luận'}
           autoSize={{ minRows: 3, maxRows: 6 }}
           disabled={!isLoggedIn || posting}
           maxLength={2000}
@@ -159,32 +124,39 @@ export default function CommentThread({
           <Button
             type="primary"
             icon={<SendOutlined />}
-            onClick={submitComment}
+            onClick={createComment}
             loading={posting}
             disabled={!isLoggedIn || !newText.trim()}
           >
             Gửi
           </Button>
         </div>
-      </div>
+      </S.Form>
 
       {/* Danh sách bình luận */}
-      {status === 'loading' && (comments?.length ?? 0) === 0 ? (
+      {status === 'loading' && comments.length === 0 ? (
         <Skeleton active paragraph={{ rows: 4 }} />
-      ) : showEmpty ? (
-        <Empty description={error ? 'Không tải được bình luận' : 'Chưa có bình luận'} />
+      ) : error ? (
+        <Empty description="Không tải được bình luận" />
+      ) : comments.length === 0 ? (
+        <Empty description="Chưa có bình luận nào — hãy là người đầu tiên!" />
       ) : (
-        <>
-          {(comments || []).map((c) => (
-            <div key={c.id} className="item">
-              <div className="top">
-                <Avatar size={36} src={c.user?.avatar} alt={c.user?.username} />
-                <div style={{ flex: 1, minWidth: 0 }}>
+        <S.List>
+          {comments.map((c) => {
+            const created = c.created_at || c.createdAt
+            const canDelete = canDeleteBy(c.user_id)
+
+            return (
+              <S.Item key={c.id}>
+                <div className="avatar">
+                  <Avatar size={36} src={c.user?.avatar} alt={c.user?.username} />
+                </div>
+                <div className="content">
                   <div className="meta">
                     <span className="author">{c.user?.username || 'Ẩn danh'}</span>
                     <span className="dot">•</span>
-                    <Tooltip title={fmtDT(c.created_at || c.createdAt)}>
-                      <span className="time">{fmtDT(c.created_at || c.createdAt)}</span>
+                    <Tooltip title={fmtDT(created)}>
+                      <span className="time">{fmtDT(created)}</span>
                     </Tooltip>
                   </div>
 
@@ -194,7 +166,7 @@ export default function CommentThread({
                     <Button
                       type="text"
                       icon={c.is_liked ? <LikeFilled /> : <LikeOutlined />}
-                      onClick={() => like?.(c.id)}
+                      onClick={() => onToggleLike && onToggleLike(c.id)}
                       disabled={!isLoggedIn}
                     >
                       {c.likes_count ?? 0}
@@ -203,18 +175,18 @@ export default function CommentThread({
                     <Button
                       type="text"
                       icon={<MessageOutlined />}
-                      onClick={() => toggleReply(c.id)}
+                      onClick={() => setReplyOpen((m) => ({ ...m, [c.id]: !m[c.id] }))}
                       disabled={!isLoggedIn}
                     >
                       Trả lời
                     </Button>
 
-                    {canDelete(c) && (
+                    {canDelete && (
                       <Popconfirm
                         title="Xoá bình luận này?"
                         okText="Xoá"
                         cancelText="Huỷ"
-                        onConfirm={() => del?.(c.id)}
+                        onConfirm={() => onDelete && onDelete(c.id)}
                       >
                         <Button type="text" danger icon={<DeleteOutlined />}>
                           Xoá
@@ -225,10 +197,10 @@ export default function CommentThread({
 
                   {/* Form trả lời */}
                   {replyOpen[c.id] && (
-                    <div className="reply-form">
+                    <div style={{ marginTop: 8 }}>
                       <TextArea
                         value={replyText[c.id] || ''}
-                        onChange={(e) => changeReplyText(c.id, e.target.value)}
+                        onChange={(e) => setReplyText((m) => ({ ...m, [c.id]: e.target.value }))}
                         autoSize={{ minRows: 2, maxRows: 6 }}
                         maxLength={2000}
                         placeholder="Nhập trả lời…"
@@ -240,73 +212,85 @@ export default function CommentThread({
                           size="small"
                           loading={!!replyBusy[c.id]}
                           disabled={!isLoggedIn}
-                          onClick={() => submitReply(c)}
+                          onClick={() => postReply(c)}
                         >
                           Gửi trả lời
                         </Button>
-                        <Button size="small" onClick={() => toggleReply(c.id)}>Huỷ</Button>
+                        <Button size="small" onClick={() => setReplyOpen((m) => ({ ...m, [c.id]: false }))}>
+                          Huỷ
+                        </Button>
                       </div>
                     </div>
                   )}
 
-                  {/* Replies (accepts both story_comments | replies) */}
-                  {!!safeReplies(c).length && (
+                  {/* Replies */}
+                  {!!(c.story_comments || []).length && (
                     <div className="replies">
-                      {safeReplies(c).map((r) => (
-                        <div key={r.id} className="reply">
-                          <Avatar size={28} src={r.user?.avatar} alt={r.user?.username} />
-                          <div style={{ flex: 1 }}>
-                            <div className="meta">
-                              <span className="author">{r.user?.username || 'Ẩn danh'}</span>
-                              <span className="dot">•</span>
-                              <Tooltip title={fmtDT(r.created_at || r.createdAt)}>
-                                <span className="time">{fmtDT(r.created_at || r.createdAt)}</span>
-                              </Tooltip>
-                            </div>
-                            <div className="body">{r.body}</div>
-                            <div className="actions">
-                              <Button
-                                type="text"
-                                icon={r.is_liked ? <LikeFilled /> : <LikeOutlined />}
-                                onClick={() => like?.(r.id)}
-                                disabled={!isLoggedIn}
-                              >
-                                {r.likes_count ?? 0}
-                              </Button>
+                      {c.story_comments.map((r) => {
+                        const rCreated = r.created_at || r.createdAt
+                        const canDeleteReply = canDeleteBy(r.user_id)
 
-                              {(currentUser?.id &&
-                                (currentUser.id === r.user_id || currentUser?.role)) && (
-                                <Popconfirm
-                                  title="Xoá bình luận này?"
-                                  okText="Xoá"
-                                  cancelText="Huỷ"
-                                  onConfirm={() => del?.(r.id)}
+                        return (
+                          <div key={r.id} className="reply">
+                            <div className="avatar">
+                              <Avatar size={28} src={r.user?.avatar} alt={r.user?.username} />
+                            </div>
+                            <div className="content">
+                              <div className="meta">
+                                <span className="author">{r.user?.username || 'Ẩn danh'}</span>
+                                <span className="dot">•</span>
+                                <Tooltip title={fmtDT(rCreated)}>
+                                  <span className="time">{fmtDT(rCreated)}</span>
+                                </Tooltip>
+                              </div>
+
+                              <div className="body">{r.body}</div>
+
+                              <div className="actions">
+                                <Button
+                                  type="text"
+                                  icon={r.is_liked ? <LikeFilled /> : <LikeOutlined />}
+                                  onClick={() => onToggleLike && onToggleLike(r.id)}
+                                  disabled={!isLoggedIn}
                                 >
-                                  <Button type="text" danger icon={<DeleteOutlined />}>
-                                    Xoá
-                                  </Button>
-                                </Popconfirm>
-                              )}
+                                  {r.likes_count ?? 0}
+                                </Button>
+
+                                {canDeleteReply && (
+                                  <Popconfirm
+                                    title="Xoá bình luận này?"
+                                    okText="Xoá"
+                                    cancelText="Huỷ"
+                                    onConfirm={() => onDelete && onDelete(r.id)}
+                                  >
+                                    <Button type="text" danger icon={<DeleteOutlined />}>
+                                      Xoá
+                                    </Button>
+                                  </Popconfirm>
+                                )}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      ))}
+                        )
+                      })}
                     </div>
                   )}
                 </div>
-              </div>
-            </div>
-          ))}
+              </S.Item>
+            )
+          })}
 
           {hasMore && (
             <div className="load-more">
-              <Button onClick={loadMore} loading={status === 'loading'}>
+              <Button onClick={onLoadMore} loading={status === 'loading'}>
                 Tải thêm bình luận
               </Button>
             </div>
           )}
-        </>
+        </S.List>
       )}
-    </Wrap>
+    </S.Wrap>
   )
 }
+
+export default CommentThread

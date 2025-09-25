@@ -1,36 +1,27 @@
 import {
-  CloseCircleOutlined,
-  DeleteOutlined,
   HeartFilled,
   HomeFilled,
   LeftOutlined,
-  LikeFilled,
-  LikeOutlined,
-  LoginOutlined,
-  MessageOutlined,
   RedoOutlined,
   RightOutlined,
-  SendOutlined,
-  UnorderedListOutlined,
+  UnorderedListOutlined
 } from '@ant-design/icons'
 import {
   Alert,
-  Avatar,
   Button,
   Empty,
   Image,
   Input,
   message,
-  Popconfirm,
   Select,
   Skeleton,
-  Tooltip,
-  Typography,
+  Typography
 } from 'antd'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate, useParams } from 'react-router-dom'
 
+import CommentThread from '@components/user/CommentThread'
 import { ROUTES } from '@constants/routes'
 import {
   createChapterComment as createChapterCommentThunk,
@@ -429,204 +420,57 @@ const ChapterDetail = () => {
 
       {/* ====== BÌNH LUẬN (đồng bộ cách làm với StoryDetail) ====== */}
       <S.Comments>
-        <S.CommentsHeader>
-          <Text strong>Bình luận</Text>
-          {commentsMeta?.total != null && (
-            <span className="count">({commentsMeta.total} bình luận)</span>
-          )}
-        </S.CommentsHeader>
+        <CommentThread
+          isLoggedIn={!!currentUser?.id}
+          currentUser={currentUser}
+          comments={comments}
+          meta={commentsMeta}
+          status={commentsStatus}
+          error={commentsError}
+          title="Bình luận"
+          placeholder={isLoggedIn ? 'Nhập bình luận của bạn...' : 'Đăng nhập để bình luận'}
 
-        {!isLoggedIn && (
-          <Alert
-            type="warning"
-            showIcon
-            icon={<LoginOutlined />}
-            message="Bạn cần đăng nhập để bình luận và thích."
-            style={{ marginBottom: 12 }}
-          />
-        )}
+          onCreate={async (body) => {
+            await dispatch(createChapterCommentThunk({
+              chapterId,
+              body,
+              parent_id: null,
+              is_spoiler: false,
+            })).unwrap()
+            await dispatch(getChapterComments({ chapterId, page: 1, limit: 20 }))
+          }}
 
-        {/* Form comment mới */}
-        <S.CommentForm>
-          <TextArea
-            value={newCommentText}
-            onChange={(e) => setNewCommentText(e.target.value)}
-            placeholder={isLoggedIn ? 'Nhập bình luận của bạn...' : 'Đăng nhập để bình luận'}
-            autoSize={{ minRows: 3, maxRows: 6 }}
-            disabled={!isLoggedIn || isPostingComment}
-            maxLength={2000}
-          />
-          <div className="actions">
-            <Button
-              type="primary"
-              icon={<SendOutlined />}
-              onClick={submitComment}
-              loading={isPostingComment}
-              disabled={!isLoggedIn || !newCommentText.trim()}
-            >
-              Gửi
-            </Button>
-          </div>
-        </S.CommentForm>
+          onReply={async (rootCmt, body) => {
+            await dispatch(createChapterCommentThunk({
+              chapterId: rootCmt.chapter_id,
+              body,
+              parent_id: rootCmt.id,
+              is_spoiler: false,
+            })).unwrap()
+            await dispatch(getChapterComments({ chapterId, page: 1, limit: 20 }))
+          }}
 
-        {/* Danh sách bình luận */}
-        {commentsStatus === 'loading' && comments.length === 0 ? (
-          <Skeleton active paragraph={{ rows: 4 }} />
-        ) : commentsError ? (
-          <Empty description="Không tải được bình luận" />
-        ) : comments.length === 0 ? (
-          <Empty description="Chưa có bình luận nào — hãy là người đầu tiên!" />
-        ) : (
-          <S.CommentList>
-            {comments.map((c) => {
-              const me = currentUser?.id
-              const canDelete = me && (me === c.user_id || currentUser?.role === 'admin')
+          onToggleLike={async (commentId) => {
+            await dispatch(toggleLikeCommentThunk({ commentId })).unwrap()
+            await dispatch(getChapterComments({
+              chapterId,
+              page: commentsMeta?.page || 1,
+              limit: commentsMeta?.limit || 20,
+              order: 'desc',
+              more: false,
+            }))
+          }}
 
-              return (
-                <S.CommentItem key={c.id}>
-                  <div className="avatar">
-                    <Avatar size={36} src={c.user?.avatar} alt={c.user?.username} />
-                  </div>
-                  <div className="content">
-                    <div className="meta">
-                      <span className="author">{c.user?.username || 'Ẩn danh'}</span>
-                      <span className="dot">•</span>
-                      <Tooltip title={fmtDT(c.created_at || c.createdAt)}>
-                        <span className="time">{fmtDT(c.created_at || c.createdAt)}</span>
-                      </Tooltip>
-                    </div>
+          onDelete={async (commentId) => {
+            await dispatch(deleteCommentThunk({ commentId })).unwrap()
+            await dispatch(getChapterComments({ chapterId, page: 1, limit: 20 }))
+          }}
 
-                    <div className="body">{c.body}</div>
-
-                    <div className="actions">
-                      <Button
-                        type="text"
-                        icon={c.is_liked ? <LikeFilled /> : <LikeOutlined />}
-                        onClick={() => handleToggleLikeComment(c.id)}
-                        disabled={!isLoggedIn}
-                      >
-                        {c.likes_count ?? 0}
-                      </Button>
-
-                      <Button
-                        type="text"
-                        icon={<MessageOutlined />}
-                        onClick={() => toggleReplyBox(c.id)}
-                        disabled={!isLoggedIn}
-                      >
-                        Trả lời
-                      </Button>
-
-                      {canDelete && (
-                        <Popconfirm
-                          title="Xoá bình luận này?"
-                          okText="Xoá"
-                          cancelText="Huỷ"
-                          onConfirm={() => handleDeleteComment(c.id)}
-                        >
-                          <Button type="text" danger icon={<DeleteOutlined />}>
-                            Xoá
-                          </Button>
-                        </Popconfirm>
-                      )}
-                    </div>
-
-                    {/* Form trả lời cho bình luận gốc */}
-                    {replyBoxOpenMap[c.id] && (
-                      <div style={{ marginTop: 8 }}>
-                        <TextArea
-                          value={replyTextMap[c.id] || ''}
-                          onChange={(e) => handleChangeReplyText(c.id, e.target.value)}
-                          autoSize={{ minRows: 2, maxRows: 6 }}
-                          maxLength={2000}
-                          placeholder="Nhập trả lời…"
-                          disabled={!isLoggedIn || replyBusyMap[c.id]}
-                        />
-                        <div style={{ marginTop: 6, display: 'flex', gap: 8 }}>
-                          <Button
-                            type="primary"
-                            size="small"
-                            loading={!!replyBusyMap[c.id]}
-                            disabled={!isLoggedIn}
-                            onClick={() => handlePostReply(c)}
-                          >
-                            Gửi trả lời
-                          </Button>
-                          <Button
-                            size="small"
-                            onClick={() => toggleReplyBox(c.id)}
-                          >
-                            Huỷ
-                          </Button>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Replies: dùng đúng field API `story_comments` */}
-                    {!!(c.story_comments || []).length && (
-                      <div className="replies">
-                        {c.story_comments.map((r) => {
-                          const canDeleteReply = me && (me === r.user_id || currentUser?.role === 'admin')
-
-                          return (
-                            <div key={r.id} className="reply">
-                              <div className="avatar">
-                                <Avatar size={28} src={r.user?.avatar} alt={r.user?.username} />
-                              </div>
-                              <div className="content">
-                                <div className="meta">
-                                  <span className="author">{r.user?.username || 'Ẩn danh'}</span>
-                                  <span className="dot">•</span>
-                                  <Tooltip title={fmtDT(r.created_at || r.createdAt)}>
-                                    <span className="time">{fmtDT(r.created_at || r.createdAt)}</span>
-                                  </Tooltip>
-                                </div>
-
-                                <div className="body">{r.body}</div>
-
-                                <div className="actions">
-                                  <Button
-                                    type="text"
-                                    icon={r.is_liked ? <LikeFilled /> : <LikeOutlined />}
-                                    onClick={() => handleToggleLikeComment(r.id)}
-                                    disabled={!isLoggedIn}
-                                  >
-                                    {r.likes_count ?? 0}
-                                  </Button>
-
-                                  {canDeleteReply && (
-                                    <Popconfirm
-                                      title="Xoá bình luận này?"
-                                      okText="Xoá"
-                                      cancelText="Huỷ"
-                                      onConfirm={() => handleDeleteComment(r.id)}
-                                    >
-                                      <Button type="text" danger icon={<DeleteOutlined />}>
-                                        Xoá
-                                      </Button>
-                                    </Popconfirm>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-                          )
-                        })}
-                      </div>
-                    )}
-                  </div>
-                </S.CommentItem>
-              )
-            })}
-
-            {hasMore && (
-              <div className="load-more">
-                <Button onClick={loadMore} loading={commentsStatus === 'loading'}>
-                  Tải thêm bình luận
-                </Button>
-              </div>
-            )}
-          </S.CommentList>
-        )}
+          onLoadMore={() => {
+            const next = Number(commentsMeta?.page || 1) + 1
+            return dispatch(getChapterComments({ chapterId, page: next, limit: 20, more: true }))
+          }}
+        />
       </S.Comments>
     </S.Page>
   )
