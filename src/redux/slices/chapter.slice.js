@@ -5,7 +5,8 @@ import {
   getChapter,
   getChapterComments,
   getChaptersByStory,
-  toggleLikeComment
+  likeComment,
+  unlikeComment,
 } from '../thunks/chapter.thunk'
 
 const pagedState = () => ({
@@ -14,6 +15,24 @@ const pagedState = () => ({
   status: 'idle',
   error: null,
 })
+
+// Helper: tìm và cập nhật 1 comment (kể cả reply) theo id
+function patchCommentById(list, commentId, patch) {
+  for (const c of list) {
+    if (c.id === commentId) {
+      Object.assign(c, patch)
+      return true
+    }
+    if (Array.isArray(c.story_comments)) {
+      const r = c.story_comments.find(x => x.id === commentId)
+      if (r) {
+        Object.assign(r, patch)
+        return true
+      }
+    }
+  }
+  return false
+}
 
 export const chapterSlice = createSlice({
   name: 'chapter',
@@ -38,7 +57,7 @@ export const chapterSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
-      // getChaptersByStory
+      // ===== chapters list =====
       .addCase(getChaptersByStory.pending, (state) => {
         state.chaptersByStory.status = 'loading'
         state.chaptersByStory.error = null
@@ -54,7 +73,7 @@ export const chapterSlice = createSlice({
         state.chaptersByStory.error = action.error.message
       })
 
-      // getChapter
+      // ===== chapter detail =====
       .addCase(getChapter.pending, (state) => {
         state.chapterDetail.status = 'loading'
         state.chapterDetail.error = null
@@ -83,7 +102,8 @@ export const chapterSlice = createSlice({
         state.chapterDetail.status = 'failed'
         state.chapterDetail.error = action.error.message
       })
-      // ====== COMMENTS THEO CHAPTER
+
+      // ===== comments (paged) =====
       .addCase(getChapterComments.pending, (state, action) => {
         const more = action.meta.arg?.more
         if (!more) state.chapterComments.status = 'loading'
@@ -121,17 +141,22 @@ export const chapterSlice = createSlice({
         }
       })
 
-      // TOGGLE LIKE
-      .addCase(toggleLikeComment.fulfilled, (state, action) => {
-        const { commentId, liked } = action.payload
-        const idx = state.chapterComments.data.findIndex(c => c.id === commentId)
-        if (idx >= 0) {
-          const cmt = state.chapterComments.data[idx]
-          // nếu backend chưa trả count, có thể thêm field tạm 'likes_count'
-          const likes = Number(cmt.likes_count || 0)
-          cmt.likes_count = liked ? likes + 1 : Math.max(0, likes - 1)
-          cmt.is_liked = liked
-        }
+      // ===== like / unlike =====
+      .addCase(likeComment.fulfilled, (state, action) => {
+        const { commentId, is_liked, likes_count } = action.payload
+        patchCommentById(state.chapterComments.data, commentId, {
+          is_liked: !!is_liked,
+          likes_count: Number(likes_count ?? 0),
+          liked: !!is_liked, // nếu UI còn dùng 'liked'
+        })
+      })
+      .addCase(unlikeComment.fulfilled, (state, action) => {
+        const { commentId, is_liked, likes_count } = action.payload
+        patchCommentById(state.chapterComments.data, commentId, {
+          is_liked: !!is_liked,
+          likes_count: Number(likes_count ?? 0),
+          liked: !!is_liked,
+        })
       })
   },
 })

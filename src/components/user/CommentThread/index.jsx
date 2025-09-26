@@ -6,6 +6,7 @@ import {
   MessageOutlined,
   SendOutlined,
 } from '@ant-design/icons'
+import { END_POINT } from '@services/api'
 import { fmtDT } from '@utils/date'
 import { Alert, Avatar, Button, Empty, Input, Popconfirm, Skeleton, Tooltip, Typography } from 'antd'
 import { useMemo, useState } from 'react'
@@ -26,7 +27,7 @@ const { TextArea } = Input
  * - error              : string | null
  * - onCreate(body)     : () => Promise   // tạo bình luận gốc
  * - onReply(root, body): (rootComment) => Promise
- * - onToggleLike(id)   : (commentId) => Promise
+ * - onToggleLike(id, nextLiked) : (commentId, boolean) => Promise
  * - onDelete(id)       : (commentId) => Promise
  * - onLoadMore()       : () => Promise   // tải trang kế tiếp (khi còn)
  * - title?             : string          // tiêu đề khối, mặc định: 'Bình luận'
@@ -149,7 +150,7 @@ const CommentThread = ({
             return (
               <S.Item key={c.id}>
                 <div className="avatar">
-                  <Avatar size={36} src={c.user?.avatar} alt={c.user?.username} />
+                  <Avatar size={36} src={c.user?.avatar ? `${END_POINT}${c.user.avatar}` : undefined} alt={c.user?.username} />
                 </div>
                 <div className="content">
                   <div className="meta">
@@ -166,7 +167,7 @@ const CommentThread = ({
                     <Button
                       type="text"
                       icon={c.is_liked ? <LikeFilled /> : <LikeOutlined />}
-                      onClick={() => onToggleLike && onToggleLike(c.id)}
+                      onClick={() => onToggleLike && onToggleLike(c.id, !c.is_liked)}
                       disabled={!isLoggedIn}
                     >
                       {c.likes_count ?? 0}
@@ -233,7 +234,7 @@ const CommentThread = ({
                         return (
                           <div key={r.id} className="reply">
                             <div className="avatar">
-                              <Avatar size={28} src={r.user?.avatar} alt={r.user?.username} />
+                              <Avatar size={28} src={r.user?.avatar ? `${END_POINT}${r.user.avatar}` : undefined} alt={r.user?.username} />
                             </div>
                             <div className="content">
                               <div className="meta">
@@ -250,7 +251,7 @@ const CommentThread = ({
                                 <Button
                                   type="text"
                                   icon={r.is_liked ? <LikeFilled /> : <LikeOutlined />}
-                                  onClick={() => onToggleLike && onToggleLike(r.id)}
+                                  onClick={() => onToggleLike && onToggleLike(r.id, !r.is_liked)}
                                   disabled={!isLoggedIn}
                                 >
                                   {r.likes_count ?? 0}

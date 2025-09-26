@@ -23,7 +23,8 @@ import {
   createChapterComment as createChapterCommentThunk,
   deleteComment as deleteCommentThunk,
   getChaptersByStory,
-  toggleLikeComment as toggleLikeCommentThunk,
+  likeComment as likeCommentThunk,
+  unlikeComment as unlikeCommentThunk,
 } from '@redux/thunks/chapter.thunk'
 import { followStory, unfollowStory } from '@redux/thunks/follow.thunk'
 import {
@@ -244,6 +245,20 @@ const StoryDetail = () => {
   const toggleReplyBox = (cid) => setReplyBoxOpenMap(m => ({ ...m, [cid]: !m[cid] }))
   const handleChangeReplyText = (cid, val) => setReplyTextMap(m => ({ ...m, [cid]: val }))
 
+  // Chuẩn hoá dữ liệu comment: đảm bảo có is_liked (boolean) & likes_count (number) cho cả comment và reply
+  const normalizedComments = useMemo(() => {
+    return (comments || []).map((c) => ({
+      ...c,
+      is_liked: !!(c.is_liked ?? c.liked ?? false),
+      likes_count: Number(c.likes_count ?? 0),
+      story_comments: (c.story_comments || []).map((r) => ({
+        ...r,
+        is_liked: !!(r.is_liked ?? r.liked ?? false),
+        likes_count: Number(r.likes_count ?? 0),
+      })),
+    }))
+  }, [comments])
+
   // Đăng bình luận mới: gắn vào chapter mới nhất để tương thích API
   const submitComment = async () => {
     if (!isLoggedIn) return message.info('Bạn cần đăng nhập để bình luận.')
@@ -293,10 +308,14 @@ const StoryDetail = () => {
   }
 
   // Like/Unlike bình luận → refresh để đồng bộ likes_count
-  const handleToggleLike = async (commentId) => {
+  const handleToggleLike = async (commentId, nextLiked) => {
     if (!isLoggedIn) return message.info('Bạn cần đăng nhập để thích bình luận.')
     try {
-      await dispatch(toggleLikeCommentThunk({ commentId })).unwrap()
+      if (nextLiked) {
+        await dispatch(likeCommentThunk({ commentId })).unwrap()
+      } else {
+        await dispatch(unlikeCommentThunk({ commentId })).unwrap()
+      }
       await dispatch(getStoryCommentsThunk({
         storyId: id,
         page: cmeta?.page || 1,
@@ -528,7 +547,7 @@ const StoryDetail = () => {
               <CommentThread
                 isLoggedIn={!!currentUser?.id}
                 currentUser={currentUser}
-                comments={comments}
+                comments={normalizedComments}
                 meta={cmeta}
                 status={cstatus}
                 error={cerror}
@@ -552,16 +571,7 @@ const StoryDetail = () => {
                   await dispatch(getStoryCommentsThunk({ storyId: id, page: 1, limit: cmeta?.limit || 20, order: 'desc' }))
                 }}
 
-                onToggleLike={async (commentId) => {
-                  await dispatch(toggleLikeCommentThunk({ commentId })).unwrap()
-                  await dispatch(getStoryCommentsThunk({
-                    storyId: id,
-                    page: cmeta?.page || 1,
-                    limit: cmeta?.limit || 20,
-                    order: 'desc',
-                    more: false,
-                  }))
-                }}
+                onToggleLike={handleToggleLike}
 
                 onDelete={async (commentId) => {
                   await dispatch(deleteCommentThunk({ commentId })).unwrap()

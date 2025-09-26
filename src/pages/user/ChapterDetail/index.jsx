@@ -29,7 +29,8 @@ import {
   getChapter,
   getChapterComments,
   getChaptersByStory,
-  toggleLikeComment as toggleLikeCommentThunk,
+  likeComment as likeCommentThunk,
+  unlikeComment as unlikeCommentThunk,
 } from '@redux/thunks/chapter.thunk'
 import { followStory, unfollowStory } from '@redux/thunks/follow.thunk'
 import { getStory } from '@redux/thunks/story.thunk'
@@ -297,21 +298,19 @@ const ChapterDetail = () => {
   }, [dispatch, isLoggedIn, replyTextMap, chapterId])
 
   // Like/Unlike bình luận → refresh để đồng bộ likes_count
-  const handleToggleLikeComment = useCallback(async (commentId) => {
+  const handleToggleLikeComment = useCallback(async (commentId, nextLiked) => {
     if (!isLoggedIn) return message.info('Bạn cần đăng nhập để thích bình luận.')
     try {
-      await dispatch(toggleLikeCommentThunk({ commentId })).unwrap()
-      await dispatch(getChapterComments({
-        chapterId,
-        page: commentsMeta?.page || 1,
-        limit: commentsMeta?.limit || 20,
-        order: 'desc',
-        more: false,
-      }))
+      if (nextLiked) {
+        await dispatch(likeCommentThunk({ commentId })).unwrap()
+      } else {
+        await dispatch(unlikeCommentThunk({ commentId })).unwrap()
+      }
+      // Không cần refetch; slice đã cập nhật is_liked + likes_count từ BE.
     } catch (e) {
       message.error(e?.message || 'Không thể thực hiện')
     }
-  }, [dispatch, isLoggedIn, chapterId, commentsMeta?.page, commentsMeta?.limit])
+  }, [dispatch, isLoggedIn])
 
   // Xoá bình luận → refresh
   const handleDeleteComment = useCallback(async (commentId) => {
@@ -446,16 +445,7 @@ const ChapterDetail = () => {
             await dispatch(getChapterComments({ chapterId, page: 1, limit: 20 }))
           }}
 
-          onToggleLike={async (commentId) => {
-            await dispatch(toggleLikeCommentThunk({ commentId })).unwrap()
-            await dispatch(getChapterComments({
-              chapterId,
-              page: commentsMeta?.page || 1,
-              limit: commentsMeta?.limit || 20,
-              order: 'desc',
-              more: false,
-            }))
-          }}
+          onToggleLike={handleToggleLikeComment}
 
           onDelete={async (commentId) => {
             await dispatch(deleteCommentThunk({ commentId })).unwrap()

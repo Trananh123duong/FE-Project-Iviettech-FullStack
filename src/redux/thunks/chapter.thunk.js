@@ -1,4 +1,3 @@
-// chapter.thunk.js
 import { createAsyncThunk } from '@reduxjs/toolkit'
 import api from '@services/api'
 
@@ -32,9 +31,7 @@ export const getChapterComments = createAsyncThunk(
 export const createChapterComment = createAsyncThunk(
   'chapter/createChapterComment',
   async ({ chapterId, body, parent_id = null }) => {
-    const { data } = await api.post(`/chapters/${chapterId}/comments`, {
-      body, parent_id
-    })
+    const { data } = await api.post(`/chapters/${chapterId}/comments`, { body, parent_id })
     return { chapterId, comment: data }
   }
 )
@@ -47,10 +44,20 @@ export const deleteComment = createAsyncThunk(
   }
 )
 
-export const toggleLikeComment = createAsyncThunk(
-  'chapter/toggleLikeComment',
+export const likeComment = createAsyncThunk(
+  'chapter/likeComment',
   async ({ commentId }) => {
     const { data } = await api.post(`/chapters/comments/${commentId}/like`)
-    return { commentId, liked: !!data?.liked }
+    // { is_liked: true, likes_count }
+    return { commentId, ...data }
+  }
+)
+
+export const unlikeComment = createAsyncThunk(
+  'chapter/unlikeComment',
+  async ({ commentId }) => {
+    const { data } = await api.delete(`/chapters/comments/${commentId}/like`)
+    // { is_liked: false, likes_count }
+    return { commentId, ...data }
   }
 )
