@@ -167,6 +167,7 @@ const CommentThread = ({
                     <Button
                       type="text"
                       icon={c.is_liked ? <LikeFilled /> : <LikeOutlined />}
+                      aria-label={c.is_liked ? 'Bỏ thích' : 'Thích'}
                       onClick={() => onToggleLike && onToggleLike(c.id, !c.is_liked)}
                       disabled={!isLoggedIn}
                     >
@@ -176,6 +177,7 @@ const CommentThread = ({
                     <Button
                       type="text"
                       icon={<MessageOutlined />}
+                      aria-label="Trả lời"
                       onClick={() => setReplyOpen((m) => ({ ...m, [c.id]: !m[c.id] }))}
                       disabled={!isLoggedIn}
                     >
@@ -189,7 +191,7 @@ const CommentThread = ({
                         cancelText="Huỷ"
                         onConfirm={() => onDelete && onDelete(c.id)}
                       >
-                        <Button type="text" danger icon={<DeleteOutlined />}>
+                        <Button type="text" danger icon={<DeleteOutlined />} aria-label="Xoá">
                           Xoá
                         </Button>
                       </Popconfirm>

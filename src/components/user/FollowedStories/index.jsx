@@ -3,6 +3,7 @@ import { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Link } from 'react-router-dom'
 
+import { DeleteOutlined } from '@ant-design/icons'
 import { ROUTES } from '@constants/routes'
 import { getMyFollows, unfollowStory } from '@redux/thunks/follow.thunk'
 import { END_POINT } from '@services/api'
@@ -85,7 +86,7 @@ function FollowedStories() {
                   cancelText="Huỷ"
                   onConfirm={() => handleUnfollow(story.id)}
                 >
-                  <Button size="small" danger>
+                  <Button size="small" danger icon={<DeleteOutlined />} aria-label="Bỏ theo dõi">
                     Xoá
                   </Button>
                 </Popconfirm>,

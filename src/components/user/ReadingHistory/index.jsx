@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Link } from 'react-router-dom'
 
+import { DeleteOutlined } from '@ant-design/icons'
 import { deleteHistoryItem, getMyHistory } from '@redux/thunks/history.thunk'
 import { END_POINT } from '@services/api'
 import * as S from './styles'
@@ -65,8 +66,10 @@ function ReadingHistory() {
                   cancelText="Huỷ"
                   onConfirm={() => handleDelete(id)}
                 >
-                  <Button danger size="small">Xoá</Button>
-                </Popconfirm>,
+                  <Button danger size="small" icon={<DeleteOutlined />} aria-label="Xoá khỏi lịch sử">
+                    Xoá
+                  </Button>
+                </Popconfirm>
               ]}
             >
               <List.Item.Meta
