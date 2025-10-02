@@ -127,6 +127,7 @@ export const Title = styled.h3`
   font-weight: 700;
   line-height: 1.3;
   color: #111;
+  height: 40px;
 
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -181,7 +182,7 @@ export const ChapterList = styled.ul`
   .chapter-link.muted { color: #999; cursor: default; text-decoration: none; }
 
   .chapter-time {
-    font-size: 10.5px;
+    font-size: 9px;
     color: #8b9099;
     white-space: nowrap;
     font-style: italic;

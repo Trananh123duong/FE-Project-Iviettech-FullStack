@@ -1,9 +1,11 @@
 import { createSlice } from '@reduxjs/toolkit'
 import {
-  register,
-  login,
+  changePassword,
   getMyProfile,
+  login,
+  logoutServer,
   refreshAccessToken,
+  register,
   updateProfile,
   uploadAvatar
 } from '../thunks/auth.thunk'
@@ -33,6 +35,14 @@ export const authSlice = createSlice({
       error: null,
     },
     avatarData: {
+      status: 'idle',
+      error: null
+    },
+    changePwdData: {
+      status: 'idle',
+      error: null
+    },
+    logoutData: {
       status: 'idle',
       error: null
     },
@@ -137,6 +147,46 @@ export const authSlice = createSlice({
       .addCase(uploadAvatar.rejected, (state, action) => {
         state.avatarData.status = 'failed'
         state.avatarData.error = action.payload || action.error.message
+      })
+      // changePassword
+      .addCase(changePassword.pending, (state) => {
+        state.changePwdData.status = 'loading'
+        state.changePwdData.error = null
+      })
+      .addCase(changePassword.fulfilled, (state) => {
+        state.changePwdData.status = 'succeeded'
+        // Sau khi đổi mật khẩu, clear token + profile để buộc re-login
+        localStorage.removeItem('accessToken')
+        localStorage.removeItem('refreshToken')
+        state.myProfile.data = {}
+        state.loginData.status = 'idle'
+      })
+      .addCase(changePassword.rejected, (state, action) => {
+        state.changePwdData.status = 'failed'
+        state.changePwdData.error = action.payload || action.error.message
+      })
+
+      // logoutServer
+      .addCase(logoutServer.pending, (state) => {
+        state.logoutData.status = 'loading'
+        state.logoutData.error = null
+      })
+      .addCase(logoutServer.fulfilled, (state) => {
+        state.logoutData.status = 'succeeded'
+        // clear local storage & state
+        localStorage.removeItem('accessToken')
+        localStorage.removeItem('refreshToken')
+        state.myProfile.data = {}
+        state.loginData.status = 'idle'
+      })
+      .addCase(logoutServer.rejected, (state, action) => {
+        state.logoutData.status = 'failed'
+        state.logoutData.error = action.payload || action.error.message
+        // Dù server fail, vẫn có thể làm "logout client" để bảo vệ:
+        localStorage.removeItem('accessToken')
+        localStorage.removeItem('refreshToken')
+        state.myProfile.data = {}
+        state.loginData.status = 'idle'
       })
   },
 })

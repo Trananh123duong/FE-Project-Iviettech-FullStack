@@ -24,11 +24,20 @@ export const getMyProfile = createAsyncThunk('auth/getMyProfile', async () => {
 export const refreshAccessToken = createAsyncThunk(
   'auth/refreshAccessToken',
   async (_, { rejectWithValue }) => {
-    const refreshToken = localStorage.getItem('refreshToken')
-    if (!refreshToken) return rejectWithValue('No refresh token')
+    try {
+      const refreshToken = localStorage.getItem('refreshToken')
+      if (!refreshToken) return rejectWithValue('No refresh token')
 
-    const res = await api.post('/auth/refresh-token', { token: refreshToken })
-    return res.data
+      const res = await api.post('/auth/refresh', { token: refreshToken })
+      return res.data // { accessToken }
+    } catch (err) {
+      const msg =
+        err?.response?.data?.message ||
+        err?.response?.data?.error ||
+        err?.message ||
+        'Refresh token failed'
+      return rejectWithValue(msg)
+    }
   }
 )
 
@@ -59,5 +68,42 @@ export const uploadAvatar = createAsyncThunk(
     })
     params.callback && params.callback()
     return res.data // { message, user }
+  }
+)
+
+export const changePassword = createAsyncThunk(
+  'auth/changePassword',
+  async (params, { rejectWithValue }) => {
+    try {
+      // params: { currentPassword, newPassword, callback? }
+      const { callback, ...payload } = params || {}
+      const res = await api.patch('/auth/change-password', payload)
+      callback?.(res.data)
+      return res.data // { message }
+    } catch (err) {
+      const msg =
+        err?.response?.data?.message ||
+        err?.response?.data?.error ||
+        err?.message ||
+        'Change password failed'
+      return rejectWithValue(msg)
+    }
+  }
+)
+
+export const logoutServer = createAsyncThunk(
+  'auth/logoutServer',
+  async (_, { rejectWithValue }) => {
+    try {
+      const res = await api.post('/auth/logout')
+      return res.data // { message }
+    } catch (err) {
+      const msg =
+        err?.response?.data?.message ||
+        err?.response?.data?.error ||
+        err?.message ||
+        'Logout failed'
+      return rejectWithValue(msg)
+    }
   }
 )

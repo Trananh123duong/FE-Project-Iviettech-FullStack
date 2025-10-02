@@ -1,28 +1,27 @@
-import { useMemo, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { useDispatch, useSelector } from 'react-redux'
-import { Input, Dropdown, Badge, Button, Avatar } from 'antd'
 import {
-  HomeOutlined,
-  BulbOutlined,
   BellOutlined,
-  UserOutlined,
   BookOutlined,
-  LogoutOutlined,
-  LoginOutlined,
-  FormOutlined,
+  BulbOutlined,
   CaretDownOutlined,
+  FormOutlined,
+  HomeOutlined,
+  LoginOutlined,
+  LogoutOutlined,
   SearchOutlined,
+  UserOutlined,
 } from '@ant-design/icons'
+import { Avatar, Badge, Button, Dropdown, Input } from 'antd'
+import { useMemo, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { Link, useNavigate } from 'react-router-dom'
 
 import logoImg from '@assets/logo.png'
 import { ROUTES } from '@constants/routes'
-import { logout } from '@redux/slices/auth.slice'
+import { logoutServer } from '@redux/thunks/auth.thunk'
 import * as S from './styles'
 
 // ========================= COMPONENT =========================
 const Header = () => {
-  // --- Store / Router helpers
   const dispatch = useDispatch()
   const navigate = useNavigate()
 
@@ -36,8 +35,12 @@ const Header = () => {
 
   // --- Đăng xuất
   const handleLogout = () => {
-    dispatch(logout())
-    navigate(ROUTES.USER.HOME)
+    dispatch(logoutServer())
+      .unwrap()
+      .finally(() => {
+        // Dù server thành công hay thất bại, state & localStorage đã clear trong slice
+        navigate(ROUTES.USER.HOME)
+      })
   }
 
   // --- Thực hiện tìm kiếm
