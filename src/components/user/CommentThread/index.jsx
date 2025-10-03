@@ -19,19 +19,11 @@ const { TextArea } = Input
  * CommentThread – UI hiển thị & thao tác bình luận (gốc + reply)
  *
  * Props:
- * - isLoggedIn         : boolean
- * - currentUser        : object | null
- * - comments           : array các comment (mỗi comment có thể có story_comments là replies)
- * - meta               : { page, totalPages, total, limit } | {}
- * - status             : 'idle' | 'loading' | 'succeeded' | 'failed'
- * - error              : string | null
- * - onCreate(body)     : () => Promise   // tạo bình luận gốc
- * - onReply(root, body): (rootComment) => Promise
- * - onToggleLike(id, nextLiked) : (commentId, boolean) => Promise
- * - onDelete(id)       : (commentId) => Promise
- * - onLoadMore()       : () => Promise   // tải trang kế tiếp (khi còn)
- * - title?             : string          // tiêu đề khối, mặc định: 'Bình luận'
- * - placeholder?       : string          // placeholder ô nhập
+ * - isLoggedIn, currentUser
+ * - comments, meta, status, error
+ * - onCreate, onReply, onToggleLike, onDelete, onLoadMore
+ * - title, placeholder
+ *
  */
 const CommentThread = ({
   isLoggedIn = false,
@@ -48,28 +40,32 @@ const CommentThread = ({
   title = 'Bình luận',
   placeholder = 'Nhập bình luận của bạn...',
 }) => {
-  // state cục bộ
+  // ===== Local state =====
   const [newText, setNewText] = useState('')
   const [posting, setPosting] = useState(false)
-  const [replyOpen, setReplyOpen] = useState({})   // { [commentId]: bool }
+  const [replyOpen, setReplyOpen] = useState({})   // { [commentId]: boolean }
   const [replyText, setReplyText] = useState({})   // { [commentId]: string }
-  const [replyBusy, setReplyBusy] = useState({})   // { [commentId]: bool }
+  const [replyBusy, setReplyBusy] = useState({})   // { [commentId]: boolean }
 
+  // Tính còn trang kế tiếp hay không (dựa vào meta từ props)
   const hasMore = useMemo(
     () => Number(meta?.page || 1) < Number(meta?.totalPages || 1),
     [meta?.page, meta?.totalPages]
   )
 
+  // Quyền xóa: chính chủ hoặc admin
   const canDeleteBy = (ownerId) => {
     const me = currentUser?.id
     return !!me && (me === ownerId || currentUser?.role === 'admin')
   }
 
+  // Gửi bình luận gốc
   const createComment = async () => {
     const body = String(newText || '').trim()
     if (!isLoggedIn) return
     if (!body) return
     if (!onCreate) return
+
     try {
       setPosting(true)
       await onCreate(body)
@@ -79,11 +75,13 @@ const CommentThread = ({
     }
   }
 
+  // Gửi trả lời cho 1 bình luận gốc
   const postReply = async (rootCmt) => {
     const body = String(replyText[rootCmt.id] || '').trim()
     if (!isLoggedIn) return
     if (!body) return
     if (!onReply) return
+
     try {
       setReplyBusy((m) => ({ ...m, [rootCmt.id]: true }))
       await onReply(rootCmt, body)
@@ -96,11 +94,13 @@ const CommentThread = ({
 
   return (
     <S.Wrap>
+      {/* Tiêu đề + tổng số bình luận */}
       <S.Header>
         <Text strong>{title}</Text>
         {meta?.total != null && <span className="count">({meta.total} bình luận)</span>}
       </S.Header>
 
+      {/* Cảnh báo khi chưa đăng nhập */}
       {!isLoggedIn && (
         <Alert
           type="warning"
@@ -134,7 +134,7 @@ const CommentThread = ({
         </div>
       </S.Form>
 
-      {/* Danh sách bình luận */}
+      {/* Danh sách bình luận / trạng thái */}
       {status === 'loading' && comments.length === 0 ? (
         <Skeleton active paragraph={{ rows: 4 }} />
       ) : error ? (
@@ -149,10 +149,18 @@ const CommentThread = ({
 
             return (
               <S.Item key={c.id}>
+                {/* Avatar người đăng */}
                 <div className="avatar">
-                  <Avatar size={36} src={c.user?.avatar ? `${END_POINT}${c.user.avatar}` : undefined} alt={c.user?.username} />
+                  <Avatar
+                    size={36}
+                    src={c.user?.avatar ? `${END_POINT}${c.user.avatar}` : undefined}
+                    alt={c.user?.username}
+                  />
                 </div>
+
+                {/* Nội dung bình luận gốc */}
                 <div className="content">
+                  {/* Tác giả + thời gian */}
                   <div className="meta">
                     <span className="author">{c.user?.username || 'Ẩn danh'}</span>
                     <span className="dot">•</span>
@@ -161,8 +169,10 @@ const CommentThread = ({
                     </Tooltip>
                   </div>
 
+                  {/* Body */}
                   <div className="body">{c.body}</div>
 
+                  {/* Hành động: Thích / Trả lời / Xóa */}
                   <div className="actions">
                     <Button
                       type="text"
@@ -236,8 +246,13 @@ const CommentThread = ({
                         return (
                           <div key={r.id} className="reply">
                             <div className="avatar">
-                              <Avatar size={28} src={r.user?.avatar ? `${END_POINT}${r.user.avatar}` : undefined} alt={r.user?.username} />
+                              <Avatar
+                                size={28}
+                                src={r.user?.avatar ? `${END_POINT}${r.user.avatar}` : undefined}
+                                alt={r.user?.username}
+                              />
                             </div>
+
                             <div className="content">
                               <div className="meta">
                                 <span className="author">{r.user?.username || 'Ẩn danh'}</span>
@@ -283,6 +298,7 @@ const CommentThread = ({
             )
           })}
 
+          {/* Nút tải thêm */}
           {hasMore && (
             <div className="load-more">
               <Button onClick={onLoadMore} loading={status === 'loading'}>

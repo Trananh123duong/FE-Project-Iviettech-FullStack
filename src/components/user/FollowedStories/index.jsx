@@ -3,7 +3,6 @@ import { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Link } from 'react-router-dom'
 
-import { DeleteOutlined } from '@ant-design/icons'
 import { ROUTES } from '@constants/routes'
 import { getMyFollows, unfollowStory } from '@redux/thunks/follow.thunk'
 import { END_POINT } from '@services/api'
@@ -12,10 +11,11 @@ import * as S from './styles'
 function FollowedStories() {
   const dispatch = useDispatch()
 
-  // Lấy danh sách truyện đang theo dõi & thông tin user
+  // ===== Global state =====
   const { followedStoryList } = useSelector((s) => s.follow)
   const { data: user } = useSelector((s) => s.auth.myProfile)
 
+  // ===== Side effect =====
   // Khi đã có user → gọi API lấy 5 truyện theo dõi đầu tiên
   useEffect(() => {
     if (user) {
@@ -36,8 +36,9 @@ function FollowedStories() {
     )
   }
 
-  // Lấy tối đa 5 truyện để hiển thị
+  // Lấy tối đa 5 truyện để hiển thị (tránh tràn UI nếu backend trả > 5)
   const list = (followedStoryList.data || []).slice(0, 5)
+  const isLoading = followedStoryList.status === 'loading'
 
   return (
     <S.Wrapper>
@@ -48,9 +49,11 @@ function FollowedStories() {
       </S.Header>
 
       <List
-        loading={followedStoryList.status === 'loading'}
+        loading={isLoading}
         itemLayout="horizontal"
         dataSource={list}
+        // Cung cấp khoá giúp React tối ưu render (không đổi logic)
+        rowKey={(story) => story.id}
         locale={{
           // Khi rỗng → hiển thị Empty của AntD
           emptyText: (
@@ -70,7 +73,7 @@ function FollowedStories() {
               : `${END_POINT}${story.thumbnail.startsWith('/') ? '' : '/'}${story.thumbnail}`
             : undefined
 
-          // Link chi tiết truyện & chapter mới nhất: dùng ROUTES để đồng bộ route
+          // Link chi tiết truyện & chapter mới nhất
           const storyHref = ROUTES.USER.STORY.replace(':id', story.id)
           const latestChapter = story?.chapters?.[0]
 
@@ -86,7 +89,7 @@ function FollowedStories() {
                   cancelText="Huỷ"
                   onConfirm={() => handleUnfollow(story.id)}
                 >
-                  <Button size="small" danger icon={<DeleteOutlined />} aria-label="Bỏ theo dõi">
+                  <Button size="small" danger>
                     Xoá
                   </Button>
                 </Popconfirm>,

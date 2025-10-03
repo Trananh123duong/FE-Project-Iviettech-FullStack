@@ -191,7 +191,6 @@ export const Item = styled.div`
       gap: 6px;
 
       /* Ẩn text của Button, chỉ giữ icon để không bị tràn khi màn nhỏ */
-      /* Cấu trúc AntD: .ant-btn [iconSpan] + span[textSpan] */
       .ant-btn .anticon + span {
         display: none;
       }

@@ -1,13 +1,5 @@
 import styled from 'styled-components'
 
-/* Breakpoints đồng nhất với các widget khác */
-const bp = {
-  xs: '360px',
-  sm: '480px',
-  md: '768px',
-  lg: '1024px',
-}
-
 /* Card chứa toàn bộ TopStory */
 export const Card = styled.section`
   border: 1px solid #e9e9e9;
@@ -16,13 +8,9 @@ export const Card = styled.section`
   overflow: hidden;
   margin-bottom: 16px;
   box-shadow: 0 6px 18px rgba(0,0,0,.04);
-
-  @media (prefers-reduced-motion: reduce) {
-    * { transition: none !important; }
-  }
 `
 
-/* Tabs: 3 nút chia đều; trên màn rất nhỏ chuyển sang cuộn ngang */
+/* Tabs: 3 nút chia đều, không xuống dòng */
 export const Tabs = styled.div`
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -43,9 +31,8 @@ export const Tabs = styled.div`
     display: flex;
     align-items: center;
     justify-content: center;
-    white-space: nowrap;
-    line-height: 1;
-    transition: background .15s ease, color .15s ease;
+    white-space: nowrap; /* >>> không cho xuống dòng */
+    line-height: 1;      /* tránh cao thấp kỳ lạ với dấu tiếng Việt */
   }
   .tab:last-child { border-right: none; }
 
@@ -64,31 +51,12 @@ export const Tabs = styled.div`
     background: #7c3aed;
   }
 
-  /* Tablet/phone: co chữ & padding để giữ 1 dòng */
-  @media (max-width: ${bp.md}) {
-    .tab { font-size: 15px; padding: 0 12px; height: 42px; }
-  }
+  /* Màn nhỏ: co chữ & padding để luôn 1 dòng */
   @media (max-width: 640px) {
-    .tab { font-size: 14px; padding: 0 10px; height: 40px; }
+    .tab { font-size: 14.5px; padding: 0 12px; }
   }
-
-  /* Màn cực nhỏ: chuyển sang flex + cuộn ngang, tránh vỡ hàng */
-  @media (max-width: ${bp.xs}) {
-    display: flex;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    gap: 6px;
-    padding: 0 6px;
-
-    .tab {
-      flex: 0 0 auto;
-      border-right: 0;
-      border-radius: 8px 8px 0 0;
-      padding: 0 12px;
-      height: 38px;
-      background: #f7f7f7;
-    }
-    .tab.active::after { height: 2px; }
+  @media (max-width: 420px) {
+    .tab { font-size: 13.5px; padding: 0 10px; }
   }
 `
 
@@ -109,7 +77,6 @@ export const Panel = styled.div`
     align-items: center;
     padding: 10px 4px;
     border-bottom: 1px solid #f2f2f2;
-    transition: background .15s ease;
   }
   .row:last-child { border-bottom: none; }
   .row:hover { background: #fafafa; }
@@ -163,37 +130,9 @@ export const Panel = styled.div`
     white-space: nowrap;
   }
 
-  /* Tablet */
-  @media (max-width: ${bp.md}) {
-    .row { grid-template-columns: 40px 52px 1fr; padding: 10px 2px; }
-    .title { font-size: 15.5px; }
-    .chapter-link { font-size: 13px; }
-    .views { font-size: 12.5px; }
-  }
-
-  /* Phone: co mọi thứ + subline chuyển 2 hàng (chapter trên, view dưới) */
   @media (max-width: 640px) {
-    .row { grid-template-columns: 36px 48px 1fr; gap: 8px; }
-    .thumb { width: 48px; height: 48px; border-radius: 5px; }
+    .row { grid-template-columns: 40px 52px 1fr; }
     .title { font-size: 15px; }
-
-    .subline {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 2px;
-    }
-    .views { opacity: .9; }
-  }
-
-  /* Very small phones */
-  @media (max-width: ${bp.xs}) {
-    padding: 6px 8px;
-
-    .row { grid-template-columns: 32px 44px 1fr; gap: 8px; }
-    .thumb { width: 44px; height: 44px; }
-    .title { font-size: 14px; }
-    .chapter-link { font-size: 12.5px; }
-    .views { font-size: 12px; }
   }
 `
 
@@ -212,16 +151,6 @@ export const RankBadge = styled.span`
     if (rank === 3) return '#f2994a';
     return '#9ca3af';
   }};
-
-  @media (max-width: ${bp.md}) {
-    width: 40px; font-size: 19px;
-  }
-  @media (max-width: 640px) {
-    width: 36px; font-size: 18px;
-  }
-  @media (max-width: ${bp.xs}) {
-    width: 32px; font-size: 17px;
-  }
 `
 
 /* Dòng thông báo loading/error */
@@ -230,8 +159,4 @@ export const InfoLine = styled.div`
   font-size: 13.5px;
   color: #555;
   &.error { color: #d32f2f; }
-
-  @media (max-width: ${bp.xs}) {
-    font-size: 13px;
-  }
 `
