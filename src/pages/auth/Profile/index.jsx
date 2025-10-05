@@ -37,6 +37,19 @@ const ProfilePage = () => {
     [localAvatar, profile?.avatar]
   )
 
+  // ========================= VIP helpers =========================
+  const isVip = !!profile?.isVip || (!!profile?.vip_expires_at && new Date(profile.vip_expires_at) > new Date())
+  const vipExpiresAt = profile?.vip_expires_at ? new Date(profile.vip_expires_at) : null
+  const fmtVN = (d) => d ? new Date(d).toLocaleString('vi-VN', { hour12: false }) : ''
+  const remain = useMemo(() => {
+    if (!vipExpiresAt) return null
+    const ms = vipExpiresAt.getTime() - Date.now()
+    if (ms <= 0) return { expired: true, text: 'Đã hết hạn' }
+    const day = Math.floor(ms / 86400000)
+    const hour = Math.floor((ms % 86400000) / 3600000)
+    return { expired: false, text: `${day} ngày ${hour} giờ` }
+  }, [profile?.vip_expires_at])
+
   // --- Lấy profile khi vào trang
   useEffect(() => {
     if (profileStatus === 'idle') dispatch(getMyProfile())
@@ -164,6 +177,15 @@ const ProfilePage = () => {
               </Text>
             </div>
 
+            {/* Nhãn VIP nhỏ gọn bên dưới tên */}
+            <div style={{ marginTop: 6 }}>
+              {isVip ? (
+                <S.VipBadge $active>VIP</S.VipBadge>
+              ) : (
+                <S.VipBadge>NON-VIP</S.VipBadge>
+              )}
+            </div>
+
             <S.ActionRow>
               <Button onClick={onPickFile} loading={updatingAvatar} disabled={updatingAvatar}>
                 Đổi avatar
@@ -177,6 +199,44 @@ const ProfilePage = () => {
               />
             </S.ActionRow>
           </S.ProfileCard>
+
+          {/* Card: Trạng thái VIP */}
+          <S.Card>
+            <S.CardHead>
+              <S.CardTitle>Trạng thái VIP</S.CardTitle>
+            </S.CardHead>
+
+            {isVip ? (
+              <div>
+                <div style={{ marginBottom: 6 }}>
+                  <S.VipBadge $active>VIP đang hoạt động</S.VipBadge>
+                </div>
+                <Text>Hết hạn: <b>{fmtVN(vipExpiresAt)}</b></Text>
+                <div>
+                  <Text type="secondary">Còn lại: {remain?.text || '-'}</Text>
+                </div>
+              </div>
+            ) : (
+              <div>
+                <div style={{ marginBottom: 6 }}>
+                  <S.VipBadge>Chưa là VIP</S.VipBadge>
+                </div>
+                <Text type="secondary">
+                  Nâng cấp để đọc mượt hơn, không quảng cáo và các đặc quyền khác.
+                </Text>
+                <S.FormActions>
+                  {/* Chưa có trang thanh toán → để trống logic */}
+                  <Button
+                    type="primary"
+                    size="large"
+                    onClick={() => navigate(ROUTES.USER.VIP_CHECKOUT)}
+                  >
+                    Đăng ký VIP 30 ngày
+                  </Button>
+                </S.FormActions>
+              </div>
+            )}
+          </S.Card>
         </S.LeftCol>
 
         {/* Cột phải: form chỉnh sửa + đổi mật khẩu */}

@@ -197,3 +197,18 @@ export const ErrorBox = styled.div`
     border-radius: 8px;
   }
 `
+
+/* ---- VIP badge ---- */
+export const VipBadge = styled.span`
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .3px;
+  text-transform: uppercase;
+  border: 1px solid ${props => props.$active ? '#0ea5e9' : '#cbd5e1'};
+  background: ${props => props.$active ? '#ecfeff' : '#f8fafc'};
+  color: ${props => props.$active ? '#0369a1' : '#64748b'};
+`

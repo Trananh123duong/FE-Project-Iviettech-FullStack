@@ -17,6 +17,7 @@ import SearchPage from '@pages/user/Search'
 import StoryDetail from '@pages/user/StoryDetail'
 import ChapterDetail from '@pages/user/ChapterDetail'
 import ProfilePage from '@pages/auth/Profile'
+import VipCheckoutPage from '@pages/user/VipCheckoutPage'
 
 function App() {
   const dispatch = useDispatch()
@@ -41,6 +42,8 @@ function App() {
         
         <Route path={ROUTES.USER.STORY} element={<StoryDetail />} />
         <Route path={ROUTES.USER.CHAPTER} element={<ChapterDetail />} />
+
+        <Route path={ROUTES.USER.VIP_CHECKOUT} element={<VipCheckoutPage />} />
       </Route>
 
       {/* <Route element={<AdminLayout />}>

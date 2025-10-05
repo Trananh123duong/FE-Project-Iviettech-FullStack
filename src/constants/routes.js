@@ -7,6 +7,7 @@ export const ROUTES = {
     STORY: '/truyen/:id',
     CHAPTER: '/chapter/:id',
     PROFILE: '/tai-khoan',
+    VIP_CHECKOUT: '/vip/thanh-toan',
   },
   ADMIN: {
     DASHBOARD: '/admin/dashboard',

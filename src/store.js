@@ -5,6 +5,7 @@ import followReducer from '@redux/slices/follow.slice'
 import historyReducer from '@redux/slices/history.slice'
 import storyReducer from '@redux/slices/story.slice'
 import authReducer from '@redux/slices/auth.slice'
+import vipReducer from '@redux/slices/vip.slice'
 
 export default configureStore({
   reducer: {
@@ -14,5 +15,6 @@ export default configureStore({
     follow: followReducer,
     history: historyReducer,
     auth: authReducer,
+    vip: vipReducer
   },
 })
