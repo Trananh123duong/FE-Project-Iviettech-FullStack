@@ -1,7 +1,8 @@
-import { Outlet } from 'react-router-dom'
+import AdOverlay from '@components/user/AdOverlay'
 import Footer from '@components/user/Footer'
 import Header from '@components/user/Header'
 import Navbar from '@components/user/Navbar'
+import { Outlet } from 'react-router-dom'
 import * as S from './styles'
 
 const UserLayout = () => {
@@ -11,6 +12,7 @@ const UserLayout = () => {
       <Navbar />
       <S.Main>
         <S.MainContainer>
+          <AdOverlay />
           <Outlet />
         </S.MainContainer>
       </S.Main>
