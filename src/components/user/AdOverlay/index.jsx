@@ -1,10 +1,10 @@
 import { ROUTES } from '@constants/routes'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useMemo } from 'react'
 import { useSelector } from 'react-redux'
 import { useLocation } from 'react-router-dom'
 
 export default function AdOverlay() {
-   const { pathname } = useLocation()
+  const { pathname } = useLocation()
   const profile = useSelector((s) => s.auth.myProfile.data)
 
   // VIP nếu có cờ isVip hoặc còn hạn vip_expires_at
@@ -12,13 +12,24 @@ export default function AdOverlay() {
     !!profile?.isVip ||
     (!!profile?.vip_expires_at && new Date(profile.vip_expires_at) > new Date())
 
-  const isHome = pathname === ROUTES.USER.HOME
+  // Các trang không hiện quảng cáo: home, login, register, profile
+  const adExemptPaths = useMemo(
+    () =>
+      new Set([
+        ROUTES.USER.HOME,
+        ROUTES.AUTH.LOGIN,
+        ROUTES.AUTH.REGISTER,
+        ROUTES.USER.PROFILE,
+      ]),
+    []
+  )
+  const isAdExempt = adExemptPaths.has(pathname)
 
   // Tránh mở lại nhiều lần cho cùng 1 path trong vòng đời component
   const lastPathRef = useRef(null)
 
   useEffect(() => {
-    if (isHome || isVip) {
+    if (isAdExempt || isVip) {
       lastPathRef.current = pathname
       return
     }
@@ -30,7 +41,7 @@ export default function AdOverlay() {
     } catch (_) {
       // ignore
     }
-  }, [pathname, isVip, isHome])
+  }, [pathname, isVip, isAdExempt])
 
   return null
 }
