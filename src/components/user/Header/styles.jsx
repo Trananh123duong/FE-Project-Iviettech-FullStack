@@ -24,9 +24,18 @@ export const Inner = styled.div`
   min-width: 0;
 
   /* map area */
-  & > .logo { grid-area: logo; min-width: 0; }
-  & > .search-wrap { grid-area: search; min-width: 0; }
-  & > .right { grid-area: right; min-width: 0; }
+  & > .logo {
+    grid-area: logo;
+    min-width: 0;
+  }
+  & > .search-wrap {
+    grid-area: search;
+    min-width: 0;
+  }
+  & > .right {
+    grid-area: right;
+    min-width: 0;
+  }
 
   /* ---------------------- Logo ---------------------- */
   .logo img {
@@ -36,7 +45,10 @@ export const Inner = styled.div`
   }
 
   /* ---------------------- Search ---------------------- */
-  .search-wrap { position: relative; display: block; }
+  .search-wrap {
+    position: relative;
+    display: block;
+  }
 
   .nt-input.ant-input {
     height: 40px;
@@ -76,30 +88,49 @@ export const Inner = styled.div`
   .icon-btn:hover { background: rgba(255,255,255,.14); }
 
   .account-btn {
-    display: inline-flex; align-items: center; gap: 8px;
-    height: 32px; padding: 0 8px; border: none;
-    background: transparent; color: #fff; border-radius: 10px; cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 32px;
+    padding: 0 8px;
+    border: none;
+    background: transparent;
+    color: #fff;
+    border-radius: 10px; cursor: pointer;
     flex: 0 0 auto;
   }
-  .account-btn:hover { background: rgba(255,255,255,.14); }
-  .account-btn .name {
-    max-width: 150px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  .account-btn:hover {
+    background: rgba(255,255,255,.14);
   }
-  .account-btn .caret { font-size: 12px; opacity: .85; }
+  .account-btn .name {
+    max-width: 150px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .account-btn .caret {
+    font-size: 12px;
+    opacity: .85;
+  }
 
   .account-menu .ant-dropdown-menu {
-    min-width: 240px; border-radius: 10px; padding: 8px 0; box-shadow: 0 8px 26px rgba(0,0,0,.18);
+    min-width: 240px;
+    border-radius: 10px;
+    padding: 8px 0;
+    box-shadow: 0 8px 26px rgba(0,0,0,.18);
   }
   .ant-input { border-color: transparent; }
 
   /* ---------- Responsive ---------- */
 
   @media (max-width: 900px) {
-    .account-btn .name { display: none; } /* gọn khi hẹp */
+    .account-btn .name {
+      display: none;
+    }
   }
 
   @media (max-width: 768px) {
-    /* đổi sang 2 hàng: logo + actions (hàng 1), search (hàng 2) */
     height: auto;
     grid-template-columns: 1fr auto;
     grid-template-rows: 52px auto;
@@ -109,16 +140,36 @@ export const Inner = styled.div`
     row-gap: 4px;
     padding: 6px 10px 6px;
 
-    .logo img { height: 34px; }
+    .logo img {
+      height: 34px;
+    }
 
-    .nt-input.ant-input { height: 36px; padding-right: 44px; }
-    .nt-search-btn { height: 32px; width: 38px; right: 3px; }
+    .nt-input.ant-input {
+      height: 36px;
+      padding-right: 44px;
+    }
+    .nt-search-btn {
+      height: 32px;
+      width: 38px;
+      right: 3px;
+    }
   }
 
   @media (max-width: 480px) {
-    .icon-btn { width: 30px; height: 30px; }
-    .account-btn { padding: 0 6px; height: 30px; }
-    .nt-input.ant-input { height: 34px; }
-    .nt-search-btn { height: 30px; width: 36px; }
+    .icon-btn {
+      width: 30px;
+      height: 30px;
+    }
+    .account-btn {
+      padding: 0 6px;
+      height: 30px;
+    }
+    .nt-input.ant-input {
+      height: 34px;
+    }
+    .nt-search-btn {
+      height: 30px;
+      width: 36px;
+    }
   }
 `

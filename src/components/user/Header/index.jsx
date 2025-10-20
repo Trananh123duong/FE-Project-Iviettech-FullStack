@@ -25,7 +25,6 @@ const Header = () => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
 
-  // --- Lấy thông tin user từ Redux
   const profile = useSelector((state) => state.auth.myProfile.data)
   const isAuthenticated = !!profile?.id
   const userDisplayName = profile?.username || profile?.email || 'Tài khoản'
@@ -38,7 +37,6 @@ const Header = () => {
     dispatch(logoutServer())
       .unwrap()
       .finally(() => {
-        // Dù server thành công hay thất bại, state & localStorage đã clear trong slice
         navigate(ROUTES.USER.HOME)
       })
   }
@@ -100,7 +98,7 @@ const Header = () => {
           <img src={logoImg} alt="NetTruyen Logo" />
         </Link>
 
-        {/* Ô tìm kiếm: input + nút riêng để căn cao bằng tuyệt đối */}
+        {/* Search */}
         <div className="search-wrap">
           <Input
             value={searchText}
@@ -131,7 +129,6 @@ const Header = () => {
             <HomeOutlined />
           </Button>
 
-          {/* TODO: gắn toggle theme thật ở đây */}
           <Button type="text" className="icon-btn" onClick={() => {}} aria-label="Chế độ tối">
             <BulbOutlined />
           </Button>
@@ -147,7 +144,6 @@ const Header = () => {
             </Button>
           </Badge>
 
-          {/* Tài khoản */}
           <Dropdown
             trigger={['hover']}
             menu={{ items: accountMenuItems }}

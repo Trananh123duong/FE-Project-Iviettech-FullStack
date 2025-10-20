@@ -20,12 +20,8 @@ import { ROUTES } from '@constants/routes'
 import { getCategories } from '@redux/thunks/category.thunk'
 import * as S from './styles'
 
-// ========================= HELPERS =========================
-
 /**
- * Tạo URL tới trang Tìm truyện với các tham số chuẩn.
- * - Luôn page=1, limit=STORY_LIMIT, order='desc'
- * - Hỗ trợ mảng categoryIds (arrayFormat=brackets)
+ * Tạo URL tới trang Tìm truyện với các tham số chuẩn: Luôn page=1, limit=STORY_LIMIT, order='desc'
  */
 const buildSearchPath = (params = {}) => {
   const search = qs.stringify(
@@ -35,8 +31,6 @@ const buildSearchPath = (params = {}) => {
   return `${ROUTES.USER.SEARCH}${search}`
 }
 
-// ========================= COMPONENT =========================
-
 const Navbar = () => {
   const dispatch = useDispatch()
   const location = useLocation()
@@ -44,17 +38,16 @@ const Navbar = () => {
   const openMenu = () => setOpen(true)
   const closeMenu = () => setOpen(false)
 
-  // Lấy danh sách thể loại từ Redux
   const { data: categories = [], status, error } = useSelector(
     (state) => state.category.categoryList
   )
 
   // Tải thể loại lần đầu
   useEffect(() => {
-    if (status === 'idle') dispatch(getCategories())
-  }, [status, dispatch])
+    dispatch(getCategories())
+  }, [dispatch])
 
-  // -------- Overlay: THỂ LOẠI (mega menu 4 cột) --------
+  // -------- THỂ LOẠI --------
   const categoriesOverlay = useMemo(() => {
     if (status === 'loading') {
       return (
@@ -151,14 +144,12 @@ const Navbar = () => {
         </button>
 
         <ul className="nav">
-          {/* Trang chủ */}
           <li className={`nav-item ${currentPath === ROUTES.USER.HOME ? 'active' : ''}`}>
             <Link to={ROUTES.USER.HOME} className="nav-link" aria-label="Trang chủ">
               <HomeFilled />
             </Link>
           </li>
 
-          {/* HOT (view_day) */}
           <li className="nav-item">
             <Link to={buildSearchPath({ sort: 'view_day' })} className="nav-link">
               <FireFilled />
@@ -166,14 +157,12 @@ const Navbar = () => {
             </Link>
           </li>
 
-          {/* THEO DÕI */}
           <li className={`nav-item ${currentPath === ROUTES.USER.FOLLOW ? 'active' : ''}`}>
             <Link to={ROUTES.USER.FOLLOW} className="nav-link">
               THEO DÕI
             </Link>
           </li>
 
-          {/* LỊCH SỬ */}
           <li className={`nav-item ${currentPath === ROUTES.USER.HISTORY ? 'active' : ''}`}>
             <Link to={ROUTES.USER.HISTORY} className="nav-link">
               <HistoryOutlined />
@@ -181,7 +170,6 @@ const Navbar = () => {
             </Link>
           </li>
 
-          {/* THỂ LOẠI (Dropdown mega) */}
           <li className="nav-item dropdown">
             <Dropdown
               trigger={['hover']}
@@ -195,7 +183,6 @@ const Navbar = () => {
             </Dropdown>
           </li>
 
-          {/* XẾP HẠNG (Dropdown gọn) */}
           <li className="nav-item dropdown">
             <Dropdown
               trigger={['hover']}
@@ -209,7 +196,6 @@ const Navbar = () => {
             </Dropdown>
           </li>
 
-          {/* TÌM TRUYỆN */}
           <li className={`nav-item ${currentPath === ROUTES.USER.SEARCH ? 'active' : ''}`}>
             <Link to={ROUTES.USER.SEARCH} className="nav-link">
               TÌM TRUYỆN
