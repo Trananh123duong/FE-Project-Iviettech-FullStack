@@ -42,12 +42,10 @@ const Navbar = () => {
     (state) => state.category.categoryList
   )
 
-  // Tải thể loại lần đầu
   useEffect(() => {
     dispatch(getCategories())
   }, [dispatch])
 
-  // -------- THỂ LOẠI --------
   const categoriesOverlay = useMemo(() => {
     if (status === 'loading') {
       return (
@@ -83,7 +81,6 @@ const Navbar = () => {
     )
   }, [categories, status, error])
 
-  // -------- Overlay: XẾP HẠNG (menu gọn 2 cột) --------
   const rankingOverlay = (
     <S.MegaPanel className="compact">
       <ul className="grid grid-2">
@@ -134,11 +131,9 @@ const Navbar = () => {
   // Xác định tab đang active theo path hiện tại
   const currentPath = location.pathname
 
-  // ========================= RENDER =========================
   return (
     <S.NavbarContainer>
       <S.NavInner>
-        {/* Hamburger – chỉ hiện mobile */}
         <button className="menu-btn" type="button" onClick={openMenu} aria-label="Mở menu">
           <MenuOutlined />
         </button>

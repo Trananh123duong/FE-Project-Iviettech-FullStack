@@ -19,9 +19,15 @@ export const NavInner = styled.div`
   /* Hamburger (ẩn desktop) */
   .menu-btn {
     display: none;
-    width: 36px; height: 36px; margin: 4px 8px 4px 0;
-    border: 0; border-radius: 8px; background: #fff; cursor: pointer;
-    align-items: center; justify-content: center;
+    width: 36px;
+    height: 36px;
+    margin: 4px 8px 4px 0;
+    border: 0;
+    border-radius: 8px;
+    background: #fff;
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
   }
   .menu-btn .anticon { font-size: 18px; }
 
