@@ -1,5 +1,5 @@
 // ========================= IMPORTS =========================
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Link } from 'react-router-dom'
 
@@ -7,14 +7,14 @@ import { ROUTES } from '@constants/routes'
 import { getStories } from '@redux/thunks/story.thunk'
 import * as S from './styles'
 
-// ========================= CONSTANTS =========================
 const TAB_LABELS = ['Top Tháng', 'Top Tuần', 'Top Ngày']
 const SORT_KEYS   = ['view_month', 'view_week', 'view_day']
 
 // Lấy chapter mới nhất theo updatedAt
 const getLatestChapterByUpdatedAt = (chapters = []) => {
   if (!Array.isArray(chapters) || !chapters.length) return null
-  return chapters.reduce((a, b) =>
+  // Tìm chapter có updatedAt mới nhất
+  return chapters.reduce((a, b) => //Hàm reduce() dùng để duyệt toàn bộ mảng và tích lũy giá trị cuối cùng.
     new Date(a?.updatedAt || 0) >= new Date(b?.updatedAt || 0) ? a : b
   )
 }
@@ -23,7 +23,6 @@ const getLatestChapterByUpdatedAt = (chapters = []) => {
 const formatCompact = (n) =>
   new Intl.NumberFormat('en', { notation: 'compact' }).format(Number(n || 0))
 
-// ========================= COMPONENT =========================
 const TopStory = () => {
   const dispatch = useDispatch()
 
@@ -31,7 +30,6 @@ const TopStory = () => {
   const [activeTabIndex, setActiveTabIndex] = useState(0)
   const activeSortKey = SORT_KEYS[activeTabIndex]
 
-  // Lấy bucket dữ liệu top từ Redux
   const topSlice = useSelector((s) => s.story?.topLists || {})
   const bucket   = topSlice[activeSortKey] || { data: [], meta: {}, status: 'idle', error: null }
   const { data = [], status = 'idle', error = null } = bucket

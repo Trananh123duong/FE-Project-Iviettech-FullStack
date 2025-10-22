@@ -1,5 +1,5 @@
 import { ROUTES } from '@constants/routes'
-import { useEffect, useRef, useMemo } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { useSelector } from 'react-redux'
 import { useLocation } from 'react-router-dom'
 
@@ -8,9 +8,20 @@ export default function AdOverlay() {
   const profile = useSelector((s) => s.auth.myProfile.data)
 
   // VIP nếu có cờ isVip hoặc còn hạn vip_expires_at
-  const isVip =
-    !!profile?.isVip ||
-    (!!profile?.vip_expires_at && new Date(profile.vip_expires_at) > new Date())
+  let isVip = false
+
+  if (profile) {
+    if (profile.isVip) {
+      isVip = true
+    }
+    else if (profile.vip_expires_at) {
+      const expiresAt = new Date(profile.vip_expires_at)
+      const now = new Date()
+      if (expiresAt > now) {
+        isVip = true
+      }
+    }
+  }
 
   // Các trang không hiện quảng cáo: home, login, register, profile
   const adExemptPaths = useMemo(
