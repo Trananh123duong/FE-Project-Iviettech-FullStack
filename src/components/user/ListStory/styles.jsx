@@ -8,11 +8,6 @@ const bp = {
   lg: '1100px',
 }
 
-/**
- * Lưới truyện
- * - 4 cột (>= lg), 3 cột (>= 900), 2 cột (>= 640), 1 cột (mobile)
- * - Tối ưu khoảng cách theo breakpoint
- */
 export const Grid = styled.div`
   position: relative;
   display: grid;
@@ -20,9 +15,15 @@ export const Grid = styled.div`
   gap: 16px 14px;
   padding-left: 0;
 
-  @media (max-width: ${bp.lg}) { grid-template-columns: repeat(3, 1fr); }
-  @media (max-width: 900px)    { grid-template-columns: repeat(2, 1fr); }
-  @media (max-width: 640px)    { grid-template-columns: 1fr; }
+  @media (max-width: ${bp.lg}) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  @media (max-width: 900px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
 
   @media (max-width: ${bp.sm}) {
     gap: 12px 10px;
@@ -41,11 +42,6 @@ export const Info = styled.div`
   }
 `
 
-/**
- * Card
- * - Bo góc + shadow nhẹ, hover nhô lên chút xíu
- * - Giảm shadow/transform ở mobile để mượt
- */
 export const Card = styled.article`
   background: #fff;
   border: 1px solid #ececec;
@@ -53,19 +49,13 @@ export const Card = styled.article`
   overflow: hidden;
   box-shadow: 0 6px 14px rgba(0,0,0,.04);
 
-  @media (prefers-reduced-motion: no-preference) {
-    transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
-    &:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 10px 20px rgba(0,0,0,.08);
-      border-color: #e9e9e9;
-    }
-  }
-
   @media (max-width: ${bp.sm}) {
     border-radius: 10px;
     box-shadow: 0 4px 10px rgba(0,0,0,.03);
-    &:hover { transform: none; box-shadow: 0 4px 10px rgba(0,0,0,.03); }
+    &:hover {
+      transform: none;
+      box-shadow: 0 4px 10px rgba(0,0,0,.03);
+    }
   }
 `
 
@@ -78,10 +68,16 @@ export const ThumbWrap = styled.div`
   aspect-ratio: 3 / 4;         /* giữ tỷ lệ ảnh */
   overflow: hidden;
 
-  a { display: block; width: 100%; height: 100%; }
+  a {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
   img {
-    width: 100%; height: 100%;
-    object-fit: cover; display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
   }
 `
 
@@ -97,8 +93,14 @@ export const OverlayStats = styled.div`
   background: linear-gradient(to top, rgba(0,0,0,.55), rgba(0,0,0,.05));
   backdrop-filter: saturate(120%);
 
-  span { display: inline-flex; align-items: center; gap: 6px; }
-  i { opacity: .95; }
+  span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  i {
+    opacity: .95;
+  }
 
   @media (max-width: ${bp.md}) {
     font-size: 11.5px;
@@ -117,10 +119,6 @@ export const OverlayStats = styled.div`
   }
 `
 
-/**
- * Tiêu đề truyện
- * - Clamp 2 dòng desktop, 1 dòng mobile
- */
 export const Title = styled.h3`
   margin: 10px 10px 6px 10px;
   font-size: 16px;
@@ -138,22 +136,21 @@ export const Title = styled.h3`
     color: inherit;
     text-decoration: none;
   }
-  a:hover { color: #2f6fea; }
+  a:hover {
+    color: #2f6fea;
+  }
 
   @media (max-width: ${bp.md}) {
     font-size: 15.5px;
   }
   @media (max-width: ${bp.sm}) {
     font-size: 15px;
-    -webkit-line-clamp: 1; /* gọn gàng ở mobile */
     margin: 8px 8px 4px 8px;
   }
 `
 
 /**
  * Danh sách 3 chapter gần nhất
- * - Desktop: tên chap trái, thời gian phải (một hàng)
- * - Mobile: thời gian xuống dòng thứ 2 (đỡ chật)
  */
 export const ChapterList = styled.ul`
   list-style: none;
@@ -168,7 +165,9 @@ export const ChapterList = styled.ul`
     padding: 3px 0;
     border-top: 1px dashed #f1f1f1;
   }
-  .chapter-row:first-child { border-top: none; }
+  .chapter-row:first-child {
+    border-top: none;
+  }
 
   .chapter-link {
     color: #333;
@@ -178,8 +177,15 @@ export const ChapterList = styled.ul`
     overflow: hidden;
     text-overflow: ellipsis;
   }
-  .chapter-link:hover { color: #2f6fea; text-decoration: underline; }
-  .chapter-link.muted { color: #999; cursor: default; text-decoration: none; }
+  .chapter-link:hover {
+    color: #2f6fea;
+    text-decoration: underline;
+  }
+  .chapter-link.muted {
+    color: #999;
+    cursor: default;
+    text-decoration: none;
+  }
 
   .chapter-time {
     font-size: 9px;
@@ -198,7 +204,6 @@ export const ChapterList = styled.ul`
   @media (max-width: ${bp.sm}) {
     margin: 0 8px 8px 8px;
 
-    /* Đưa thời gian xuống dòng thứ 2 để tiết kiệm chiều ngang */
     .chapter-row {
       grid-template-columns: 1fr;
       align-items: start;
@@ -220,8 +225,6 @@ export const ChapterList = styled.ul`
 
 /**
  * Khu vực action (bỏ theo dõi)
- * - Desktop: nút chuẩn
- * - Mobile: full width, tăng chiều cao chạm tay
  */
 export const Actions = styled.div`
   padding: 6px 10px 12px 10px;
@@ -246,7 +249,10 @@ export const Actions = styled.div`
       }
     }
   }
-  .btn-unfollow[disabled] { opacity: .6; cursor: not-allowed; }
+  .btn-unfollow[disabled] {
+    opacity: .6;
+    cursor: not-allowed;
+  }
 
   @media (max-width: ${bp.md}) {
     padding: 6px 9px 10px 9px;
@@ -255,7 +261,7 @@ export const Actions = styled.div`
   @media (max-width: ${bp.sm}) {
     padding: 6px 8px 10px 8px;
     .btn-unfollow {
-      padding: 10px 12px;      /* lớn hơn cho ngón tay */
+      padding: 10px 12px;
       border-radius: 9px;
       font-size: 14px;
     }

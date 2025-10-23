@@ -31,26 +31,32 @@ const TopStory = () => {
   const activeSortKey = SORT_KEYS[activeTabIndex]
 
   const topSlice = useSelector((s) => s.story?.topLists || {})
-  const bucket   = topSlice[activeSortKey] || { data: [], meta: {}, status: 'idle', error: null }
+  
+  let bucket
+
+  if (topSlice[activeSortKey]) {
+    bucket = topSlice[activeSortKey]
+  } else {
+    bucket = {
+      data: [],
+      meta: {},
+      status: 'idle',
+      error: null
+    }
+  }
+
   const { data = [], status = 'idle', error = null } = bucket
 
-  // Nạp dữ liệu cho tab hiện tại nếu chưa có
   useEffect(() => {
     if (status === 'idle') {
       dispatch(getStories({ scope: 'top', sort: activeSortKey }))
     }
   }, [status, activeSortKey, dispatch])
 
-  // Tối ưu: map dữ liệu hiển thị
+  // map dữ liệu hiển thị
   const items = useMemo(() => {
     return (data || []).map((story) => {
       const latest = getLatestChapterByUpdatedAt(story?.chapters)
-      const viewsForTab =
-        story?.[activeSortKey] ??
-        story?.view_day ??
-        story?.view_week ??
-        story?.view_month ??
-        story?.total_view ?? 0
 
       return {
         id: story?.id,
@@ -58,7 +64,6 @@ const TopStory = () => {
         thumbnail: story?.thumbnail,
         latestChapterId: latest?.id,
         latestChapterNumber: latest?.chapter_number,
-        viewsText: formatCompact(viewsForTab),
       }
     })
   }, [data, activeSortKey])
@@ -107,10 +112,6 @@ const TopStory = () => {
                   ) : (
                     <span className="chapter-link muted">Chưa có chap</span>
                   )}
-
-                  <span className="views">
-                    <i className="fa fa-eye" aria-hidden="true" /> {it.viewsText}
-                  </span>
                 </div>
               </div>
             </li>

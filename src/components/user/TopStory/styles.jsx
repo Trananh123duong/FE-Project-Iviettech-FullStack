@@ -1,6 +1,5 @@
 import styled from 'styled-components'
 
-/* Card chứa toàn bộ TopStory */
 export const Card = styled.section`
   border: 1px solid #e9e9e9;
   border-radius: 12px;
@@ -31,12 +30,17 @@ export const Tabs = styled.div`
     display: flex;
     align-items: center;
     justify-content: center;
-    white-space: nowrap; /* >>> không cho xuống dòng */
+    white-space: nowrap; /* không cho xuống dòng */
     line-height: 1;      /* tránh cao thấp kỳ lạ với dấu tiếng Việt */
   }
-  .tab:last-child { border-right: none; }
+  .tab:last-child {
+    border-right: none;
+  }
 
-  .tab:hover { background: #f2f2f2; color: #7c3aed; }
+  .tab:hover {
+    background: #f2f2f2;
+    color: #7c3aed;
+  }
 
   .tab.active {
     background: #fff;
@@ -49,14 +53,6 @@ export const Tabs = styled.div`
     left: 0; right: 0; bottom: 0;
     height: 3px;
     background: #7c3aed;
-  }
-
-  /* Màn nhỏ: co chữ & padding để luôn 1 dòng */
-  @media (max-width: 640px) {
-    .tab { font-size: 14.5px; padding: 0 12px; }
-  }
-  @media (max-width: 420px) {
-    .tab { font-size: 13.5px; padding: 0 10px; }
   }
 `
 
@@ -78,8 +74,12 @@ export const Panel = styled.div`
     padding: 10px 4px;
     border-bottom: 1px solid #f2f2f2;
   }
-  .row:last-child { border-bottom: none; }
-  .row:hover { background: #fafafa; }
+  .row:last-child {
+    border-bottom: none;
+  }
+  .row:hover {
+    background: #fafafa;
+  }
 
   /* Thumb */
   .thumb {
@@ -89,10 +89,16 @@ export const Panel = styled.div`
     display: block;
     box-shadow: 0 1px 4px rgba(0,0,0,.06);
   }
-  .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block; }
 
   /* Meta */
-  .meta { min-width: 0; }
+  .meta {
+    min-width: 0;
+  }
   .title {
     margin: 0 0 2px 0;
     font-size: 16px;
@@ -103,8 +109,13 @@ export const Panel = styled.div`
     white-space: nowrap;
     text-overflow: ellipsis;
   }
-  .title a { color: inherit; text-decoration: none; }
-  .title a:hover { color: #2f6fea; }
+  .title a {
+    color: inherit;
+    text-decoration: none;
+  }
+  .title a:hover {
+    color: #2f6fea;
+  }
 
   .subline {
     display: flex;
@@ -118,21 +129,12 @@ export const Panel = styled.div`
     color: #333;
     text-decoration: none;
   }
-  .chapter-link:hover { color: #2f6fea; }
-  .chapter-link.muted { color: #999; cursor: default; }
-
-  .views {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    color: #666;
-    font-size: 13px;
-    white-space: nowrap;
+  .chapter-link:hover {
+    color: #2f6fea;
   }
-
-  @media (max-width: 640px) {
-    .row { grid-template-columns: 40px 52px 1fr; }
-    .title { font-size: 15px; }
+  .chapter-link.muted {
+    color: #999;
+    cursor: default;
   }
 `
 
@@ -153,7 +155,6 @@ export const RankBadge = styled.span`
   }};
 `
 
-/* Dòng thông báo loading/error */
 export const InfoLine = styled.div`
   padding: 8px 10px;
   font-size: 13.5px;

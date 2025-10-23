@@ -15,7 +15,6 @@ import { getStories } from '@redux/thunks/story.thunk'
 import * as S from './styles'
 
 const Home = () => {
-  // ====== Hook core ======
   const dispatch = useDispatch()
   const location = useLocation()
   const navigate = useNavigate()

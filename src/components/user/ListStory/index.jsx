@@ -1,20 +1,11 @@
-// ========================= IMPORTS =========================
-import { Link } from 'react-router-dom'
 import { ROUTES } from '@constants/routes'
 import { timeAgo } from '@utils/date'
+import { Link } from 'react-router-dom'
 import * as S from './styles'
 
-// ========================= HELPERS =========================
 const compactNumber = (n) =>
   new Intl.NumberFormat('en', { notation: 'compact' }).format(Number(n || 0))
 
-// Lấy 3 chapter cập nhật mới nhất
-const pickLatest3 = (chapters = []) =>
-  [...(chapters || [])]
-    .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
-    .slice(0, 3)
-
-// ========================= COMPONENT =========================
 const ListStory = ({
   stories = [],
   status,
@@ -29,7 +20,6 @@ const ListStory = ({
       {status === 'failed' && <S.Info className="error">Lỗi: {error}</S.Info>}
 
       {stories.map((story) => {
-        const latest3 = pickLatest3(story.chapters)
         const storyLink = ROUTES.USER.STORY.replace(':id', story.id)
 
         return (
@@ -54,8 +44,8 @@ const ListStory = ({
 
             {/* 3 chapter mới nhất */}
             <S.ChapterList>
-              {latest3.length > 0 ? (
-                latest3.map((c) => {
+              {story.chapters.length > 0 ? (
+                story.chapters.map((c) => {
                   const chapterHref = ROUTES.USER.CHAPTER.replace(':id', c.id)
                   return (
                     <li key={c.id} className="chapter-row">
