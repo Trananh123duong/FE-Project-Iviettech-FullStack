@@ -56,12 +56,10 @@ const Home = () => {
 
   return (
     <>
-      {/* Slider đề cử */}
       <Sliderbar />
 
       <S.Page>
         <S.ContentGrid>
-          {/* ===== Cột trái: danh sách truyện mới cập nhật ===== */}
           <section>
             <S.SectionHeader>
               <S.SectionTitle>
@@ -79,7 +77,6 @@ const Home = () => {
             />
           </section>
 
-          {/* ===== Sidebar: theo dõi + lịch sử (nếu đăng nhập) + top story ===== */}
           <aside>
             {currentUser?.id && (
               <>

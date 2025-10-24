@@ -15,12 +15,10 @@ import { getMyFollows, unfollowStory } from '@redux/thunks/follow.thunk'
 import * as S from './styles'
 
 const FollowPage = () => {
-  // ===== Hook core =====
   const dispatch = useDispatch()
   const location = useLocation()
   const navigate = useNavigate()
 
-  // ===== Thông tin user (để bật/tắt gate) =====
   const { data: currentUser } = useSelector((s) => s.auth.myProfile)
 
   // ===== Danh sách truyện theo dõi =====
@@ -41,10 +39,9 @@ const FollowPage = () => {
   const urlPage = Number(queryObj.page || 1)
   const urlLimit = Number(queryObj.limit || STORY_LIMIT)
 
-  // ===== Load danh sách khi đã đăng nhập =====
   useEffect(() => {
     if (currentUser?.id) {
-      dispatch(getMyFollows({ page: urlPage, limit: urlLimit, more: false }))
+      dispatch(getMyFollows({ page: urlPage, limit: urlLimit }))
     }
   }, [dispatch, currentUser?.id, urlPage, urlLimit])
 
@@ -54,18 +51,17 @@ const FollowPage = () => {
     try {
       const res = await dispatch(unfollowStory({ storyId: story.id })).unwrap()
       message.success(res?.message || 'Đã bỏ theo dõi')
-      dispatch(getMyFollows({ page: urlPage, limit: urlLimit, more: false }))
+      dispatch(getMyFollows({ page: urlPage, limit: urlLimit }))
     } catch (e) {
       message.error(e?.message || 'Bỏ theo dõi thất bại')
     }
   }
 
-  // ===== Thông tin phân trang =====
+  // ===== phân trang =====
   const currentPage = meta.page || urlPage
   const pageSize = meta.limit || urlLimit
   const totalItems = meta.total || 0
 
-  // ===== Điều hướng phân trang bằng query string =====
   const handlePaginate = (page, size) => {
     const newQuery = qs.stringify({ ...queryObj, page, limit: size }, { addQueryPrefix: true })
     navigate(`${location.pathname}${newQuery}`)
@@ -95,7 +91,6 @@ const FollowPage = () => {
   // ===== Trạng thái đã đăng nhập =====
   return (
     <S.Page>
-      {/* Breadcrumb */}
       <S.Breadcrumb>
         <Link to={ROUTES.USER.HOME}>Trang chủ</Link>
         <span className="sep">»</span>
@@ -103,7 +98,6 @@ const FollowPage = () => {
       </S.Breadcrumb>
 
       <S.ContentGrid>
-        {/* Cột trái: danh sách theo dõi */}
         <section>
           <S.SectionHeader>
             <S.SectionTitle>
@@ -135,7 +129,6 @@ const FollowPage = () => {
           )}
         </section>
 
-        {/* Sidebar: lịch sử đọc + top */}
         <aside>
           <ReadingHistory />
           <TopStory />

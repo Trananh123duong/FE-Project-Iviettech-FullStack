@@ -25,11 +25,9 @@ export const historySlice = createSlice({
         state.historyList.error = null
       })
       .addCase(getMyHistory.fulfilled, (state, action) => {
-        const { data, meta, more } = action.payload
+        const { data, meta } = action.payload
         state.historyList.status = 'succeeded'
-        state.historyList.data = more
-          ? [...state.historyList.data, ...data]
-          : data
+        state.historyList.data = data
         state.historyList.meta = meta
       })
       .addCase(getMyHistory.rejected, (state, action) => {
@@ -45,8 +43,6 @@ export const historySlice = createSlice({
       .addCase(deleteHistoryItem.fulfilled, (state, action) => {
         state.deleteAction.status = 'succeeded'
         state.deleteAction.last = action.payload // { id, message }
-        // Nếu muốn xoá ngay khỏi list (UI phản hồi tức thì), bỏ comment dòng dưới:
-        // state.historyList.data = state.historyList.data.filter(item => item.id !== action.payload.id)
       })
       .addCase(deleteHistoryItem.rejected, (state, action) => {
         state.deleteAction.status = 'failed'

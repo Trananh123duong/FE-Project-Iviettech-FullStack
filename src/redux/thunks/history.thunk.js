@@ -1,19 +1,14 @@
 import { createAsyncThunk } from '@reduxjs/toolkit'
 import api from '@services/api'
 
-// GET /me/history  -> { data: [...], meta: { total, page, limit, totalPages } }
 export const getMyHistory = createAsyncThunk(
   'history/getMyHistory',
   async (params = {}) => {
     const response = await api.get('/me/history', { params })
-    return {
-      ...response.data,             // { data, meta }
-      more: params?.more ?? false,  // báo reducer append hay replace
-    }
+    return { ...response.data }
   }
 )
 
-// DELETE /me/history/:id -> { message }
 export const deleteHistoryItem = createAsyncThunk(
   'history/deleteHistoryItem',
   async (params) => {

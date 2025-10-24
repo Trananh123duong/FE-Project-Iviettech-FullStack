@@ -5,8 +5,8 @@ export const followSlice = createSlice({
   name: 'follow',
   initialState: {
     followedStoryList: {
-      data: [],     // danh sách stories (mỗi story có thể gồm chapters[0..2], user_follows.created_at,...)
-      meta: {},     // { total, page, limit, totalPages }
+      data: [],
+      meta: {},
       status: 'idle',
       error: null,
     },
@@ -30,11 +30,9 @@ export const followSlice = createSlice({
         state.followedStoryList.error = null
       })
       .addCase(getMyFollows.fulfilled, (state, action) => {
-        const { data, meta, more } = action.payload
+        const { data, meta } = action.payload
         state.followedStoryList.status = 'succeeded'
-        state.followedStoryList.data = more
-          ? [...state.followedStoryList.data, ...data]
-          : data
+        state.followedStoryList.data = data
         state.followedStoryList.meta = meta
       })
       .addCase(getMyFollows.rejected, (state, action) => {
@@ -50,9 +48,6 @@ export const followSlice = createSlice({
       .addCase(followStory.fulfilled, (state, action) => {
         state.followAction.status = 'succeeded'
         state.followAction.last = action.payload // { storyId, is_followed: true, message }
-        // Lưu ý: không tự động đẩy vào list; UI có thể: 
-        // - gọi lại getMyFollows({ page: 1, more: false }) để refresh
-        // - hoặc chèn tạm vào đầu list nếu cần
       })
       .addCase(followStory.rejected, (state, action) => {
         state.followAction.status = 'failed'
@@ -67,9 +62,6 @@ export const followSlice = createSlice({
       .addCase(unfollowStory.fulfilled, (state, action) => {
         state.unfollowAction.status = 'succeeded'
         state.unfollowAction.last = action.payload // { storyId, is_followed: false, message }
-        // Có thể chọn lọc bỏ ra khỏi list tại đây nếu UI muốn phản hồi tức thì:
-        // state.followedStoryList.data = state.followedStoryList.data.filter(s => s.id !== action.payload.storyId)
-        // Nhưng để giữ style "UI quyết định", mình không tự động mutate list ở đây.
       })
       .addCase(unfollowStory.rejected, (state, action) => {
         state.unfollowAction.status = 'failed'

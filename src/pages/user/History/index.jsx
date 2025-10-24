@@ -15,7 +15,6 @@ import { getMyHistory } from '@redux/thunks/history.thunk'
 import * as S from './styles'
 
 const HistoryPage = () => {
-  // ===== Hook core =====
   const dispatch = useDispatch()
   const location = useLocation()
   const navigate = useNavigate()
@@ -36,10 +35,9 @@ const HistoryPage = () => {
   const urlPage = Number(queryObj.page || 1)
   const urlLimit = Number(queryObj.limit || STORY_LIMIT)
 
-  // ===== Load lịch sử khi đã đăng nhập =====
   useEffect(() => {
     if (currentUser?.id) {
-      dispatch(getMyHistory({ page: urlPage, limit: urlLimit, more: false }))
+      dispatch(getMyHistory({ page: urlPage, limit: urlLimit }))
     }
   }, [dispatch, currentUser?.id, urlPage, urlLimit])
 
@@ -84,7 +82,6 @@ const HistoryPage = () => {
       </S.Breadcrumb>
 
       <S.ContentGrid>
-        {/* Cột trái: lịch sử đọc */}
         <section>
           <S.SectionHeader>
             <S.SectionTitle>
@@ -112,7 +109,6 @@ const HistoryPage = () => {
           )}
         </section>
 
-        {/* Sidebar: tiện ích/gợi ý */}
         <aside>
           <FollowedStories />
           <TopStory />
