@@ -1,14 +1,13 @@
+import { LockOutlined, MailOutlined, UserOutlined } from '@ant-design/icons'
+import { Alert, Form, Input, notification } from 'antd'
 import { useEffect, useMemo } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Link, useNavigate } from 'react-router-dom'
-import { Alert, Form, Input, notification } from 'antd'
-import { UserOutlined, MailOutlined, LockOutlined } from '@ant-design/icons'
 
 import { ROUTES } from '@constants/routes'
 import { register } from '@redux/thunks/auth.thunk'
 import * as S from './styles'
 
-// ========================= COMPONENT =========================
 const Register = () => {
   const [form] = Form.useForm()
   const dispatch = useDispatch()
@@ -18,7 +17,6 @@ const Register = () => {
   const loading = useMemo(() => registerData.status === 'loading', [registerData.status])
   const error = registerData.error
 
-  // Gửi form
   const handleSubmit = (values) => {
     dispatch(
       register({
@@ -38,7 +36,6 @@ const Register = () => {
     )
   }
 
-  // Hiển thị lỗi server vào form
   useEffect(() => {
     if (error) {
       form.setFields([
@@ -65,7 +62,6 @@ const Register = () => {
           onFinish={handleSubmit}
           autoComplete="on"
         >
-          {/* Tên */}
           <Form.Item
             label="Name"
             name="username"
@@ -79,7 +75,6 @@ const Register = () => {
             />
           </Form.Item>
 
-          {/* Email */}
           <Form.Item
             label="Email"
             name="email"
@@ -96,7 +91,6 @@ const Register = () => {
             />
           </Form.Item>
 
-          {/* Mật khẩu */}
           <Form.Item
             label="Mật khẩu"
             name="password"
@@ -114,7 +108,6 @@ const Register = () => {
             />
           </Form.Item>
 
-          {/* Xác nhận mật khẩu */}
           <Form.Item
             label="Xác nhận mật khẩu"
             name="confirm"
@@ -138,12 +131,10 @@ const Register = () => {
             />
           </Form.Item>
 
-          {/* Link phụ */}
           <S.FormExtras>
             <Link to={ROUTES.AUTH.LOGIN}>Đăng nhập</Link>
           </S.FormExtras>
 
-          {/* Nút submit */}
           <Form.Item style={{ marginTop: 8, marginBottom: 0 }}>
             <S.SubmitButton type="primary" htmlType="submit" size="large" loading={loading}>
               Đăng ký

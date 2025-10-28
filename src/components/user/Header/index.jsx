@@ -20,7 +20,6 @@ import { ROUTES } from '@constants/routes'
 import { logoutServer } from '@redux/thunks/auth.thunk'
 import * as S from './styles'
 
-// ========================= COMPONENT =========================
 const Header = () => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
@@ -89,7 +88,6 @@ const Header = () => {
     ]
   }, [isAuthenticated])
 
-  // ========================= RENDER =========================
   return (
     <S.HeaderContainer>
       <S.Inner>

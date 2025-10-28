@@ -1,23 +1,20 @@
+import { LockOutlined, MailOutlined } from '@ant-design/icons'
+import { Alert, Form, Input, notification } from 'antd'
 import { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Link, useNavigate } from 'react-router-dom'
-import { Alert, Form, Input, notification } from 'antd'
-import { MailOutlined, LockOutlined } from '@ant-design/icons'
 
 import { ROUTES } from '@constants/routes'
 import { login } from '@redux/thunks/auth.thunk'
 import * as S from './styles'
 
-// ========================= COMPONENT =========================
 const Login = () => {
   const [form] = Form.useForm()
   const dispatch = useDispatch()
   const navigate = useNavigate()
 
-  // Lấy state đăng nhập từ Redux
   const { loginData } = useSelector((state) => state.auth)
 
-  // Gửi form
   const handleSubmit = (values) => {
     dispatch(
       login({
@@ -33,7 +30,6 @@ const Login = () => {
     )
   }
 
-  // Hiển thị lỗi server lên form
   useEffect(() => {
     if (loginData.error) {
       form.setFields([
@@ -46,11 +42,9 @@ const Login = () => {
   return (
     <S.Page>
       <S.AuthCard>
-        {/* Tiêu đề */}
         <S.Title>ĐĂNG NHẬP</S.Title>
         <S.TitleUnderline />
 
-        {/* Lỗi tổng (nếu có) */}
         {!!loginData.error && (
           <Alert
             type="error"
@@ -60,14 +54,12 @@ const Login = () => {
           />
         )}
 
-        {/* Form */}
         <Form
           layout="vertical"
           form={form}
           onFinish={handleSubmit}
           autoComplete="on"
         >
-          {/* Email */}
           <Form.Item
             label="Email"
             name="email"
@@ -84,7 +76,6 @@ const Login = () => {
             />
           </Form.Item>
 
-          {/* Mật khẩu */}
           <Form.Item
             label="Mật khẩu"
             name="password"
@@ -98,14 +89,12 @@ const Login = () => {
             />
           </Form.Item>
 
-          {/* Link phụ */}
           <S.FormExtras>
             <Link to={ROUTES.AUTH.FORGOT_PASSWORD}>Quên mật khẩu</Link>
             <span className="sep">•</span>
             <Link to={ROUTES.AUTH.REGISTER}>Đăng ký</Link>
           </S.FormExtras>
 
-          {/* Nút submit */}
           <Form.Item style={{ marginTop: 8, marginBottom: 0 }}>
             <S.SubmitButton
               type="primary"

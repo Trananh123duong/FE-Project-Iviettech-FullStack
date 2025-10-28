@@ -1,6 +1,5 @@
 import styled from 'styled-components'
 
-/* ============= Khung trang & breadcrumb ============= */
 export const Page = styled.main`
   max-width: var(--site-width, 1100px);
   margin: 0 auto 28px;
@@ -12,14 +11,23 @@ export const Breadcrumb = styled.nav`
   line-height: 1.2;
   margin: 8px 0 14px;
 
-  a { color: #2f6fea; text-decoration: none; }
-  a:hover { text-decoration: underline; }
+  a {
+    color: #2f6fea;
+    text-decoration: none;
+  }
+  a:hover {
+    text-decoration: underline;
+  }
 
-  .sep { margin: 0 8px; color: #c0c4cc; }
-  .current { color: #9aa1a9; }
+  .sep {
+    margin: 0 8px;
+    color: #c0c4cc;
+  }
+  .current {
+    color: #9aa1a9;
+    }
 `
 
-/* ============= Bố cục 2 cột bằng CSS Grid ============= */
 export const ContentGrid = styled.div`
   display: grid;
   grid-template-columns: 1fr 320px;
@@ -30,7 +38,6 @@ export const ContentGrid = styled.div`
   }
 `
 
-/* ============= Phần đầu mỗi section ============= */
 export const SectionHeader = styled.div`
   display: flex;
   justify-content: space-between;
@@ -45,7 +52,9 @@ export const SectionTitle = styled.h2`
   color: #1e88e5;
   line-height: 1.25;
 
-  i { margin-left: 4px; }
+  i {
+    margin-left: 4px;
+  }
 `
 
 export const KeywordHint = styled.div`
@@ -53,7 +62,6 @@ export const KeywordHint = styled.div`
   color: #666;
 `
 
-/* ============= Filter bar dưới dạng card ============= */
 export const FilterCard = styled.section`
   background: #fff;
   border: 1px solid #ececee;
@@ -96,7 +104,9 @@ export const KeywordInput = styled.input`
     border-color: #1e88e5;
     box-shadow: 0 0 0 3px rgba(30,136,229,.14);
   }
-  &::placeholder { color: #aaa; }
+  &::placeholder {
+    color: #aaa;
+  }
 `
 
 export const ButtonGroup = styled.div`
@@ -116,7 +126,9 @@ export const TabButton = styled.button`
   transition: all .15s ease;
   outline-offset: 2px;
 
-  &:hover { filter: brightness(0.98); }
+  &:hover {
+    filter: brightness(0.98);
+  }
 `
 
 export const PillButton = styled.button`
@@ -133,9 +145,15 @@ export const PillButton = styled.button`
   transition: all .15s ease;
   outline-offset: 2px;
 
-  i { font-size: 14px; }
-  span { white-space: nowrap; }
-  &:hover { filter: brightness(0.98); }
+  i {
+    font-size: 14px;
+  }
+  span {
+    white-space: nowrap;
+  }
+  &:hover {
+    filter: brightness(0.98);
+  }
 `
 
 export const Actions = styled.div`
@@ -156,8 +174,12 @@ export const ApplyButton = styled.button`
   cursor: pointer;
   outline-offset: 2px;
 
-  i { margin-right: 6px; }
-  &:hover { filter: brightness(0.98); }
+  i {
+    margin-right: 6px;
+  }
+  &:hover {
+    filter: brightness(0.98);
+  }
 `
 
 export const ClearButton = styled.button`
@@ -170,7 +192,9 @@ export const ClearButton = styled.button`
   cursor: pointer;
   outline-offset: 2px;
 
-  &:hover { background: #fafafa; }
+  &:hover {
+    background: #fafafa;
+  }
 `
 
 export const Hint = styled.span`

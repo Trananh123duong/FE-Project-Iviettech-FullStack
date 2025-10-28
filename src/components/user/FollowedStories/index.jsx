@@ -11,12 +11,9 @@ import * as S from './styles'
 function FollowedStories() {
   const dispatch = useDispatch()
 
-  // ===== Global state =====
   const { followedStoryList } = useSelector((s) => s.follow)
   const { data: user } = useSelector((s) => s.auth.myProfile)
 
-  // ===== Side effect =====
-  // Khi đã có user → gọi API lấy 5 truyện theo dõi đầu tiên
   useEffect(() => {
     if (user) {
       dispatch(getMyFollows({ page: 1, limit: 5 }))
@@ -26,7 +23,7 @@ function FollowedStories() {
   // Nếu chưa đăng nhập → không hiển thị widget này
   if (!user) return null
 
-  // Bỏ theo dõi 1 truyện rồi reload danh sách (đảm bảo UI luôn cập nhật)
+  // Bỏ theo dõi 1 truyện rồi reload danh sách
   const handleUnfollow = (storyId) => {
     dispatch(
       unfollowStory({
@@ -36,13 +33,12 @@ function FollowedStories() {
     )
   }
 
-  // Lấy tối đa 5 truyện để hiển thị (tránh tràn UI nếu backend trả > 5)
+  // Lấy tối đa 5 truyện để hiển thị
   const list = (followedStoryList.data || []).slice(0, 5)
   const isLoading = followedStoryList.status === 'loading'
 
   return (
     <S.Wrapper>
-      {/* Header: tiêu đề + link “Xem tất cả” tới trang Theo dõi */}
       <S.Header>
         <Typography.Title level={5}>Truyện đang theo dõi</Typography.Title>
         <Link to={ROUTES.USER.FOLLOW}>Xem tất cả</Link>
@@ -52,10 +48,8 @@ function FollowedStories() {
         loading={isLoading}
         itemLayout="horizontal"
         dataSource={list}
-        // Cung cấp khoá giúp React tối ưu render (không đổi logic)
         rowKey={(story) => story.id}
         locale={{
-          // Khi rỗng → hiển thị Empty của AntD
           emptyText: (
             <Empty
               image={Empty.PRESENTED_IMAGE_SIMPLE}
@@ -64,14 +58,21 @@ function FollowedStories() {
           ),
         }}
         renderItem={(story) => {
-          // Chuẩn hoá ảnh thumbnail:
-          // - Nếu là URL đầy đủ (http/https) thì dùng trực tiếp
-          // - Nếu là path tương đối thì nối với END_POINT
-          const thumb = story?.thumbnail
-            ? story.thumbnail.startsWith('http')
-              ? story.thumbnail
-              : `${END_POINT}${story.thumbnail.startsWith('/') ? '' : '/'}${story.thumbnail}`
-            : undefined
+          // Chuẩn hoá ảnh thumbnail
+          let thumb;
+          if (story?.thumbnail) {
+            const isFullUrl = story.thumbnail.startsWith('http');
+
+            if (isFullUrl) {
+              thumb = story.thumbnail;
+            } else {
+              const needsSlash = !story.thumbnail.startsWith('/');
+              const prefix = needsSlash ? '/' : '';
+              thumb = `${END_POINT}${prefix}${story.thumbnail}`;
+            }
+          } else {
+            thumb = undefined;
+          }
 
           // Link chi tiết truyện & chapter mới nhất
           const storyHref = ROUTES.USER.STORY.replace(':id', story.id)
@@ -96,13 +97,10 @@ function FollowedStories() {
               ]}
             >
               <List.Item.Meta
-                // Ảnh avatar (vuông) của truyện
                 avatar={<Avatar shape="square" size={48} src={thumb} />}
 
-                // Tiêu đề: link tới trang chi tiết truyện
                 title={<Link to={storyHref}>{story.name}</Link>}
 
-                // Mô tả: nếu có chapter mới nhất → cho phép click vào
                 description={
                   latestChapter ? (
                     <Link to={ROUTES.USER.CHAPTER.replace(':id', latestChapter.id)}>

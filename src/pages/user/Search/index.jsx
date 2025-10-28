@@ -15,7 +15,6 @@ import { getCategories } from '@redux/thunks/category.thunk'
 import { getStories } from '@redux/thunks/story.thunk'
 import * as S from './styles'
 
-/** Tabs trạng thái */
 const STATUS_TABS = [
   { key: 'all',         label: 'Tất cả' },
   { key: 'coming_soon', label: 'Sắp ra mắt' },
@@ -23,7 +22,6 @@ const STATUS_TABS = [
   { key: 'completed',   label: 'Hoàn thành' },
 ]
 
-/** Tùy chọn sắp xếp hiển thị ở UI */
 const SORT_OPTIONS = [
   { key: 'updated',    label: 'Mới cập nhật', icon: 'fa-rotate' },
   { key: 'new',        label: 'Truyện mới',   icon: 'fa-calendar-plus' },
@@ -34,7 +32,6 @@ const SORT_OPTIONS = [
   { key: 'top_follow', label: 'Top Follow',   icon: 'fa-users' },
 ]
 
-/** Map khóa UI -> khóa BE */
 const SORT_MAP = {
   updated: 'updated_at',
   new: 'created_at',
@@ -50,13 +47,28 @@ const REVERSE_SORT_MAP = Object.fromEntries(
   Object.entries(SORT_MAP).map(([ui, be]) => [be, ui])
 )
 
+function parseCategoryIds(query) {
+  if (Array.isArray(query.categoryIds)) {
+    return query.categoryIds
+  }
+
+  if (Array.isArray(query['categoryIds[]'])) {
+    return query['categoryIds[]']
+  }
+
+  if (typeof query.categoryIds === 'string') {
+    return query.categoryIds.split(',')
+  }
+
+  return []
+}
+
+
 const SearchPage = () => {
-  // ===== Hook core =====
   const dispatch = useDispatch()
   const location = useLocation()
   const navigate = useNavigate()
 
-  // ===== Thông tin user (dùng cho sidebar) =====
   const { data: currentUser } = useSelector((s) => s.auth.myProfile)
 
   // ===== Danh mục thể loại =====
@@ -86,21 +98,20 @@ const SearchPage = () => {
   const keywordFromURL = (query.keyword ?? query.q ?? '').toString()
   const sortUIFromURL  = REVERSE_SORT_MAP[query.sort] || ''
 
-  // ===== Chuẩn hóa categoryIds từ URL (hỗ trợ nhiều biến thể) =====
-  const catsFromURL = Array.isArray(query.categoryIds)
-    ? query.categoryIds
-    : Array.isArray(query['categoryIds[]'])
-    ? query['categoryIds[]']
-    : typeof query.categoryIds === 'string'
-    ? query.categoryIds.split(',')
-    : []
+  // ===== Chuẩn hóa categoryIds từ URL =====
+  const catsFromURL = parseCategoryIds(query)
 
-  // ===== State bộ lọc tại UI =====
   const [statusTab, setStatusTab] = useState(query.status || 'all')
   const [sortBy, setSortBy] = useState(sortUIFromURL)
-  const [selectedCategories, setSelectedCategories] = useState(
-    catsFromURL.map((v) => Number(v)).filter(Number.isInteger)
-  )
+  const [selectedCategories, setSelectedCategories] = useState(() => {
+    if (!Array.isArray(catsFromURL)) return []
+
+    const parsed = catsFromURL
+      .map((v) => Number(v))               // chuyển từng phần tử sang số
+      .filter((v) => Number.isInteger(v))  // chỉ giữ lại số nguyên hợp lệ
+
+    return parsed
+  })
   const [keyword, setKeyword] = useState(keywordFromURL)
 
   // Đồng bộ lại state khi URL đổi
@@ -128,13 +139,7 @@ const SearchPage = () => {
 
     if (query.status) params.status = query.status
 
-    const catIds = Array.isArray(query.categoryIds)
-      ? query.categoryIds
-      : Array.isArray(query['categoryIds[]'])
-      ? query['categoryIds[]']
-      : typeof query.categoryIds === 'string'
-      ? query.categoryIds.split(',')
-      : []
+    const catIds = parseCategoryIds(query)
 
     if (catIds.length) params.categoryIds = catIds
 
@@ -152,10 +157,23 @@ const SearchPage = () => {
 
   // Toggle chọn thể loại
   const toggleCategory = (id) => {
-    setSelectedCategories((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
-    )
-  }
+    setSelectedCategories((prevSelected) => {
+      const newSelected = [...prevSelected];
+
+      // Kiểm tra xem id này đã được chọn chưa
+      const index = newSelected.indexOf(id);
+
+      if (index !== -1) {
+        // Nếu đã chọn -> bỏ ra
+        newSelected.splice(index, 1);
+      } else {
+        // Nếu chưa chọn -> thêm vào
+        newSelected.push(id);
+      }
+
+      return newSelected;
+    });
+  };
 
   // Áp dụng bộ lọc -> đẩy lên URL (reset về page 1)
   const applyFilters = () => {
@@ -178,9 +196,9 @@ const SearchPage = () => {
     if (kw) queryObj.keyword = kw
 
     const newQuery = qs.stringify(queryObj, {
-      addQueryPrefix: true,
-      arrayFormat: 'brackets',
-      skipNulls: true,
+      addQueryPrefix: true,      //Tự động thêm dấu “?” ở đầu chuỗi query để gắn trực tiếp vào URL, khỏi phải nối thủ công.
+      arrayFormat: 'brackets',   //Định dạng mảng dưới dạng brackets (ví dụ: categoryIds[]=1&categoryIds[]=2) để backend dễ nhận dạng.
+      skipNulls: true,           //Bỏ qua các giá trị null hoặc undefined để giữ URL gọn gàng.
     })
     navigate(`${location.pathname}${newQuery}`)
   }
@@ -201,7 +219,6 @@ const SearchPage = () => {
 
   return (
     <S.Page>
-      {/* Breadcrumb: dùng ROUTES thay vì path cứng */}
       <S.Breadcrumb>
         <Link to={ROUTES.USER.HOME}>Trang chủ</Link>
         <span className="sep">»</span>
@@ -209,7 +226,6 @@ const SearchPage = () => {
       </S.Breadcrumb>
 
       <S.ContentGrid>
-        {/* Cột trái: bộ lọc + danh sách kết quả */}
         <section>
           <S.SectionHeader>
             <S.SectionTitle>
@@ -218,9 +234,7 @@ const SearchPage = () => {
             {keywordFromURL && <S.KeywordHint>Từ khóa: “{keywordFromURL}”</S.KeywordHint>}
           </S.SectionHeader>
 
-          {/* Filter bar */}
           <S.FilterCard>
-            {/* Từ khóa */}
             <S.FilterRow>
               <S.FilterLabel>Từ khóa</S.FilterLabel>
               <S.KeywordInput
@@ -232,7 +246,6 @@ const SearchPage = () => {
               />
             </S.FilterRow>
 
-            {/* Trạng thái */}
             <S.FilterRow>
               <S.FilterLabel>Trạng thái</S.FilterLabel>
               <S.ButtonGroup>
@@ -249,7 +262,6 @@ const SearchPage = () => {
               </S.ButtonGroup>
             </S.FilterRow>
 
-            {/* Sắp xếp */}
             <S.FilterRow>
               <S.FilterLabel>Sắp xếp theo</S.FilterLabel>
               <S.ButtonGroup>
@@ -267,7 +279,6 @@ const SearchPage = () => {
               </S.ButtonGroup>
             </S.FilterRow>
 
-            {/* Thể loại */}
             <S.FilterRow>
               <S.FilterLabel>Thể loại</S.FilterLabel>
               <S.ButtonGroup>
@@ -288,7 +299,6 @@ const SearchPage = () => {
               </S.ButtonGroup>
             </S.FilterRow>
 
-            {/* Hành động */}
             <S.Actions>
               <S.ApplyButton type="button" onClick={applyFilters}>
                 <i className="fa-solid fa-magnifying-glass" /> Tìm kiếm
@@ -302,7 +312,6 @@ const SearchPage = () => {
             </S.Actions>
           </S.FilterCard>
 
-          {/* Kết quả + paginate */}
           <ListStory stories={stories} status={status} error={error} />
           <Paginate
             current={current}
@@ -312,7 +321,6 @@ const SearchPage = () => {
           />
         </section>
 
-        {/* Sidebar: theo dõi + lịch sử (nếu đã đăng nhập) + top story */}
         <aside>
           {currentUser?.id && (
             <>
