@@ -60,15 +60,7 @@ const viStatus = (s) => {
 /* ===== Helper: bỏ thẻ HTML khỏi description ===== */
 const stripHtml = (html) => (html || '').replace(/<[^>]*>/g, '').trim()
 
-/* ===== Helpers về số chapter ===== */
-const extractNum = (v) => {
-  if (v == null) return null
-  if (typeof v === 'number') return v
-  const m = String(v).match(/\d+/)
-  return m ? Number(m[0]) : null
-}
-const getChapterNum = (c) =>
-  extractNum(c?.chapter_number ?? c?.number ?? c?.order ?? c?.index ?? c?.name)
+const getChapterNum = (c) => Number(c?.chapter_number ?? null)
 
 const StoryDetail = () => {
   const dispatch = useDispatch()
@@ -90,7 +82,6 @@ const StoryDetail = () => {
   const isActing    = followAction.status === 'loading' || unfollowAction.status === 'loading'
   const ratingBusy  = ratingSummary?.status === 'loading'
 
-  /* ===== Nạp dữ liệu ===== */
   useEffect(() => {
     if (!id) return
     dispatch(getStory({ id }))
@@ -103,38 +94,29 @@ const StoryDetail = () => {
   const [showAllChapters, setShowAllChapters] = useState(false)
   const MAX_SHOWN = 18
 
-  /* ===== Thể loại ===== */
   const categories = useMemo(() => story?.category_id_categories || [], [story])
 
   /* ===== Bảng chapter ===== */
   const chapterRows = useMemo(() => {
     const src = showAllChapters ? chapterList : chapterList.slice(0, MAX_SHOWN)
-    return src.map((c) => {
-      const num = getChapterNum(c)
-      const rel = timeAgo(c.updatedAt || c.createdAt || c.updated_at || c.created_at) || '—'
-      return { key: c.id, id: c.id, number: num ?? '?', rel, _num: num }
-    })
+    return src.map((c) => ({
+      key: c.id,
+      id: c.id,
+      number: getChapterNum(c) ?? '?',
+      rel: timeAgo(c.updated_at) || '—',
+      _num: getChapterNum(c),
+    }))
   }, [chapterList, showAllChapters])
 
-  /* ===== Sort chương tăng dần để lấy first/last ===== */
   const sortedChapters = useMemo(() => {
-    const arr = [...chapterList]
-    arr.sort((a, b) => {
-      const na = getChapterNum(a)
-      const nb = getChapterNum(b)
-      if (na == null && nb == null) return (a.id ?? 0) - (b.id ?? 0)
-      if (na == null) return 1
-      if (nb == null) return -1
-      if (na !== nb) return na - nb
-      return (a.id ?? 0) - (b.id ?? 0)
+    return [...chapterList].sort((a, b) => {
+      return getChapterNum(a) - getChapterNum(b)
     })
-    return arr
   }, [chapterList])
 
   const firstChapterId = sortedChapters[0]?.id ?? null
   const lastChapterId  = sortedChapters[sortedChapters.length - 1]?.id ?? null
 
-  /* ===== Điều hướng đọc ===== */
   const goFirst = () => firstChapterId && navigate(ROUTES.USER.CHAPTER.replace(':id', firstChapterId))
   const goLast  = () => lastChapterId  && navigate(ROUTES.USER.CHAPTER.replace(':id', lastChapterId))
 
@@ -180,7 +162,7 @@ const StoryDetail = () => {
   const statusText     = viStatus(story?.status)
   const follows        = story?.total_follow ?? 0
 
-  /* ===== Rating summary (ưu tiên từ API summary; fallback về fields trong story) ===== */
+  /* ===== Rating summary ===== */
   const sum = ratingSummary?.data
   const avgRating    = Number(sum?.avg_rating ?? story?.avg_rating ?? 0)
   const ratingsCount = Number(sum?.ratings_count ?? story?.ratings_count ?? 0)
@@ -232,79 +214,25 @@ const StoryDetail = () => {
   }
 
   /* ===== Helper % phân phối ===== */
-  const distTotal = Object.values(dist).reduce((a, b) => a + Number(b || 0), 0) || 1
-  const pct = (n) => Math.round((Number(n || 0) * 100) / distTotal)
+  // Tổng số lượt đánh giá (1★ + 2★ + 3★ + 4★ + 5★)
+  let totalRatings = 0
 
-  /* ===== Bình luận — state & handlers (đồng bộ cách làm với ChapterDetail) ===== */
-  const [newCommentText, setNewCommentText] = useState('')
-  const [isPostingComment, setIsPostingComment] = useState(false)
-  const [replyBoxOpenMap, setReplyBoxOpenMap] = useState({}) // { [cid]: bool }
-  const [replyTextMap, setReplyTextMap] = useState({})       // { [cid]: string }
-  const [replyBusyMap, setReplyBusyMap] = useState({})       // { [cid]: bool }
-
-  const toggleReplyBox = (cid) => setReplyBoxOpenMap(m => ({ ...m, [cid]: !m[cid] }))
-  const handleChangeReplyText = (cid, val) => setReplyTextMap(m => ({ ...m, [cid]: val }))
-
-  // Chuẩn hoá dữ liệu comment: đảm bảo có is_liked (boolean) & likes_count (number) cho cả comment và reply
-  const normalizedComments = useMemo(() => {
-    return (comments || []).map((c) => ({
-      ...c,
-      is_liked: !!(c.is_liked ?? c.liked ?? false),
-      likes_count: Number(c.likes_count ?? 0),
-      story_comments: (c.story_comments || []).map((r) => ({
-        ...r,
-        is_liked: !!(r.is_liked ?? r.liked ?? false),
-        likes_count: Number(r.likes_count ?? 0),
-      })),
-    }))
-  }, [comments])
-
-  // Đăng bình luận mới: gắn vào chapter mới nhất để tương thích API
-  const submitComment = async () => {
-    if (!isLoggedIn) return message.info('Bạn cần đăng nhập để bình luận.')
-    if (!lastChapterId) return message.warning('Chưa có chapter để bình luận.')
-    const body = String(newCommentText || '').trim()
-    if (!body) return
-
-    try {
-      setIsPostingComment(true)
-      await dispatch(createChapterCommentThunk({ chapterId: lastChapterId, body })).unwrap()
-      setNewCommentText('')
-      // refresh danh sách bình luận theo truyện (trả về page 1)
-      await dispatch(getStoryCommentsThunk({ storyId: id, page: 1, limit: cmeta?.limit || 20, order: 'desc' }))
-      message.success('Đã đăng bình luận')
-    } catch (e) {
-      message.error(e?.message || 'Không thể đăng bình luận')
-    } finally {
-      setIsPostingComment(false)
+  Object.values(dist).forEach((count) => {
+    const num = Number(count)
+    if (Number.isFinite(num)) {
+      totalRatings += num
     }
+  })
+
+  // Tránh chia cho 0 → nếu chưa có ai đánh giá thì coi như tổng = 1
+  if (totalRatings === 0) {
+    totalRatings = 1
   }
 
-  // Trả lời bình luận gốc
-  const handlePostReply = async (rootCmt) => {
-    if (!isLoggedIn) return message.info('Bạn cần đăng nhập để trả lời.')
-    const body = String(replyTextMap[rootCmt.id] || '').trim()
-    if (!body) return message.warning('Nhập nội dung trả lời.')
-    if (!rootCmt.chapter_id) return message.error('Thiếu chapter_id cho bình luận này.')
-
-    try {
-      setReplyBusyMap(m => ({ ...m, [rootCmt.id]: true }))
-      await dispatch(
-        createChapterCommentThunk({
-          chapterId: rootCmt.chapter_id,
-          body,
-          parent_id: rootCmt.id,
-        })
-      ).unwrap()
-      setReplyTextMap(m => ({ ...m, [rootCmt.id]: '' }))
-      setReplyBoxOpenMap(m => ({ ...m, [rootCmt.id]: false }))
-      await dispatch(getStoryCommentsThunk({ storyId: id, page: 1, limit: cmeta?.limit || 20, order: 'desc' }))
-      message.success('Đã trả lời')
-    } catch (e) {
-      message.error(e?.message || 'Không thể gửi trả lời')
-    } finally {
-      setReplyBusyMap(m => ({ ...m, [rootCmt.id]: false }))
-    }
+  // Hàm tính phần trăm cho từng mức sao
+  const getRatingPercent = (count) => {
+    const num = Number(count) || 0
+    return Math.round((num * 100) / totalRatings)
   }
 
   // Like/Unlike bình luận → refresh để đồng bộ likes_count
@@ -328,39 +256,9 @@ const StoryDetail = () => {
     }
   }
 
-  // Xoá bình luận
-  const handleDeleteComment = async (commentId) => {
-    if (!isLoggedIn) return message.info('Bạn cần đăng nhập.')
-    try {
-      await dispatch(deleteCommentThunk({ commentId })).unwrap()
-      await dispatch(getStoryCommentsThunk({ storyId: id, page: 1, limit: cmeta?.limit || 20, order: 'desc' }))
-      message.success('Đã xoá bình luận')
-    } catch (e) {
-      message.error(e?.message || 'Không thể xoá')
-    }
-  }
-
-  // Load more
-  const handleLoadMore = async () => {
-    const page = Number(cmeta?.page || 1)
-    const totalPages = Number(cmeta?.totalPages || 1)
-    if (page >= totalPages) return
-    await dispatch(
-      getStoryCommentsThunk({
-        storyId: id,
-        page: page + 1,
-        limit: cmeta?.limit || 20,
-        order: 'desc',
-        more: true,
-      })
-    )
-  }
-
   return (
     <S.Page>
-      {/* Lưới 2 cột: trái nội dung – phải sidebar */}
       <S.ContentGrid>
-        {/* Cột trái: nội dung chính */}
         <section>
           <S.TitleBlock>
             <S.PageTitle>{title}</S.PageTitle>
@@ -448,9 +346,9 @@ const StoryDetail = () => {
                         <S.DistRow key={star}>
                           <span className="label">{star}★</span>
                           <S.DistBar>
-                            <span className="bar" style={{ width: `${pct(dist[star])}%` }} />
+                            <span className="bar" style={{ width: `${getRatingPercent(dist[star])}%` }} />
                           </S.DistBar>
-                          <span className="value">{dist[star] || 0} ({pct(dist[star])}%)</span>
+                          <span className="value">{dist[star] || 0} ({getRatingPercent(dist[star])}%)</span>
                         </S.DistRow>
                       ))}
                     </div>
@@ -489,7 +387,6 @@ const StoryDetail = () => {
 
               <Divider />
 
-              {/* ===== Nội dung mô tả ===== */}
               <S.SectionHeader>
                 <S.SectionTitle>
                   <i className="fa fa-list-ul" /> NỘI DUNG TRUYỆN {title.toUpperCase()} TRÊN NETTRUYEN
@@ -517,9 +414,17 @@ const StoryDetail = () => {
                   columns={chapterColumns}
                   dataSource={chapterRows}
                   rowClassName={(row) => {
-                    const isLast = history?.chapter_id && row.id === history.chapter_id
-                    const isRead = lastReadNum != null && row._num != null && row._num <= lastReadNum
-                    return `${isLast ? 'is-last-read' : ''} ${isRead ? 'is-read' : ''}`.trim()
+                    const hasHistory   = !!history?.chapter_id
+                    const isLastRead   = hasHistory && row.id === history.chapter_id
+
+                    const hasLastReadNum = lastReadNum != null
+                    const hasRowNum      = row._num != null
+                    const isReadUpTo     = hasLastReadNum && hasRowNum && row._num <= lastReadNum
+
+                    return [
+                      isLastRead ? 'is-last-read' : '',
+                      isReadUpTo ? 'is-read' : '',
+                    ].filter(Boolean).join(' ')
                   }}
                   style={{ marginTop: 12 }}
                   locale={{ emptyText: 'Chưa có dữ liệu chương' }}
@@ -543,25 +448,24 @@ const StoryDetail = () => {
                 </S.SectionTitle>
               </S.SectionHeader>
 
-              {/* Ô nhập bình luận mới */}
               <CommentThread
                 isLoggedIn={!!currentUser?.id}
                 currentUser={currentUser}
-                comments={normalizedComments}
+                comments={comments}
                 meta={cmeta}
                 status={cstatus}
                 error={cerror}
                 title="Bình luận"
                 placeholder={isLoggedIn ? 'Viết bình luận của bạn…' : 'Đăng nhập để bình luận'}
 
-                // tạo bình luận gốc (StoryDetail đang gắn vào chapter mới nhất)
+                // tạo bình luận gốc
                 onCreate={async (body) => {
                   if (!lastChapterId) throw new Error('No chapter to attach comment.')
                   await dispatch(createChapterCommentThunk({ chapterId: lastChapterId, body })).unwrap()
                   await dispatch(getStoryCommentsThunk({ storyId: id, page: 1, limit: cmeta?.limit || 20, order: 'desc' }))
                 }}
 
-                // trả lời bình luận gốc (có sẵn c.chapter_id)
+                // trả lời bình luận gốc
                 onReply={async (rootCmt, body) => {
                   await dispatch(createChapterCommentThunk({
                     chapterId: rootCmt.chapter_id,
@@ -595,7 +499,6 @@ const StoryDetail = () => {
           )}
         </section>
 
-        {/* Cột phải: sidebar */}
         <aside>
           {currentUser?.id && (
             <>

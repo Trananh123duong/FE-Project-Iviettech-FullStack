@@ -40,32 +40,18 @@ import * as S from './styles'
 const { Text } = Typography
 const { TextArea } = Input
 
-/* =========================
- * Helpers về số chapter
- * =======================*/
-const extractNum = (value) => {
-  if (value == null) return null
-  if (typeof value === 'number') return value
-  const match = String(value).match(/\d+/)
-  return match ? Number(match[0]) : null
-}
-const getChapterNum = (c) =>
-  extractNum(c?.chapter_number ?? c?.number ?? c?.order ?? c?.index ?? c?.name)
+const getChapterNum = (c) => Number(c?.chapter_number ?? null)
 
 const ChapterDetail = () => {
-  /* ====== Lấy id chapter từ URL ====== */
   const { id: chapterIdParam } = useParams()
   const chapterId = Number(chapterIdParam)
 
-  /* ====== Hook điều hướng & redux ====== */
   const navigate = useNavigate()
   const dispatch = useDispatch()
 
-  /* ====== Thông tin user đăng nhập ====== */
   const { data: currentUser } = useSelector((s) => s.auth.myProfile)
   const isLoggedIn = !!currentUser?.id
 
-  /* ====== Detail chapter (đã flatten prev/next/is_following) ====== */
   const {
     data: chapter = {},
     previousChapterId,
@@ -75,11 +61,9 @@ const ChapterDetail = () => {
     error: chapterError,
   } = useSelector((s) => s.chapter.chapterDetail)
 
-  /* ====== Danh sách chapter theo story để render Select ====== */
   const { chaptersByStory, chapterComments } = useSelector((s) => s.chapter)
   const { data: chapterList = [], status: chaptersStatus } = chaptersByStory
 
-  /* ====== Comments theo chapter ====== */
   const {
     data: comments = [],
     meta: commentsMeta = {},
@@ -87,7 +71,6 @@ const ChapterDetail = () => {
     error: commentsError,
   } = chapterComments
 
-  // Phân trang "tải thêm"
   const [page, setPage] = useState(1)
 
   // Trạng thái comment tổng quát (đồng bộ với StoryDetail)
@@ -99,7 +82,6 @@ const ChapterDetail = () => {
   const [replyTextMap, setReplyTextMap] = useState({})       // { [commentId]: string }
   const [replyBusyMap, setReplyBusyMap] = useState({})       // { [commentId]: boolean }
 
-  /* ====== Detail story (hiện tên, dùng breadcrumb) ====== */
   const storyDetail = useSelector((s) => s.story.storyDetail.data)
 
   /* ====== Trạng thái follow/unfollow ====== */
@@ -123,21 +105,15 @@ const ChapterDetail = () => {
     if (!storyDetail?.id || storyDetail.id !== storyId) {
       dispatch(getStory({ id: String(storyId) }))
     }
-  }, [dispatch, chapter?.story_id]) // giữ phụ thuộc này để đảm bảo nạp đúng lúc
+  }, [dispatch, chapter?.story_id])
 
   /* ====== Danh sách chapter sort tăng dần (phục vụ select) ====== */
   const sortedChapters = useMemo(() => {
-    const arr = [...chapterList]
-    arr.sort((a, b) => {
-      const na = getChapterNum(a) ?? 0
-      const nb = getChapterNum(b) ?? 0
-      if (na !== nb) return na - nb
-      return (a.id ?? 0) - (b.id ?? 0)
-    })
-    return arr
-  }, [chapterList])
+      return [...chapterList].sort((a, b) => {
+        return getChapterNum(a) - getChapterNum(b)
+      })
+    }, [chapterList])
 
-  /* ====== Options cho Select: "Chapter X - title" ====== */
   const selectOptions = useMemo(
     () =>
       sortedChapters.map((c) => ({
@@ -147,20 +123,7 @@ const ChapterDetail = () => {
     [sortedChapters]
   )
 
-  /* ====== previous/next: ưu tiên từ store, fallback theo vị trí ====== */
-  const currentIndex = useMemo(
-    () => sortedChapters.findIndex((c) => Number(c.id) === Number(chapterId)),
-    [sortedChapters, chapterId]
-  )
-  const prevId =
-    previousChapterId ?? (currentIndex > 0 ? sortedChapters[currentIndex - 1]?.id : null)
-  const nextId =
-    nextChapterId ??
-    (currentIndex >= 0 && currentIndex < sortedChapters.length - 1
-      ? sortedChapters[currentIndex + 1]?.id
-      : null)
-
-  /* ====== Điều hướng tới chapter cụ thể (kèm scroll top) ====== */
+  /* ====== Điều hướng tới chapter cụ thể ====== */
   const goChapter = useCallback(
     (id) => {
       if (!id) return
@@ -169,8 +132,8 @@ const ChapterDetail = () => {
     },
     [navigate]
   )
-  const goPrev = () => goChapter(prevId)
-  const goNext = () => goChapter(nextId)
+  const goPrev = () => goChapter(previousChapterId)
+  const goNext = () => goChapter(nextChapterId)
 
   /* ====== Keyboard ← → để chuyển chapter ====== */
   useEffect(() => {
@@ -202,100 +165,19 @@ const ChapterDetail = () => {
     }
   }
 
-  /* ====== Dữ liệu hiển thị ====== */
   const chapterNumber = getChapterNum(chapter)
   const storyName = storyDetail?.name || 'Truyện'
   const updatedAtLabel = fmtDT(chapter?.updated_at || chapter?.updatedAt)
 
-  // Ảnh trong chapter: sort theo sort_order, key URL là img_path
   const imageList = useMemo(() => {
     const arr = Array.isArray(chapter?.chapter_images) ? [...chapter.chapter_images] : []
     arr.sort((a, b) => (a?.sort_order ?? 0) - (b?.sort_order ?? 0))
     return arr
   }, [chapter])
 
-  /* ====== Breadcrumb handlers ====== */
   const goHome = () => navigate(ROUTES.USER.HOME)
   const goStory = () => chapter?.story_id && navigate(ROUTES.USER.STORY.replace(':id', chapter.story_id))
   const goStoryChapters = goStory
-
-  /* =========================
-   * Phần BÌNH LUẬN — đồng bộ với StoryDetail
-   * ========================= */
-
-  // Tải thêm
-  const hasMore = (commentsMeta?.totalPages || 1) > page
-  const loadMore = () => {
-    const next = page + 1
-    setPage(next)
-    dispatch(getChapterComments({ chapterId, page: next, limit: 20, more: true }))
-  }
-
-  // Mở/đóng ô trả lời cho 1 comment gốc
-  const toggleReplyBox = useCallback((commentId) => {
-    setReplyBoxOpenMap((m) => ({ ...m, [commentId]: !m[commentId] }))
-  }, [])
-
-  // Nhập nội dung trả lời cho 1 comment gốc
-  const handleChangeReplyText = useCallback((commentId, text) => {
-    setReplyTextMap((m) => ({ ...m, [commentId]: text }))
-  }, [])
-
-  // Gửi bình luận mới (comment gốc)
-  const submitComment = async () => {
-    if (!isLoggedIn) return message.info('Bạn cần đăng nhập để bình luận')
-    const content = String(newCommentText || '').trim()
-    if (!content) return
-    try {
-      setIsPostingComment(true)
-      await dispatch(
-        createChapterCommentThunk({
-          chapterId,
-          body: content,
-          parent_id: null,
-        })
-      ).unwrap()
-      setNewCommentText('')
-      // Refresh về page 1 để đảm bảo thấy comment mới nhất
-      setPage(1)
-      await dispatch(getChapterComments({ chapterId, page: 1, limit: 20 }))
-      message.success('Đã gửi bình luận')
-    } catch (e) {
-      message.error(e?.message || 'Không gửi được bình luận')
-    } finally {
-      setIsPostingComment(false)
-    }
-  }
-
-  // Gửi trả lời cho 1 comment gốc
-  const handlePostReply = useCallback(async (rootComment) => {
-    if (!isLoggedIn) return message.info('Bạn cần đăng nhập để trả lời.')
-    const body = String(replyTextMap[rootComment.id] || '').trim()
-    if (!body) return message.warning('Nhập nội dung trả lời.')
-    if (!rootComment.chapter_id) return message.error('Thiếu chapter_id cho bình luận này.')
-
-    try {
-      setReplyBusyMap((m) => ({ ...m, [rootComment.id]: true }))
-      await dispatch(
-        createChapterCommentThunk({
-          chapterId: rootComment.chapter_id,
-          body,
-          parent_id: rootComment.id,
-        })
-      ).unwrap()
-      setReplyTextMap((m) => ({ ...m, [rootComment.id]: '' }))
-      setReplyBoxOpenMap((m) => ({ ...m, [rootComment.id]: false }))
-
-      // Refresh trang hiện tại (quay về page 1 để thấy reply mới)
-      setPage(1)
-      await dispatch(getChapterComments({ chapterId, page: 1, limit: 20 }))
-      message.success('Đã trả lời')
-    } catch (e) {
-      message.error(e?.message || 'Không thể gửi trả lời')
-    } finally {
-      setReplyBusyMap((m) => ({ ...m, [rootComment.id]: false }))
-    }
-  }, [dispatch, isLoggedIn, replyTextMap, chapterId])
 
   // Like/Unlike bình luận → refresh để đồng bộ likes_count
   const handleToggleLikeComment = useCallback(async (commentId, nextLiked) => {
@@ -312,23 +194,8 @@ const ChapterDetail = () => {
     }
   }, [dispatch, isLoggedIn])
 
-  // Xoá bình luận → refresh
-  const handleDeleteComment = useCallback(async (commentId) => {
-    if (!isLoggedIn) return message.info('Bạn cần đăng nhập.')
-    try {
-      await dispatch(deleteCommentThunk({ commentId })).unwrap()
-      setPage(1)
-      await dispatch(getChapterComments({ chapterId, page: 1, limit: 20 }))
-      message.success('Đã xoá bình luận')
-    } catch (e) {
-      message.error(e?.message || 'Không thể xoá')
-    }
-  }, [dispatch, isLoggedIn, chapterId])
-
-  /* ====== Render ====== */
   return (
     <S.Page>
-      {/* ===== Breadcrumb + tiêu đề rút gọn ===== */}
       <S.BreadcrumbBar>
         <S.Crumb onClick={goHome}>Trang chủ</S.Crumb>
         <span>›</span>
@@ -338,7 +205,6 @@ const ChapterDetail = () => {
         {updatedAtLabel && <S.UpdatedAt>&nbsp;[Cập nhật lúc: {updatedAtLabel}]</S.UpdatedAt>}
       </S.BreadcrumbBar>
 
-      {/* ===== Gợi ý phím tắt ===== */}
       <Alert
         type="info"
         showIcon
@@ -346,7 +212,6 @@ const ChapterDetail = () => {
         style={{ marginBottom: 8 }}
       />
 
-      {/* ===== Thanh công cụ sticky ===== */}
       <S.Toolbar>
         <div className="left">
           <Button type="text" icon={<HomeFilled />} onClick={goHome} aria-label="Trang chủ" />
@@ -357,7 +222,7 @@ const ChapterDetail = () => {
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
             aria-label="Lên đầu trang"
           />
-          <S.NavButton icon={<LeftOutlined />} onClick={goPrev} disabled={!prevId} aria-label="Chương trước" />
+          <S.NavButton icon={<LeftOutlined />} onClick={goPrev} disabled={!previousChapterId} aria-label="Chương trước" />
 
           <Select
             className="chapter-select"
@@ -374,7 +239,7 @@ const ChapterDetail = () => {
             disabled={selectOptions.length === 0}
           />
 
-          <S.NavButton icon={<RightOutlined />} onClick={goNext} disabled={!nextId} aria-label="Chương sau" />
+          <S.NavButton icon={<RightOutlined />} onClick={goNext} disabled={!nextChapterId} aria-label="Chương sau" />
         </div>
 
         <div className="right">
@@ -415,7 +280,6 @@ const ChapterDetail = () => {
         </S.Reader>
       )}
 
-      {/* ====== BÌNH LUẬN (đồng bộ cách làm với StoryDetail) ====== */}
       <S.Comments>
         <CommentThread
           isLoggedIn={!!currentUser?.id}

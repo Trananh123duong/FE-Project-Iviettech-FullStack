@@ -1,9 +1,6 @@
 import { Button } from 'antd'
 import styled from 'styled-components'
 
-/* =========================
- * Bảng màu/tokens đơn giản
- * ========================= */
 const palette = {
   text: '#111827',
   textMuted: '#6b7280',
@@ -23,7 +20,6 @@ const palette = {
   tableReadBg: '#fffbe6',
 }
 
-/* ===== Khung trang & lưới 2 cột ===== */
 export const Page = styled.main`
   max-width: var(--site-width, 1100px);
   margin: 0 auto;
@@ -32,10 +28,13 @@ export const Page = styled.main`
   overflow-x: hidden;
   color: ${palette.text};
 
-  .muted { color: ${palette.textLighter}; }
-  .strong { font-weight: 700; }
+  .muted {
+    color: ${palette.textLighter};
+  }
+  .strong {
+    font-weight: 700;
+  }
 
-  /* Focus ring nhất quán */
   *:focus-visible {
     outline: 2px solid ${palette.primary};
     outline-offset: 2px;
@@ -53,7 +52,6 @@ export const ContentGrid = styled.div`
   }
 `
 
-/* ===== Tiêu đề ===== */
 export const TitleBlock = styled.div`
   text-align: center;
   margin: 4px 0 8px;
@@ -75,7 +73,6 @@ export const UpdatedAt = styled.div`
   color: #8c8c8c;
 `
 
-/* ===== Section heading ===== */
 export const SectionHeader = styled.div`
   display: flex;
   justify-content: space-between;
@@ -93,22 +90,29 @@ export const SectionTitle = styled.h2`
   align-items: center;
   gap: 6px;
 
-  i { margin-right: 2px; }
+  i {
+    margin-right: 2px;
+  }
 `
 
-/* ===== Summary + meta ===== */
 export const TopInfo = styled.div`
   display: grid;
   grid-template-columns: 200px 1fr;
   gap: 16px;
   margin-top: 12px;
 
-  .cover { grid-column: 1 / 2; }
-  .meta  { grid-column: 2 / 3; }
+  .cover {
+    grid-column: 1 / 2
+  }
+  .meta  {
+    grid-column: 2 / 3;
+  }
 
   @media (max-width: 640px) {
     grid-template-columns: 1fr;
-    .cover, .meta { grid-column: auto; }
+    .cover, .meta {
+      grid-column: auto;
+    }
   }
 `
 
@@ -119,16 +123,30 @@ export const FieldRow = styled.div`
   gap: 10px;
   margin-bottom: 10px;
 
-  .icon { color: #9ca3af; width: 18px; text-align: center; }
-  .label { color: ${palette.textMuted}; font-weight: 700; }
-  .value { color: ${palette.text}; font-weight: 600; word-break: break-word; }
+  .icon {
+    color: #9ca3af;
+    width: 18px;
+    text-align: center;
+  }
+  .label {
+    color: ${palette.textMuted};
+    font-weight: 700;
+  }
+  .value {
+    color: ${palette.text};
+    font-weight: 600;
+    word-break: break-word;
+  }
 `
 
 export const CategoryLink = styled.span`
   color: ${palette.primary};
   cursor: pointer;
   text-decoration: none;
-  &:hover, &:focus { text-decoration: underline; outline: none; }
+  &:hover, &:focus {
+    text-decoration: underline;
+    outline: none;
+}
 `
 
 export const RatingLine = styled.div`
@@ -139,7 +157,9 @@ export const RatingLine = styled.div`
     color: ${palette.primary};
     text-decoration: none;
   }
-  a:hover { text-decoration: underline; }
+  a:hover {
+    text-decoration: underline;
+  }
 `
 
 export const ActionRow = styled.div`
@@ -189,7 +209,7 @@ export const RatingWrap = styled.div`
     }
     .ant-rate {
       font-size: 20px;
-      gap: 2px; /* thu nhỏ khoảng cách các sao */
+      gap: 2px;
     }
   }
 
@@ -210,8 +230,15 @@ export const DistRow = styled.div`
   align-items: center;
   gap: 8px;
 
-  .label { color: ${palette.textLabel}; font-weight: 600; width: 40px; }
-  .value { color: ${palette.textMuted}; text-align: right; font-variant-numeric: tabular-nums; }
+  .label {
+    color: ${palette.textLabel};
+    font-weight: 600; width: 40px;
+  }
+  .value {
+    color: ${palette.textMuted};
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
 `
 
 export const DistBar = styled.div`
@@ -226,11 +253,10 @@ export const DistBar = styled.div`
     left: 0; top: 0; bottom: 0;
     width: 0%;
     background: ${palette.warn};
-    transition: width .25s ease; /* animation mượt khi phân phối thay đổi */
+    transition: width .25s ease;
   }
 `
 
-/* ===== Buttons ===== */
 export const FollowButton = styled(Button)`
   background-color: ${palette.danger};
   border-color: ${palette.danger};
@@ -296,9 +322,15 @@ export const ChapterTableWrap = styled.div`
     color: ${palette.textLabel};
     font-weight: 700;
   }
-  .ant-table-tbody > tr.is-last-read > td { background: ${palette.tableReadBg}; }
-  .ant-table-tbody > tr.is-read > td { color: ${palette.textMuted}; }
-  .ant-table-tbody > tr.is-read .chapter-link-btn { color: ${palette.textMuted}; }
+  .ant-table-tbody > tr.is-last-read > td {
+    background: ${palette.tableReadBg};
+  }
+  .ant-table-tbody > tr.is-read > td {
+    color: ${palette.textMuted};
+  }
+  .ant-table-tbody > tr.is-read .chapter-link-btn {
+    color: ${palette.textMuted};
+  }
   .ant-table-tbody > tr > td {
     transition: background-color .15s ease;
   }
@@ -311,7 +343,10 @@ export const ChapterLinkBtn = styled.span.attrs({ className: 'chapter-link-btn' 
   color: ${palette.text};
   text-decoration: none;
   cursor: pointer;
-  &:hover, &:focus { text-decoration: underline; color: ${palette.primary}; }
+  &:hover, &:focus {
+    text-decoration: underline;
+    color: ${palette.primary};
+  }
 `
 
 /* ===== BÌNH LUẬN (Story comments) ===== */
@@ -328,7 +363,9 @@ export const CommentsWrap = styled.div`
     padding: 10px 0;
     border-bottom: 1px solid ${palette.border};
   }
-  .ant-comment-inner { padding: 0; }
+  .ant-comment-inner {
+    padding: 0;
+  }
   .ant-comment-content-author-name {
     font-weight: 700;
     color: ${palette.text};
@@ -338,14 +375,22 @@ export const CommentsWrap = styled.div`
     line-height: 1.6;
     word-break: break-word;
   }
-  .ant-comment-actions { margin-top: 6px; }
-  .ant-comment-actions > li { margin-right: 12px; }
+  .ant-comment-actions {
+    margin-top: 6px;
+  }
+  .ant-comment-actions > li {
+    margin-right: 12px;
+  }
   .ant-avatar { border: 1px solid ${palette.border}; }
 
   /* Replies thụt vào */
-  .ant-comment-nested { margin-left: 42px; }
+  .ant-comment-nested {
+    margin-left: 42px;
+  }
   @media (max-width: 640px) {
-    .ant-comment-nested { margin-left: 36px; }
+    .ant-comment-nested {
+      margin-left: 36px;
+    }
   }
 
   /* Load more */

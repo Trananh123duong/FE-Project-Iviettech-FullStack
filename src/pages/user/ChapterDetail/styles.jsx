@@ -1,7 +1,6 @@
 import { Button } from 'antd'
 import styled from 'styled-components'
 
-/* ===== Khung trang: đồng bộ site-width với Header/Nav ===== */
 export const Page = styled.main`
   max-width: var(--site-width, 1100px);
   margin: 0 auto 28px;
@@ -9,7 +8,6 @@ export const Page = styled.main`
   background: #fff;
 `
 
-/* ===== Breadcrumb ===== */
 export const BreadcrumbBar = styled.div`
   display: flex;
   align-items: baseline;
@@ -21,14 +19,15 @@ export const BreadcrumbBar = styled.div`
 export const Crumb = styled.span`
   color: #1e88e5;
   cursor: pointer;
-  &:hover { text-decoration: underline; }
+  &:hover {
+    text-decoration: underline;
+  }
 `
 export const UpdatedAt = styled.span`
   font-style: italic;
   color: #8c8c8c;
 `
 
-/* ===== Thanh công cụ sticky ===== */
 export const Toolbar = styled.div`
   position: sticky;
   top: 8px;
@@ -42,10 +41,20 @@ export const Toolbar = styled.div`
   border: 1px solid #e5e7eb;
   border-radius: 10px;
 
-  .left { display: flex; align-items: center; gap: 8px; }
-  .right { display: flex; align-items: center; gap: 8px; }
+  .left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
 
-  .chapter-select { width: clamp(250px, 50vw, 560px); }
+  .chapter-select {
+    width: clamp(250px, 50vw, 560px);
+  }
 
   @media (max-width: 640px) {
     flex-wrap: wrap;
@@ -58,8 +67,14 @@ export const NavButton = styled(Button)`
   background: #d1d5db;
   color: #111;
   border-radius: 8px;
-  &:hover { background: #cbd5e1 !important; color: #111 !important; }
-  &:disabled { opacity: .6; cursor: not-allowed; }
+  &:hover {
+    background: #cbd5e1 !important;
+    color: #111 !important;
+  }
+  &:disabled {
+    opacity: .6;
+    cursor: not-allowed;
+  }
 `
 
 export const FollowButton = styled(Button)`
@@ -106,7 +121,9 @@ export const Reader = styled.div`
     max-width: 900px;
     margin: 0 auto 8px;
   }
-  .img-wrap .ant-image { width: 100%; }
+  .img-wrap .ant-image {
+    width: 100%;
+  }
   .img-wrap img {
     width: 100%;
     height: auto;
@@ -127,7 +144,9 @@ export const CommentsHeader = styled.div`
   gap: 8px;
   margin-bottom: 12px;
 
-  .count { color: #6b7280; }
+  .count {
+    color: #6b7280;
+  }
 `
 
 export const CommentForm = styled.div`

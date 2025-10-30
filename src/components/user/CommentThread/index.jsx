@@ -15,16 +15,7 @@ import * as S from './styles'
 const { Text } = Typography
 const { TextArea } = Input
 
-/**
- * CommentThread – UI hiển thị & thao tác bình luận (gốc + reply)
- *
- * Props:
- * - isLoggedIn, currentUser
- * - comments, meta, status, error
- * - onCreate, onReply, onToggleLike, onDelete, onLoadMore
- * - title, placeholder
- *
- */
+
 const CommentThread = ({
   isLoggedIn = false,
   currentUser,
@@ -40,7 +31,6 @@ const CommentThread = ({
   title = 'Bình luận',
   placeholder = 'Nhập bình luận của bạn...',
 }) => {
-  // ===== Local state =====
   const [newText, setNewText] = useState('')
   const [posting, setPosting] = useState(false)
   const [replyOpen, setReplyOpen] = useState({})   // { [commentId]: boolean }
@@ -48,10 +38,11 @@ const CommentThread = ({
   const [replyBusy, setReplyBusy] = useState({})   // { [commentId]: boolean }
 
   // Tính còn trang kế tiếp hay không (dựa vào meta từ props)
-  const hasMore = useMemo(
-    () => Number(meta?.page || 1) < Number(meta?.totalPages || 1),
-    [meta?.page, meta?.totalPages]
-  )
+  const hasMore = useMemo(() => {
+    const currentPage = meta?.page ? Number(meta.page) : 1
+    const totalPages  = meta?.totalPages ? Number(meta.totalPages) : 1
+    return currentPage < totalPages
+  }, [meta?.page, meta?.totalPages])
 
   // Quyền xóa: chính chủ hoặc admin
   const canDeleteBy = (ownerId) => {
@@ -94,7 +85,6 @@ const CommentThread = ({
 
   return (
     <S.Wrap>
-      {/* Tiêu đề + tổng số bình luận */}
       <S.Header>
         <Text strong>{title}</Text>
         {meta?.total != null && <span className="count">({meta.total} bình luận)</span>}
@@ -111,7 +101,6 @@ const CommentThread = ({
         />
       )}
 
-      {/* Form bình luận mới */}
       <S.Form>
         <TextArea
           value={newText}
