@@ -15,18 +15,15 @@ const ProfilePage = () => {
   const navigate = useNavigate()
   const fileRef = useRef(null)
 
-  // --- Redux state
   const { data: profile, status: profileStatus, error: profileError } = useSelector(
     (s) => s.auth.myProfile
   )
   const updatingProfile = useSelector((s) => s.auth.updateData.status === 'loading')
   const updatingAvatar = useSelector((s) => s.auth.avatarData.status === 'loading')
 
-  // NEW: trạng thái đổi mật khẩu
   const changingPwd = useSelector((s) => s.auth.changePwdData.status === 'loading')
   const changePwdError = useSelector((s) => s.auth.changePwdData.error)
 
-  // --- Form
   const [form] = Form.useForm()
   const [pwdForm] = Form.useForm()
 
@@ -50,7 +47,6 @@ const ProfilePage = () => {
     return { expired: false, text: `${day} ngày ${hour} giờ` }
   }, [profile?.vip_expires_at])
 
-  // --- Lấy profile khi vào trang
   useEffect(() => {
     if (profileStatus === 'idle') dispatch(getMyProfile())
   }, [profileStatus, dispatch])
@@ -65,11 +61,6 @@ const ProfilePage = () => {
     }
   }, [profile, form])
 
-  // =========================================================
-  // Handlers
-  // =========================================================
-
-  // Lưu thay đổi thông tin (chỉ username)
   const onSave = async () => {
     try {
       const values = await form.validateFields()
@@ -125,7 +116,6 @@ const ProfilePage = () => {
     }
   }
 
-  // NEW: Đổi mật khẩu
   const onChangePassword = async () => {
     try {
       const values = await pwdForm.validateFields()
@@ -136,7 +126,6 @@ const ProfilePage = () => {
       const res = await dispatch(changePassword(payload)).unwrap()
       message.success(res?.message || 'Đổi mật khẩu thành công')
 
-      // Sau khi slice tự clear token + profile, điều hướng tới trang đăng nhập
       navigate(ROUTES.AUTH.LOGIN)
     } catch (err) {
       if (!err) return
@@ -145,13 +134,8 @@ const ProfilePage = () => {
     }
   }
 
-  // =========================================================
-  // Render
-  // =========================================================
-
   return (
     <>
-      {/* Breadcrumb */}
       <S.BreadcrumbBar>
         <S.Breadcrumb>
           <Link to={ROUTES.USER.HOME}>Trang chủ</Link>
@@ -161,7 +145,6 @@ const ProfilePage = () => {
       </S.BreadcrumbBar>
 
       <S.Wrapper>
-        {/* Cột trái: avatar + info ngắn */}
         <S.LeftCol>
           <S.ProfileCard>
             <S.AvatarWrap>
@@ -177,7 +160,6 @@ const ProfilePage = () => {
               </Text>
             </div>
 
-            {/* Nhãn VIP nhỏ gọn bên dưới tên */}
             <div style={{ marginTop: 6 }}>
               {isVip ? (
                 <S.VipBadge $active>VIP</S.VipBadge>
@@ -200,7 +182,6 @@ const ProfilePage = () => {
             </S.ActionRow>
           </S.ProfileCard>
 
-          {/* Card: Trạng thái VIP */}
           <S.Card>
             <S.CardHead>
               <S.CardTitle>Trạng thái VIP</S.CardTitle>
@@ -225,7 +206,6 @@ const ProfilePage = () => {
                   Nâng cấp để đọc mượt hơn, không quảng cáo và các đặc quyền khác.
                 </Text>
                 <S.FormActions>
-                  {/* Chưa có trang thanh toán → để trống logic */}
                   <Button
                     type="primary"
                     size="large"
@@ -239,9 +219,7 @@ const ProfilePage = () => {
           </S.Card>
         </S.LeftCol>
 
-        {/* Cột phải: form chỉnh sửa + đổi mật khẩu */}
         <S.RightCol>
-          {/* Card: Thông tin cá nhân */}
           <S.Card>
             <S.CardHead>
               <S.CardTitle>Thông tin cá nhân</S.CardTitle>
@@ -280,7 +258,6 @@ const ProfilePage = () => {
             )}
           </S.Card>
 
-          {/* NEW: Card: Đổi mật khẩu */}
           <S.Card style={{ marginTop: 16 }}>
             <S.CardHead>
               <S.CardTitle>Đổi mật khẩu</S.CardTitle>

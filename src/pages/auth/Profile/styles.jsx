@@ -2,10 +2,10 @@ import styled from 'styled-components'
 
 /* ---- Breakpoints ---- */
 const bp = {
-  xl: 1200,   // >=1200
-  lg: 992,    // >=992
-  md: 768,    // >=768
-  sm: 576,    // >=576
+  xl: 1200, // >=1200
+  lg: 992, // >=992
+  md: 768, // >=768
+  sm: 576, // >=576
 }
 
 /* ---- Breadcrumb ---- */
@@ -17,17 +17,36 @@ export const BreadcrumbBar = styled.div`
     padding-bottom: 12px;
   }
 `
+
 export const Breadcrumb = styled.nav`
   font-size: 18px;
-  a { color: #2f80ed; text-decoration: none; }
-  a:hover { text-decoration: underline; }
-  .sep { margin: 0 10px; color: #c0c4cc; }
-  .current { color: #9aa1a9; }
+
+  a {
+    color: #2f80ed;
+    text-decoration: none;
+  }
+
+  a:hover {
+    text-decoration: underline;
+  }
+
+  .sep {
+    margin: 0 10px;
+    color: #c0c4cc;
+  }
+
+  .current {
+    color: #9aa1a9;
+  }
 
   @media (max-width: ${bp.md}px) {
     font-size: 16px;
-    .sep { margin: 0 8px; }
+
+    .sep {
+      margin: 0 8px;
+    }
   }
+
   @media (max-width: ${bp.sm}px) {
     font-size: 15px;
   }
@@ -50,8 +69,14 @@ export const Wrapper = styled.main`
   padding: 0 8px;
 
   /* đồng bộ label antd */
-  .nt-form .ant-form-item-label > label { font-weight: 600; }
-  .nt-form .ant-input[disabled] { background: #f7f8fa; color: #8f96a3; }
+  .nt-form .ant-form-item-label > label {
+    font-weight: 600;
+  }
+
+  .nt-form .ant-input[disabled] {
+    background: #f7f8fa;
+    color: #8f96a3;
+  }
 
   /* <= lg: chuyển sang 1 cột */
   @media (max-width: ${bp.lg}px) {
@@ -96,12 +121,13 @@ export const Card = styled.div`
   border: 1px solid var(--border);
   border-radius: 14px;
   padding: 18px;
-  box-shadow: 0 2px 10px rgba(31,45,61,.04);
+  box-shadow: 0 2px 10px rgba(31, 45, 61, 0.04);
 
   @media (max-width: ${bp.md}px) {
     border-radius: 12px;
     padding: 16px;
   }
+
   @media (max-width: ${bp.sm}px) {
     border-radius: 10px;
     padding: 14px;
@@ -115,8 +141,13 @@ export const ProfileCard = styled(Card)`
   align-items: start;
 
   .meta {
-    .name { margin: 0; }
-    .email { margin-top: 2px; }
+    .name {
+      margin: 0;
+    }
+
+    .email {
+      margin-top: 2px;
+    }
   }
 `
 
@@ -131,7 +162,7 @@ export const AvatarWrap = styled.div`
     border-radius: 999px;
     object-fit: cover;
     background: #f5f5f5;
-    box-shadow: 0 4px 18px rgba(0,0,0,.08);
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
     border: 4px solid #fff;
     outline: 1px solid var(--border);
   }
@@ -153,30 +184,37 @@ export const ActionRow = styled.div`
 
 /* ---- Form card ---- */
 export const CardHead = styled.div`
-  display: flex; align-items: center; justify-content: space-between;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   margin-bottom: 6px;
 
   @media (max-width: ${bp.sm}px) {
     margin-bottom: 4px;
   }
 `
+
 export const CardTitle = styled.h3`
   margin: 0;
   font-size: 18px;
   font-weight: 800;
   color: #1f2937;
-  letter-spacing: .2px;
+  letter-spacing: 0.2px;
 
   @media (max-width: ${bp.md}px) {
     font-size: 17px;
   }
+
   @media (max-width: ${bp.sm}px) {
     font-size: 16px;
   }
 `
 
 export const FormActions = styled.div`
-  display: flex; align-items: center; gap: 12px; margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 6px;
   flex-wrap: wrap;
 
   @media (max-width: ${bp.sm}px) {
@@ -206,9 +244,9 @@ export const VipBadge = styled.span`
   border-radius: 999px;
   font-size: 12px;
   font-weight: 800;
-  letter-spacing: .3px;
+  letter-spacing: 0.3px;
   text-transform: uppercase;
-  border: 1px solid ${props => props.$active ? '#0ea5e9' : '#cbd5e1'};
-  background: ${props => props.$active ? '#ecfeff' : '#f8fafc'};
-  color: ${props => props.$active ? '#0369a1' : '#64748b'};
+  border: 1px solid ${props => (props.$active ? '#0ea5e9' : '#cbd5e1')};
+  background: ${props => (props.$active ? '#ecfeff' : '#f8fafc')};
+  color: ${props => (props.$active ? '#0369a1' : '#64748b')};
 `
